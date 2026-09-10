@@ -71,7 +71,8 @@ LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs $(ARCH) $(OPTIMIZATION) -Wl,-Ma
 			-Wl,--gc-sections -Wl,--build-id=sha1
 
 STORAGE_LIBS := $(STORAGE_BUILD)/_deps/libsmb2-build/lib/libsmb2.a \
-				$(STORAGE_BUILD)/_deps/libusbhsfs-build/liblibusbhsfs.a
+				$(STORAGE_BUILD)/_deps/libusbhsfs-build/liblibusbhsfs.a \
+				$(PORTLIBS)/lib/libntfs-3g.a
 
 # nx supplies audren, HID, applet, and filesystem services. DraStic's OpenSL ES
 # ABI is implemented directly by the audren-backed source/opensles.c layer.
@@ -181,7 +182,8 @@ else
 $(OUTPUT).nro	:	$(OUTPUT).elf
 endif
 
-$(OUTPUT).elf	:	$(OFILES)
+# Relink when the prebuilt storage archives change, not only on source edits.
+$(OUTPUT).elf	:	$(OFILES) $(STORAGE_LIBS)
 
 $(OFILES_SRC)	: $(HFILES_BIN)
 

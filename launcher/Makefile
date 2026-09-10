@@ -53,7 +53,8 @@ LDFLAGS	=	-specs=$(DEVKITPRO)/libnx/switch.specs $(ARCH) $(OPTIMIZATION) -Wl,-Ma
 # SDL2_image (covers) + libcurl (SteamGridDB; libnx TLS backend, no cacert needed) +
 # turbojpeg (forwarder NACP icon encoding).
 STORAGE_LIBS := $(STORAGE_BUILD)/_deps/libsmb2-build/lib/libsmb2.a \
-				$(STORAGE_BUILD)/_deps/libusbhsfs-build/liblibusbhsfs.a
+				$(STORAGE_BUILD)/_deps/libusbhsfs-build/liblibusbhsfs.a \
+				$(PORTLIBS)/lib/libntfs-3g.a
 LIBS	:=	$(STORAGE_LIBS) `$(PREFIX)pkg-config --libs $(PKGS)` -lturbojpeg -lz -lGLESv2 -lnx
 
 #---------------------------------------------------------------------------------
@@ -153,7 +154,8 @@ else
 $(OUTPUT).nro	:	$(OUTPUT).elf
 endif
 
-$(OUTPUT).elf	:	$(OFILES)
+# Relink when the prebuilt storage archives change, not only on source edits.
+$(OUTPUT).elf	:	$(OFILES) $(STORAGE_LIBS)
 
 $(OFILES_SRC)	: $(HFILES_BIN)
 

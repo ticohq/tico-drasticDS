@@ -107,9 +107,9 @@ This will not run in applet/album mode. It needs the full memory and JIT
 services of a game override. Launch it by holding **R** while opening an
 installed title, or use a forwarder.
 
-The launcher supports multiple library folders across SD, USB mass storage,
-and SMB shares, cover downloads, themes, a file manager, and HOME-menu
-shortcut creation.
+The launcher supports multiple library folders across SD, USB mass storage
+(FAT32, exFAT, NTFS), and SMB shares, cover downloads, themes, a file
+manager, and HOME-menu shortcut creation.
 Use **Settings > Launcher > Launcher rotation** to select 0, 90, 180, or 270
 degrees. The 90 and 270 degree modes reflow the complete SDL launcher for
 vertical/tate use, while 0 and 180 retain its landscape layout. Touch follows
@@ -172,7 +172,7 @@ Install the devkitPro Switch toolchain and portlibs:
 
 ```sh
 pacman -S devkitA64 switch-tools libnx switch-sdl2 switch-sdl2_ttf \
-          switch-sdl2_image switch-curl \
+          switch-sdl2_image switch-curl switch-ntfs-3g \
           switch-zlib switch-zstd cmake ninja git python \
           mingw-w64-ucrt-x86_64-glslang
 ```

@@ -944,7 +944,10 @@ bool InitializeUsb(std::string* error)
 	{
 		std::lock_guard<std::mutex> lock(s_mountMutex);
 		if (s_usbInitialized) return true;
-		usbHsFsSetFileSystemMountFlags(UsbHsFsMountFlags_None);
+		// Replay an unclean NTFS journal and list hidden game folders. FAT and exFAT
+		// ignore both flags.
+		usbHsFsSetFileSystemMountFlags(UsbHsFsMountFlags_ReplayJournal |
+		                               UsbHsFsMountFlags_ShowHiddenFiles);
 		const Result result=usbHsFsInitialize(0);
 		if (R_FAILED(result))
 		{
