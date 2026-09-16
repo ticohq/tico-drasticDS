@@ -2132,6 +2132,7 @@ static SDL_GameController *g_pad=nullptr;
 static bool g_exitRequested=false;
 static int g_navHeld=0;
 static Uint32 g_navSince=0,g_navLast=0;
+static Uint32 g_lastUiActivity=0;
 // Events taken off SDL's queue by the frame wait are held here instead of
 // being pushed back: re-queuing appends them behind whatever SDL has since
 // added, so a press could be reordered or delayed past the frame that was
@@ -2201,12 +2202,16 @@ static bool beginUiFrame() {
 // Block when the UI is idle, but keep a 60 Hz cadence for active transitions.
 // Worker wake events make scans, USB hotplug and downloads immediately visible.
 static void waitForNextUiFrame(bool animated=true, Uint32 requestedDeadline=0) {
+  if(g_exitRequested||SDL_HasEvents(SDL_FIRSTEVENT,SDL_LASTEVENT))return;
   for(;;){
     const Uint32 now=SDL_GetTicks();
     const bool transitionActive=(animated&&g_uiAnimations&&now-g_fxT<180)||g_scrollTextActive;
+    const bool recentInput=now-g_lastUiActivity<240;
+    const bool animate=transitionActive||recentInput||g_navHeld||g_touch.active||
+                       (g_uiAnimations&&hasAnimatedBackground());
     // A vsynced present already blocked for the frame; sleeping on top of it
     // would halve the marquee/transition cadence.
-    if(transitionActive&&g_presentVsync) return;
+    if(animate&&g_presentVsync) return;
     Uint32 deadline=requestedDeadline;
     auto includeDeadline=[&](Uint32 candidate){
       if(candidate&&!SDL_TICKS_PASSED(now,candidate)&&
@@ -2215,7 +2220,7 @@ static void waitForNextUiFrame(bool animated=true, Uint32 requestedDeadline=0) {
     includeDeadline(g_toastUntil);
     includeDeadline(g_updateNoticeUntil);
     if(g_navHeld) includeDeadline(g_navLast+85);
-    int timeout=transitionActive?16:250;
+    int timeout=animate?16:250;
     if(deadline){
       const Uint32 remaining=deadline-now;
       timeout=std::min(timeout,(int)std::min<Uint32>(remaining,250));
@@ -2225,7 +2230,7 @@ static void waitForNextUiFrame(bool animated=true, Uint32 requestedDeadline=0) {
       g_waitedEvents.push_back(event); return;
     }
     const Uint32 after=SDL_GetTicks();
-    if(transitionActive||
+    if(animate||
        (requestedDeadline&&SDL_TICKS_PASSED(after,requestedDeadline))||
        (g_toastUntil&&SDL_TICKS_PASSED(after,g_toastUntil))||
        (g_updateNoticeUntil&&SDL_TICKS_PASSED(after,g_updateNoticeUntil))||
@@ -2263,6 +2268,7 @@ static bool pollUiEvent(SDL_Event &event) {
       event=g_waitedEvents.front();
       g_waitedEvents.pop_front();
     } else if(!SDL_PollEvent(&event)) return false;
+    g_lastUiActivity=SDL_GetTicks();
     if (event.type == SDL_QUIT) {
       g_exitRequested = true;
       continue;
