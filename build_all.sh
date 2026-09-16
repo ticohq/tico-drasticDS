@@ -130,6 +130,7 @@ ROMFS_STAGE="$WORK/romfs"
 DFX_STAGE="$WORK/dfx"
 mkdir -p "$ROMFS_STAGE" "$DFX_STAGE"
 cp -f "$APP/launcher/romfs/logo.png" "$ROMFS_STAGE/logo.png"
+cp -f "$APP/launcher/icon.jpg" "$ROMFS_STAGE/forwarder-icon.jpg"
 
 echo "==== clean previous outputs ===="
 make -C "$APP" clean >/dev/null

@@ -1471,7 +1471,7 @@ bool forwarder_create_launcher(char *err,std::size_t errSize)
     std::vector<u8> nso,npdm,nacpRaw,iconJpeg;
     if(!readFile("romfs:/fwd/hbl.nso",nso)||!readFile("romfs:/fwd/hbl.npdm",npdm)||
        !readFile("romfs:/fwd/default.nacp",nacpRaw)||nacpRaw.size()<sizeof(NacpStruct)||
-       !makeNacpIcon("romfs:/logo.png",iconJpeg)){
+       !readFile("romfs:/forwarder-icon.jpg",iconJpeg)){
         if(err&&errSize)snprintf(err,errSize,"Forwarder assets missing.");
         return false;
     }
