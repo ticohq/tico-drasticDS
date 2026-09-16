@@ -1019,6 +1019,8 @@ static SDL_Color COL_SEL   = { 116, 200, 255, 255 };
 static SDL_Color COL_PANEL = { 16, 23, 39, 255 };
 static SDL_Color COL_CARD  = { 22, 30, 49, 214 };
 static SDL_Color COL_FOCUS = { 28, 69, 92, 255 };
+static const SDL_Color COL_STATUS_OK      = { 120, 220, 120, 255 };
+static const SDL_Color COL_STATUS_MISSING = { 235, 125, 115, 255 };
 
 // Logical coordinates land on fractional output pixels once the renderer is
 // scaled.  Snapping both edges keeps hairlines a consistent width and stops
@@ -5183,6 +5185,7 @@ static void renderSettings(int scr,int sel,int top,const char *ctx){
     int i=top+r,slotY=listY+r*rowH; bool cur=(i==sel); bool en=optEnabled(S.opts[i]);
     SDL_Color lc = !en?(SDL_Color){92,98,110,255}:(cur?COL_VAL:COL_TXT);
     SDL_Color vc = !en?(SDL_Color){92,98,110,255}:(cur?COL_VAL:COL_DIM);
+    if(S.opts[i].type==OT_STATUS) vc=lsfgDllInstalled()?COL_STATUS_OK:COL_STATUS_MISSING;
     char v[256]; optValue(S.opts[i],v,sizeof(v));
     const std::string value=std::string(LauncherLocalization::Translate(v));
     drawSettingsRowText(LauncherLocalization::Translate(S.opts[i].label).data(),value.c_str(),slotY,colW,labelX,valX,
