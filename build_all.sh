@@ -2,7 +2,6 @@
 set -euo pipefail
 
 export DEVKITPRO=${DEVKITPRO:-/opt/devkitpro}
-export DEVKITARM=$DEVKITPRO/devkitARM
 export DEVKITA64=$DEVKITPRO/devkitA64
 JOBS=${JOBS:-$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 4)}
 [[ "$JOBS" =~ ^[1-9][0-9]*$ ]] || {
@@ -13,7 +12,7 @@ JOBS=${JOBS:-$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 4)}
 APP="$(cd "$(dirname "$0")" && pwd)"
 ROOT="$(dirname "$APP")"
 APK_DIR=${DRASTIC_APK_DIR:-"$ROOT/com.dsemu.drastic_r2.6.0.4a-109_minAPI14(arm64-v8a)(nodpi)_drasticds.com"}
-MESA_SDK=${MESA_SDK_DIR:-${NVK_SDK_DIR:-"$ROOT/mesa-switch-unified-sdk"}}
+MESA_SDK=${MESA_SDK_DIR:-"$ROOT/mesa-switch-unified-sdk"}
 # Accept either the installed Switch prefix itself or the root produced by
 # extracting mesa-*-switch-unified-horizon-sdk.zip.
 if [[ -d "$MESA_SDK/opt/devkitpro/portlibs/switch" ]]; then
@@ -78,7 +77,6 @@ required=(
   "$MESA_SDK/include/vk_video/vulkan_video_codec_vp9std.h"
   "$MESA_SDK/include/vk_video/vulkan_video_codec_vp9std_decode.h"
   "$MESA_SDK/lib/libEGL.a"
-  "$MESA_SDK/lib/libGL.a"
   "$MESA_SDK/lib/libGLESv2.a"
   "$MESA_SDK/lib/libglapi.a"
   "$MESA_SDK/lib/libvulkan.a"
@@ -138,8 +136,6 @@ make -C "$APP" clean >/dev/null
 make -C "$APP/launcher" clean >/dev/null
 make -C "$APP/launcher/fwd" clean >/dev/null
 
-echo "==== use supplied unified Mesa SDK (NVK + NVC0 + Zink) ===="
-
 echo "==== Drastic Android post-FX programs ===="
 "$PYTHON3" "$APP/tools/build_dfx.py" \
   --source "$DFX_SOURCE" --output "$DFX_STAGE" --glslang "$GLSLANG"
@@ -194,8 +190,7 @@ storage_include_args=(
 
 echo "==== unified DraStic host: Vulkan + NVC0 + Zink ===="
 make -C "$APP" -j"$JOBS" "${storage_include_args[@]}" \
-  "${dfx_args[@]}" MESA_SDK="$MESA_SDK" \
-  VULKAN_INCLUDE="$MESA_SDK/include"
+  "${dfx_args[@]}" MESA_SDK="$MESA_SDK"
 
 echo "==== assemble temporary ROMFS ===="
 mkdir -p "$ROMFS_STAGE/cores" "$ROMFS_STAGE/emu" "$ROMFS_STAGE/res"

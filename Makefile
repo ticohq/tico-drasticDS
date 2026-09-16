@@ -26,7 +26,7 @@ endif
 STORAGE_BUILD ?= $(TOPDIR)/launcher/dependencies/build
 LIBSMB2_INCLUDE ?= $(STORAGE_BUILD)/_deps/libsmb2-src/include
 LIBUSBHSFS_INCLUDE ?= $(STORAGE_BUILD)/_deps/libusbhsfs-src/include
-MESA_SDK ?= $(TOPDIR)/mesa-switch-sdk
+MESA_SDK ?= $(TOPDIR)/../mesa-switch-unified-sdk
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -34,18 +34,13 @@ MESA_SDK ?= $(TOPDIR)/mesa-switch-sdk
 ARCH	:=	-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
 OPTIMIZATION := -O3 -flto=auto
 
-# __SWITCH__ for libnx; DRASTIC_NX gates the port-specific host branches.
-DEFINES	:=	-D__SWITCH__ -DDRASTIC_NX -DDRASTIC_NX_VERSION='"$(APP_VERSION)"'
-ifneq ($(strip $(DFX_GENERATED)),)
-DEFINES	+=	-DDRASTIC_DFX_GENERATED
-endif
+DEFINES	:=	-D__SWITCH__
 
 # --- unified renderer host --------------------------------------------------
 # The Horizon Mesa SDK provides native NVC0 OpenGL, Zink-on-NVK and loaderless
 # Vulkan in one coherent static build.  All renderer implementations are linked
 # once and the host selects Vulkan or EGL at runtime from drastic.ini.
-DEFINES	+=	-DUSE_VULKAN -DUSE_OPENGL -DUSE_UNIFIED_RENDERER \
-			-DVK_USE_PLATFORM_VI_NN
+DEFINES	+=	-DUSE_VULKAN -DUSE_OPENGL -DVK_USE_PLATFORM_VI_NN
 VULKAN_INCLUDE ?= $(MESA_SDK)/include
 SOURCES	+=	source/lsfg \
 			third_party/lsfg-vk/lsfg-vk-common/src/helpers \
@@ -160,11 +155,7 @@ $(BUILD):
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET).nro $(TARGET).nacp $(TARGET).elf \
-		$(TARGET)_gl.nro $(TARGET)_gl.elf $(TARGET)_gl.map \
-		$(TARGET)_vk.nro $(TARGET)_vk.elf $(TARGET)_vk.map \
-		$(TARGET)_zink.nro $(TARGET)_zink.elf $(TARGET)_zink.map \
-		DrasticDS.nro vulkan
+	@rm -fr $(BUILD) $(TARGET).nro $(TARGET).nacp $(TARGET).elf DrasticDS.nro
 	@rm -f *.o
 
 #---------------------------------------------------------------------------------

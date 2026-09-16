@@ -137,7 +137,7 @@ $(BUILD):
 clean:
 	@echo clean ...
 	@rm -fr $(BUILD) $(TARGET).nro $(TARGET).nacp $(TARGET).elf
-	@rm -fr romfs/cores romfs/emu romfs/fwd romfs/res
+	@rm -fr romfs/fwd
 
 #---------------------------------------------------------------------------------
 else

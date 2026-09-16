@@ -2,11 +2,7 @@
 /.drasticds-nx-cache/
 /launcher/build/
 /launcher/dependencies/build/
-/launcher/romfs/cores/
-/launcher/romfs/emu/
 /launcher/romfs/fwd/
-/launcher/romfs/res/
-/extras/system/
 *.nro
 *.nacp
 *.elf
@@ -14,8 +10,6 @@
 *.o
 *.pyc
 __pycache__/
-/out/
-/vulkan/
 **/Lossless.dll
 **/libdrastic_arm64.so
 **/drastic_bios_arm7.bin

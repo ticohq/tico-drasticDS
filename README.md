@@ -139,9 +139,10 @@ swapchain takes precedence over Low-latency Vulkan. Also enable Game Mode on
 the connected TV or monitor when playing docked.
 
 Nearest, linear, Quilez, scanline, Scale2x, HQ2x, FXAA, FXAA HQ, and SMAA use
-Drastic's original Android post-FX programs on every backend. Native NVC0 and
-Zink execute the generated GLES programs directly. Vulkan executes SPIR-V
-generated from the same `.dfx`/`.dsd`.
+Drastic's original Android post-FX programs. Native NVC0 and Zink execute the
+generated GLES programs directly. Vulkan executes SPIR-V generated from the
+same `.dfx`/`.dsd` for Scale2x, HQ2x, FXAA, FXAA HQ, and SMAA, and built-in
+equivalents for nearest, linear, Quilez, and scanline.
 
 ### Custom shaders
 
@@ -173,7 +174,8 @@ Install the devkitPro Switch toolchain and portlibs:
 ```sh
 pacman -S devkitA64 switch-tools libnx switch-sdl2 switch-sdl2_ttf \
           switch-sdl2_image switch-curl switch-ntfs-3g \
-          switch-zlib switch-zstd cmake ninja git python \
+          switch-zlib switch-libzstd switch-libexpat switch-cmake \
+          cmake ninja git python \
           mingw-w64-ucrt-x86_64-glslang
 ```
 
