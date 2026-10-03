@@ -32,6 +32,20 @@
 #include "pthr.h"
 #include "so_util.h"
 #include "switch/SwitchStorageBridge.h"
+#ifdef DRASTIC_TICO
+#include "tico/tico_entry.h"
+#include "tico/tico_menu.h"
+
+/* tico's quick menu stands in for the host's in-game menu */
+#define DrasticIngameMenu TicoMenu
+#define drastic_menu_create tico_menu_create
+#define drastic_menu_destroy tico_menu_destroy
+#define drastic_menu_open tico_menu_open
+#define drastic_menu_is_open tico_menu_is_open
+#define drastic_menu_update tico_menu_update
+#define drastic_menu_take_exit_request tico_menu_take_exit_request
+#define drastic_menu_apply_persisted_cheats tico_menu_apply_persisted_cheats
+#endif
 #include "util.h"
 
 static void *heap_so_base;
@@ -567,7 +581,12 @@ static void update_runtime_hud(RuntimeHud *hud,
       hud->window_frames = 0;
     }
   }
+#ifdef DRASTIC_TICO
+  (void)config;
+  tico_menu_set_hud(hud->fps, controls->fast_forward > 0);
+#else
   overlay_draw_hud(config->show_fps, hud->fps, controls->fast_forward);
+#endif
 }
 
 static void load_runtime_controls(RuntimeControls *controls) {
@@ -852,11 +871,23 @@ static void applet_lifecycle_hook(AppletHookType hook, void *parameter) {
   }
 }
 
+#ifdef DRASTIC_TICO
+int main(int argc, char **argv) {
+#else
 int main(void) {
+#endif
   cpu_boost(1);
   bool cpu_boost_active = true;
+#ifdef DRASTIC_TICO
+  romfsInit();
+  tico_make_directories();
+#endif
   setup_directories();
   prefs_init(PREFS_PATH);
+#ifdef DRASTIC_TICO
+  tico_prepare(argc, argv);
+  tico_menu_load_config();
+#endif
   const char *configured_renderer =
       prefs_get_string("Wrapper/Renderer", "vk");
   drastic_renderer_select(configured_renderer);
@@ -1017,6 +1048,9 @@ int main(void) {
   DrasticIngameMenu *menu = drastic_menu_create(
       &runtime, &menu_core, &controls.state_slot);
   if (!menu) fatal_error("Could not allocate the in-game menu.");
+#ifdef DRASTIC_TICO
+  tico_menu_set_toggle_combo(menu, controls.hotkeys.menu);
+#endif
 
   CoreGameThread game = {
     .clazz = clazz,
@@ -1153,8 +1187,12 @@ int main(void) {
 
   /* Match NetherSX2's chainload ordering: schedule the launcher while the
    * libnx environment is still intact, before core/JIT/runtime teardown. */
+#ifdef DRASTIC_TICO
+  if (controls.exit_requested) tico_queue_return();
+#else
   if (controls.exit_requested && envHasNextLoad() && runtime.launcher_path[0])
     envSetNextLoad(runtime.launcher_path, runtime.launcher_path);
+#endif
 
   drastic_input_sampler_destroy(input_sampler);
   HidVibrationValue stopped[2] = {0};
@@ -1173,6 +1211,9 @@ int main(void) {
   libc_memory_shutdown();
   so_unload(&emu_mod);
   switchStorageShutdown();
+#ifdef DRASTIC_TICO
+  romfsExit();
+#endif
   extern void NX_NORETURN __libnx_exit(int rc);
   __libnx_exit(0);
   return 0;

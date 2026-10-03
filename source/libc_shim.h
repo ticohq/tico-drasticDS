@@ -33,6 +33,9 @@ long __read_chk_fake(int fd, void *buf, size_t count, size_t buf_size);
 // directory (cwd). Safe on any path; returns either the input or one of a
 // small set of rotating buffers.
 const char *fix_path(const char *path);
+// Resolves a path below Drastic's "User/" virtual root, sending backup/ and
+// savestates/ to BACKUPS_DIR and SAVESTATES_DIR.
+void drastic_user_path(const char *rest, char *out, size_t out_size);
 
 // misc bionic
 int __system_property_get_fake(const char *name, char *value);

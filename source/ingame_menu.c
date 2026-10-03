@@ -604,7 +604,11 @@ static void render_main(DrasticIngameMenu *menu) {
     "Frame generation",
 #endif
     "Reset game",
+#ifdef DRASTIC_TICO
+    "Quit to tico",
+#else
     "Quit to launcher",
+#endif
   };
   draw_shell("Drastic DS", "A  Select     B  Resume");
   const int portrait = ui_is_portrait();
@@ -793,7 +797,7 @@ static const char *layout_label(DrasticLayoutMode layout) {
 static const char *filter_label(DrasticVideoFilter filter) {
   static const char *labels[DRASTIC_FILTER_COUNT] = {
     "Nearest", "Linear", "Quilez", "Scanline", "Scale2x", "HQ2x", "FXAA",
-    "FXAA HQ", "SMAA", "Custom"
+    "FXAA HQ", "SMAA", "FSR 1.0", "Custom"
   };
   return (unsigned)filter < DRASTIC_FILTER_COUNT ? labels[filter] : labels[0];
 }

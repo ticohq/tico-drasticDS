@@ -252,6 +252,15 @@ int clock_gettime_fake(int clk_id, struct timespec *tp) {
   return 0;
 }
 
+void drastic_user_path(const char *rest, char *out, size_t out_size) {
+  if (!strncmp(rest, "backup/", 7))
+    snprintf(out, out_size, "%s/%s", BACKUPS_DIR, rest + 7);
+  else if (!strncmp(rest, "savestates/", 11))
+    snprintf(out, out_size, "%s/%s", SAVESTATES_DIR, rest + 11);
+  else
+    snprintf(out, out_size, "%s/%s", USER_DIR, rest);
+}
+
 const char *fix_path(const char *path) {
   static _Thread_local char buf[2][1024];
   static _Thread_local int which = 0;
@@ -262,11 +271,12 @@ const char *fix_path(const char *path) {
    * POSIX calls.  Keep this translation identical to DraSticPathCache.open. */
   if (!strncmp(path, "DraStic/", 8) || !strncmp(path, "User/", 5)) {
     const int drastic_root = !strncmp(path, "DraStic/", 8);
-    const char *rest = path + (drastic_root ? 8 : 5);
-    const char *root = drastic_root ? DATA_ROOT : USER_DIR;
     char *out = buf[which];
     which ^= 1;
-    snprintf(out, sizeof(buf[0]), "%s/%s", root, rest);
+    if (drastic_root)
+      snprintf(out, sizeof(buf[0]), "%s/%s", DATA_ROOT, path + 8);
+    else
+      drastic_user_path(path + 5, out, sizeof(buf[0]));
     return out;
   }
   // Redirect Android application paths into the data directory.

@@ -41,6 +41,7 @@
 #define drastic_renderer_set_custom_shader \
   drastic_vk_renderer_set_custom_shader
 #define drastic_renderer_last_error drastic_vk_renderer_last_error
+#include "drastic_overlay_hook.h"
 #include "drastic_renderer.h"
 #include "drastic_rotation.h"
 #include "drastic_vk_capture.h"
@@ -254,6 +255,7 @@ static int texture_for_role(int screen, DrasticDfxTextureRole role) {
 static int final_effect(const DrasticDfxChain *chain) {
   if (chain->final_shader == DRASTIC_DFX_QUILEZ) return 2;
   if (chain->final_shader == DRASTIC_DFX_SCANLINE) return 3;
+  if (chain->final_shader == DRASTIC_DFX_FSR) return 4;
   return chain->final_sampler == DRASTIC_DFX_LINEAR ? 1 : 0;
 }
 
@@ -1862,10 +1864,11 @@ static void build_draws(const DrasticRuntimeConfig *config,
           ? rectangle->height : rectangle->width;
       const float target_height = (config->rotation & 1)
           ? rectangle->width : rectangle->height;
-      const DrawParameters screen = texture_parameters(
+      DrawParameters screen = texture_parameters(
           final_effect(chain), 2, (float)g_textures[texture].width,
           (float)g_textures[texture].height, target_width,
           target_height);
+      screen.padding[0] = (float)config->fsr_sharpness / 100.0f;
       add_rectangle(rectangle->x, rectangle->y, rectangle->width,
                     rectangle->height, config->rotation,
                     texture, chain->final_sampler,
@@ -2193,6 +2196,22 @@ static int record_commands(VkCommandBuffer command, uint32_t image_index,
                        VK_SHADER_STAGE_FRAGMENT_BIT, 0,
                        sizeof(draw->parameters), &draw->parameters);
     vkCmdDraw(command, draw->vertex_count, 1, draw->first_vertex, 0);
+  }
+  if (drastic_vk_overlay_hook) {
+    const DrasticVkOverlayContext overlay_context = {
+      .instance = g_instance,
+      .physical_device = g_physical,
+      .device = g_device,
+      .queue = g_queue,
+      .queue_family = g_queue_family,
+      .render_pass = g_render_pass,
+      .command_buffer = command,
+      .format = g_format,
+      .image_count = g_image_count,
+      .width = g_extent.width,
+      .height = g_extent.height,
+    };
+    drastic_vk_overlay_hook(&overlay_context);
   }
   vkCmdEndRenderPass(command);
   return vk_ok(vkEndCommandBuffer(command));

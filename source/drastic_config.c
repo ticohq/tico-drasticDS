@@ -113,6 +113,7 @@ static DrasticVideoFilter read_filter(void) {
   if (!strcmp(filter, "fxaa")) return DRASTIC_FILTER_FXAA;
   if (!strcmp(filter, "fxaa_hq")) return DRASTIC_FILTER_FXAA_HQ;
   if (!strcmp(filter, "smaa")) return DRASTIC_FILTER_SMAA;
+  if (!strcmp(filter, "fsr")) return DRASTIC_FILTER_FSR;
   if (!strcmp(filter, "custom")) return DRASTIC_FILTER_CUSTOM;
   return DRASTIC_FILTER_NEAREST;
 }
@@ -133,7 +134,7 @@ static DrasticStylusMode read_stylus_mode(void) {
 const char *drastic_config_filter_name(DrasticVideoFilter filter) {
   static const char *names[DRASTIC_FILTER_COUNT] = {
     "nearest", "linear", "quilez", "scanline", "scale2x", "hq2x", "fxaa",
-    "fxaa_hq", "smaa", "custom"
+    "fxaa_hq", "smaa", "fsr", "custom"
   };
   if ((unsigned)filter >= DRASTIC_FILTER_COUNT) return names[0];
   return names[filter];
@@ -178,6 +179,8 @@ void drastic_config_load(DrasticRuntimeConfig *config) {
   config->vulkan_low_latency =
       prefs_get_bool("Wrapper/VulkanLowLatency", false);
   config->video_filter = read_filter();
+  config->fsr_sharpness =
+      clamp_int(prefs_get_int("Wrapper/FsrSharpness", 40), 0, 100);
   snprintf(config->custom_shader, sizeof(config->custom_shader), "%s",
            prefs_get_string("Wrapper/CustomShader", ""));
   config->show_fps = prefs_get_bool("Drastic/ShowFPS", false);

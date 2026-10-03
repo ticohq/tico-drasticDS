@@ -17,6 +17,8 @@ typedef enum {
   DRASTIC_DFX_SMAA_EDGE,
   DRASTIC_DFX_SMAA_WEIGHT,
   DRASTIC_DFX_SMAA_BLEND,
+  /* FSR 1.0 spatial upscaling, drawn straight from the screen texture */
+  DRASTIC_DFX_FSR,
   DRASTIC_DFX_SHADER_COUNT,
 } DrasticDfxShader;
 
@@ -163,6 +165,11 @@ static inline const DrasticDfxChain *drastic_dfx_chain(
       .final_shader = DRASTIC_DFX_QUILEZ,
       .final_texture = DRASTIC_DFX_WORK_A,
       .final_sampler = DRASTIC_DFX_LINEAR,
+    },
+    [DRASTIC_FILTER_FSR] = {
+      .final_shader = DRASTIC_DFX_FSR,
+      .final_texture = DRASTIC_DFX_SOURCE,
+      .final_sampler = DRASTIC_DFX_NEAREST,
     },
   };
   if ((unsigned)filter >= DRASTIC_FILTER_COUNT)

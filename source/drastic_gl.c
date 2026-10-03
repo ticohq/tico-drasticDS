@@ -8,6 +8,7 @@
 
 #include "config.h"
 #include "drastic_custom_shader.h"
+#include "drastic_overlay_hook.h"
 #include "drastic_dfx.h"
 #include "drastic_dfx_gl_generated.h"
 
@@ -47,6 +48,7 @@ typedef struct {
   GLint texture_size;
   GLint target_size;
   GLint time;
+  GLint sharpness;
   GLint samplers[DRASTIC_CUSTOM_SHADER_MAX_SAMPLERS];
 } GlProgram;
 
@@ -87,6 +89,70 @@ static unsigned g_frames;
 static GlCustomState g_custom;
 static char g_renderer_error[512];
 
+/* FSR 1.0 style spatial upscaling, the GLSL ES counterpart of fsr_pixel() in
+ * shaders/drastic_vk.frag (after Autorun's blit_upscale.comp). */
+static const char fsr_vertex_source[] =
+  "attribute vec2 a_vertex_coordinate;\n"
+  "attribute vec2 a_texture_coordinate;\n"
+  "varying vec2 v_texture_coordinate;\n"
+  "void main(){\n"
+  " gl_Position=vec4(a_vertex_coordinate,0.0,1.0);\n"
+  " v_texture_coordinate=a_texture_coordinate;\n"
+  "}\n";
+
+static const char fsr_fragment_source[] =
+  "#ifdef GL_FRAGMENT_PRECISION_HIGH\n"
+  "precision highp float;\n"
+  "#else\n"
+  "precision mediump float;\n"
+  "#endif\n"
+  "varying vec2 v_texture_coordinate;\n"
+  "uniform sampler2D u_texture;\n"
+  "uniform vec4 u_texture_size;\n"
+  "uniform float u_sharpness;\n"
+  "vec3 fetch(vec2 texel){\n"
+  " texel=clamp(texel,vec2(0.0),u_texture_size.zw-1.0);\n"
+  " return texture2D(u_texture,(texel+0.5)*u_texture_size.xy).rgb;\n"
+  "}\n"
+  "float luma(vec3 c){return dot(c,vec3(0.2126,0.7152,0.0722));}\n"
+  "float kernel(float x){\n"
+  " x=clamp(abs(x),0.0,2.0);\n"
+  " float x2=x*x;\n"
+  " return (1.0-0.4*x2)*(x2-1.0)*(x2-1.0);\n"
+  "}\n"
+  "void main(){\n"
+  " vec2 position=v_texture_coordinate*u_texture_size.zw-0.5;\n"
+  " vec2 base=floor(position);\n"
+  " vec2 f=position-base;\n"
+  " vec3 s00=fetch(base);\n"
+  " vec3 s10=fetch(base+vec2(1.0,0.0));\n"
+  " vec3 s01=fetch(base+vec2(0.0,1.0));\n"
+  " vec3 s11=fetch(base+vec2(1.0,1.0));\n"
+  " vec3 st=fetch(base+vec2(0.0,-1.0));\n"
+  " vec3 sl=fetch(base+vec2(-1.0,0.0));\n"
+  " vec3 sr=fetch(base+vec2(2.0,0.0));\n"
+  " vec3 sb=fetch(base+vec2(0.0,2.0));\n"
+  " float l00=luma(s00),l10=luma(s10),l01=luma(s01),l11=luma(s11);\n"
+  " vec2 d=vec2((l10-l00)+(l11-l01),(l01-l00)+(l11-l10));\n"
+  " float len=length(d);\n"
+  " vec2 e=len>0.001?d/len:vec2(0.0);\n"
+  " float wx0=kernel(f.x),wx1=kernel(1.0-f.x);\n"
+  " float wy0=kernel(f.y),wy1=kernel(1.0-f.y);\n"
+  " float k=clamp(len*2.0,0.0,0.5);\n"
+  " float w00=max(wx0*wy0+k*dot(e,vec2(-1.0,-1.0)),0.0001);\n"
+  " float w10=max(wx1*wy0+k*dot(e,vec2(1.0,-1.0)),0.0001);\n"
+  " float w01=max(wx0*wy1+k*dot(e,vec2(-1.0,1.0)),0.0001);\n"
+  " float w11=max(wx1*wy1+k*dot(e,vec2(1.0,1.0)),0.0001);\n"
+  " vec3 c=(s00*w00+s10*w10+s01*w01+s11*w11)/(w00+w10+w01+w11);\n"
+  " if(u_sharpness>0.01){\n"
+  "  vec3 lo=min(min(min(s00,s10),min(s01,s11)),min(min(st,sb),min(sl,sr)));\n"
+  "  vec3 hi=max(max(max(s00,s10),max(s01,s11)),max(max(st,sb),max(sl,sr)));\n"
+  "  vec3 a=(s00+s10+s01+s11)*0.25;\n"
+  "  c=clamp(c+(c-a)*(u_sharpness*1.5),lo,hi);\n"
+  " }\n"
+  " gl_FragColor=vec4(c,1.0);\n"
+  "}\n";
+
 static const char *const g_vertex_sources[DRASTIC_DFX_SHADER_COUNT] = {
   dfx_copy_vertex_source,
   dfx_quilez_vertex_source,
@@ -99,6 +165,7 @@ static const char *const g_vertex_sources[DRASTIC_DFX_SHADER_COUNT] = {
   dfx_smaa_edge_vertex_source,
   dfx_smaa_weight_vertex_source,
   dfx_smaa_blend_vertex_source,
+  fsr_vertex_source,
 };
 
 static const char *const g_fragment_sources[DRASTIC_DFX_SHADER_COUNT] = {
@@ -113,6 +180,7 @@ static const char *const g_fragment_sources[DRASTIC_DFX_SHADER_COUNT] = {
   dfx_smaa_edge_fragment_source,
   dfx_smaa_weight_fragment_source,
   dfx_smaa_blend_fragment_source,
+  fsr_fragment_source,
 };
 
 static const char *const g_sampler_names[DRASTIC_DFX_SHADER_COUNT][3] = {
@@ -129,6 +197,7 @@ static const char *const g_sampler_names[DRASTIC_DFX_SHADER_COUNT][3] = {
     "u_texture_edges", "u_texture_area", "u_texture_search"
   },
   [DRASTIC_DFX_SMAA_BLEND] = {"u_texture", "u_texture_blend"},
+  [DRASTIC_DFX_FSR] = {"u_texture"},
 };
 
 static const char overlay_vertex_source[] =
@@ -192,6 +261,7 @@ static int create_program(GlProgram *program, const char *vertex_source,
   program->target_size = glGetUniformLocation(program->id,
                                                "u_target_size");
   program->time = glGetUniformLocation(program->id, "u_time");
+  program->sharpness = glGetUniformLocation(program->id, "u_sharpness");
   for (int index = 0; index < DRASTIC_CUSTOM_SHADER_MAX_SAMPLERS; index++) {
     program->samplers[index] = sampler_names && index < sampler_count &&
         sampler_names[index]
@@ -279,6 +349,7 @@ static int create_custom_program(GlProgram *program,
   program->target_size = glGetUniformLocation(program->id,
                                                "u_target_size");
   program->time = glGetUniformLocation(program->id, "u_time");
+  program->sharpness = glGetUniformLocation(program->id, "u_sharpness");
   for (int index = 0; index < DRASTIC_CUSTOM_SHADER_MAX_SAMPLERS; index++)
     program->samplers[index] = index < pass->sampler_count
         ? glGetUniformLocation(program->id, pass->sampler_names[index]) : -1;
@@ -692,7 +763,7 @@ static void draw_custom_screen(const DrasticScreenRect *rect, int rotation) {
 }
 
 static void draw_screen(const DrasticScreenRect *rect, int rotation,
-                        const DrasticDfxChain *chain) {
+                        const DrasticDfxChain *chain, float sharpness) {
   const int screen = rect->screen ? 1 : 0;
   int texture_width, texture_height;
   dimensions_for_role(screen, chain->final_texture,
@@ -709,6 +780,7 @@ static void draw_screen(const DrasticScreenRect *rect, int rotation,
   set_texture_filter(texture_for_role(screen, chain->final_texture),
                      chain->final_sampler);
   if (program->samplers[0] >= 0) glUniform1i(program->samplers[0], 0);
+  if (program->sharpness >= 0) glUniform1f(program->sharpness, sharpness);
   glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
@@ -919,11 +991,14 @@ void drastic_renderer_present(const DrasticRuntimeConfig *config,
     if (custom)
       draw_custom_screen(&config->screens[index], config->rotation);
     else
-      draw_screen(&config->screens[index], config->rotation, chain);
+      draw_screen(&config->screens[index], config->rotation, chain,
+                  (float)config->fsr_sharpness / 100.0f);
   }
   draw_stylus_cursor(config);
   if (overlay && overlay->visible && upload_overlay(overlay))
     draw_overlay(config->rotation);
+  if (drastic_gl_overlay_hook)
+    drastic_gl_overlay_hook(panel_width, panel_height);
   eglSwapBuffers(g_display, g_surface);
   g_frames++;
 }

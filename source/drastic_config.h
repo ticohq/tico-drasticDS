@@ -26,6 +26,7 @@ typedef enum {
   DRASTIC_FILTER_FXAA,
   DRASTIC_FILTER_FXAA_HQ,
   DRASTIC_FILTER_SMAA,
+  DRASTIC_FILTER_FSR,
   DRASTIC_FILTER_CUSTOM,
   DRASTIC_FILTER_COUNT,
 } DrasticVideoFilter;
@@ -63,6 +64,8 @@ typedef struct {
   int custom_aspect_lock;
   int vulkan_low_latency;
   DrasticVideoFilter video_filter;
+  /* FSR 1.0 sharpening, 0..100 */
+  int fsr_sharpness;
   char custom_shader[DRASTIC_CUSTOM_SHADER_PATH_MAX];
   int show_fps;
   int volume;

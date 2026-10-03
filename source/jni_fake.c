@@ -362,7 +362,7 @@ static int drastic_real_path(const char *virtual_path, char *output,
   if (!strncmp(virtual_path, "DraStic/", 8))
     snprintf(output, output_size, "%s/%s", DATA_ROOT, virtual_path + 8);
   else if (!strncmp(virtual_path, "User/", 5))
-    snprintf(output, output_size, "%s/%s", USER_DIR, virtual_path + 5);
+    drastic_user_path(virtual_path + 5, output, output_size);
   else if (virtual_path[0] == '/')
     snprintf(output, output_size, "%s", virtual_path);
   else {

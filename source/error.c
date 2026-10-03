@@ -14,6 +14,9 @@
 
 #include "util.h"
 #include "error.h"
+#ifdef DRASTIC_TICO
+#include "tico/tico_entry.h"
+#endif
 
 static int g_graphics_active;
 
@@ -56,6 +59,9 @@ void fatal_error(const char *fmt, ...) {
   }
 
   consoleExit(NULL);
+#ifdef DRASTIC_TICO
+  tico_queue_return();
+#endif
   /* The failure was displayed; do not ask hbloader to convert it
      into an opaque non-zero-exit user break. */
   exit(0);

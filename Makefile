@@ -28,6 +28,19 @@ LIBSMB2_INCLUDE ?= $(STORAGE_BUILD)/_deps/libsmb2-src/include
 LIBUSBHSFS_INCLUDE ?= $(STORAGE_BUILD)/_deps/libusbhsfs-src/include
 MESA_SDK ?= $(TOPDIR)/../mesa-switch-unified-sdk
 
+# TICO=1 builds the host as tico-drastic.nro, the entrypoint the tico frontend
+# chainloads (source/tico). TICO_ROMFS is an optional staged romfs holding
+# cores/libdrastic_arm64.so and res/game_database.xml.
+ifeq ($(TICO),1)
+TARGET		:=	tico-drastic
+APP_TITLE	:=	tico DrasticDS
+APP_AUTHOR	:=	ticoverse.com
+BUILD		:=	build_tico
+SOURCES		+=	source/tico source/tico/overlay \
+			third_party/imgui third_party/imgui/backends
+INCLUDES	+=	third_party/imgui third_party/imgui/backends third_party/tico
+endif
+
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
@@ -35,6 +48,9 @@ ARCH	:=	-march=armv8-a+crc+crypto -mtune=cortex-a57 -mtp=soft -fPIE
 OPTIMIZATION := -O3 -flto=auto
 
 DEFINES	:=	-D__SWITCH__
+ifeq ($(TICO),1)
+DEFINES	+=	-DDRASTIC_TICO -DIMGUI_USER_CONFIG=\"imgui_user_config.h\"
+endif
 
 # --- unified renderer host --------------------------------------------------
 # The Horizon Mesa SDK provides native NVC0 OpenGL, Zink-on-NVK and loaderless
@@ -74,6 +90,8 @@ STORAGE_LIBS := $(STORAGE_BUILD)/_deps/libsmb2-build/lib/libsmb2.a \
 # Unified EGL embeds both NVC0 and Zink, while the Vulkan renderer calls the
 # same loaderless NVK archive directly. Keep the complete static dependency set
 # in one rescan group so both runtime paths resolve from a single executable.
+# nothing references libelf; the switch-dev image does not ship it (ELF_LIB=)
+ELF_LIB ?= -lelf
 LIBDIRS	:= $(MESA_SDK) $(PORTLIBS) $(LIBNX)
 LIBS	:= -Wl,-u,vk_icdGetInstanceProcAddr \
 		-Wl,-u,vk_icdNegotiateLoaderICDInterfaceVersion -pthread \
@@ -81,7 +99,7 @@ LIBS	:= -Wl,-u,vk_icdGetInstanceProcAddr \
 		-l:libGLESv2.a -l:libEGL.a -l:libvulkan.a -l:libglapi.a \
 		-l:libmesa_util_c11.a -l:libblake3.a -l:libmesa_util.a \
 		-l:libmesa_util_simd.a -l:libxmlconfig.a \
-		-lelf -lexpat -lzstd -lz -lnx -lstdc++ -lm \
+		$(ELF_LIB) -lexpat -lzstd -lz -lnx -lstdc++ -lm \
 		-Wl,--end-group
 
 #---------------------------------------------------------------------------------
@@ -137,6 +155,10 @@ endif
 
 ifeq ($(strip $(NO_NACP)),)
 	export NROFLAGS += --nacp=$(CURDIR)/$(TARGET).nacp
+endif
+
+ifneq ($(strip $(TICO_ROMFS)),)
+	export NROFLAGS += --romfsdir=$(TICO_ROMFS)
 endif
 
 ifneq ($(APP_TITLEID),)

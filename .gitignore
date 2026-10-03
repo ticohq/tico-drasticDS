@@ -1,4 +1,5 @@
 /build/
+/build_tico/
 /.drasticds-nx-cache/
 /launcher/build/
 /launcher/dependencies/build/
@@ -21,3 +22,5 @@ __pycache__/
 **/game_database.xml
 **/usrcheat.dat
 !third_party/nds-i-cheat-databases/usrcheat.dat
+*.apk
+.DS_Store

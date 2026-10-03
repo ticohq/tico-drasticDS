@@ -1,4 +1,5 @@
 #include "drastic_renderer.h"
+#include "drastic_overlay_hook.h"
 
 #include <string.h>
 
@@ -37,6 +38,9 @@ bool drastic_vk_renderer_lsfg_request_enabled(bool enabled);
 bool drastic_vk_renderer_set_custom_shader(const char *relative_path,
                                            char *error, size_t error_size);
 const char *drastic_vk_renderer_last_error(void);
+
+DrasticVkOverlayHook drastic_vk_overlay_hook;
+DrasticGlOverlayHook drastic_gl_overlay_hook;
 
 static DrasticRendererBackend g_backend = DRASTIC_RENDERER_BACKEND_VULKAN;
 
