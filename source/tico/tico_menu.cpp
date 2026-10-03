@@ -28,6 +28,7 @@ extern "C" {
 #include "tico/overlay/imgui_overlay.h"
 #include "tico/overlay/overlay_ui.h"
 #include "tico/overlay/tico_config.h"
+#include "tico/overlay/translation_manager.h"
 
 namespace OverlayUI = SwitchFrontend::OverlayUI;
 namespace ImGuiOverlay = SwitchFrontend::ImGuiOverlay;
@@ -72,6 +73,21 @@ struct Cheat {
     bool custom = false;
     bool enabled = false;
 };
+
+// The overlay's message for key in the language tico is set to.
+std::string Tr(const char* key) {
+    SwitchFrontend::OverlayTranslation::TranslationManager::Instance().Init();
+    return SwitchFrontend::OverlayTranslation::tr(key);
+}
+
+// Tr() with one %d or %s filled in.
+template <typename T>
+std::string TrFormat(const char* key, T value) {
+    const std::string format = Tr(key);
+    char text[256];
+    std::snprintf(text, sizeof(text), format.c_str(), value);
+    return text;
+}
 
 std::string JavaBytes(void* array) {
     std::string text;
@@ -202,20 +218,14 @@ struct TicoMenu {
     void SaveState(int slot) {
         const bool requested =
             core.save_state && core.save_state(core.env, core.clazz, slot, 1);
-        char message[64];
-        std::snprintf(message, sizeof(message),
-                      requested ? "Saving state to slot %d" : "Slot %d could not be saved",
-                      slot + 1);
-        OverlayUI::ShowToast(message);
+        OverlayUI::ShowToast(
+            TrFormat(requested ? "drastic_saving_state" : "drastic_save_failed", slot + 1));
     }
 
     void LoadState(int slot) {
         const bool loaded = core.load_state && core.load_state(core.env, core.clazz, slot);
-        char message[64];
-        std::snprintf(message, sizeof(message),
-                      loaded ? "Loaded state from slot %d" : "Slot %d could not be loaded",
-                      slot + 1);
-        OverlayUI::ShowToast(message);
+        OverlayUI::ShowToast(
+            TrFormat(loaded ? "drastic_state_loaded" : "drastic_load_failed", slot + 1));
     }
 
     // ---------------------------------------------------------------------
@@ -244,7 +254,7 @@ struct TicoMenu {
             if (core.get_cheat_name)
                 cheat.name = JavaBytes(core.get_cheat_name(core.env, core.clazz, i));
             if (cheat.name.empty())
-                cheat.name = "Cheat " + std::to_string(i + 1);
+                cheat.name = TrFormat("drastic_cheat_number", i + 1);
             cheats.push_back(std::move(cheat));
         }
         const int custom_count =
@@ -258,7 +268,7 @@ struct TicoMenu {
             if (core.get_custom_cheat_name)
                 cheat.name = JavaBytes(core.get_custom_cheat_name(core.env, core.clazz, i));
             if (cheat.name.empty())
-                cheat.name = "Custom cheat " + std::to_string(i + 1);
+                cheat.name = TrFormat("drastic_custom_cheat_number", i + 1);
             cheats.push_back(std::move(cheat));
         }
     }
@@ -267,13 +277,15 @@ struct TicoMenu {
         RefreshCheats();
         std::vector<OverlayUI::CheatMenuEntry> entries;
         OverlayUI::CheatMenuEntry add;
-        add.name = "+ Add custom Action Replay cheat";
+        add.name = Tr("drastic_add_cheat");
         add.source_index = kAddCheatRow;
         add.is_add_row = true;
         entries.push_back(add);
         for (std::size_t i = 0; i < cheats.size(); i++) {
             OverlayUI::CheatMenuEntry entry;
-            entry.name = cheats[i].custom ? cheats[i].name + " (custom)" : cheats[i].name;
+            entry.name = cheats[i].custom
+                             ? TrFormat("drastic_custom_cheat_suffix", cheats[i].name.c_str())
+                             : cheats[i].name;
             entry.enabled = cheats[i].enabled;
             entry.source_index = static_cast<int>(i);
             entries.push_back(entry);
@@ -316,26 +328,27 @@ struct TicoMenu {
 
     void AddCustomCheat() {
         if (!core.add_custom_cheat) {
-            OverlayUI::ShowToast("Custom cheats are unavailable in this core");
+            OverlayUI::ShowToast(Tr("drastic_cheats_unavailable"));
             return;
         }
         std::string name;
         std::string codes;
-        if (!PromptKeyboard("New custom cheat", "Enter a name", "", 95, false, name) ||
+        if (!PromptKeyboard(Tr("drastic_new_cheat").c_str(), Tr("drastic_enter_name").c_str(),
+                            "", 95, false, name) ||
             name.empty())
             return;
-        if (!PromptKeyboard("Action Replay code", "Enter hexadecimal address/value pairs", "",
-                            4095, true, codes))
+        if (!PromptKeyboard(Tr("drastic_action_replay_code").c_str(),
+                            Tr("drastic_enter_code").c_str(), "", 4095, true, codes))
             return;
         const std::vector<int32_t> words = ParseCheatWords(codes);
         if (words.empty()) {
-            OverlayUI::ShowToast("Invalid code: use 8-digit address/value pairs");
+            OverlayUI::ShowToast(Tr("drastic_invalid_code"));
             return;
         }
         void* array = jni_make_int_array(static_cast<int>(words.size()));
         int32_t* data = jni_int_array_data(array);
         if (!data) {
-            OverlayUI::ShowToast("Could not allocate the cheat code");
+            OverlayUI::ShowToast(Tr("drastic_cheat_alloc_failed"));
             return;
         }
         std::memcpy(data, words.data(), words.size() * sizeof(*data));
@@ -347,7 +360,7 @@ struct TicoMenu {
         if (core.update_cheats)
             core.update_cheats(core.env, core.clazz, 1);
         OverlayUI::RefreshCheatList();
-        OverlayUI::ShowToast(added ? "Custom cheat added" : "Drastic rejected the custom cheat");
+        OverlayUI::ShowToast(Tr(added ? "drastic_cheat_added" : "drastic_cheat_rejected"));
     }
 
     // ---------------------------------------------------------------------
@@ -381,7 +394,7 @@ struct TicoMenu {
                     TicoConfig::SetOptionValue(*filter, drastic_config_filter_name(live.video_filter));
                 if (shader)
                     TicoConfig::SetOptionValue(*shader, live.custom_shader);
-                OverlayUI::ShowToast(error[0] ? error : "This custom shader could not be loaded");
+                OverlayUI::ShowToast(error[0] ? std::string(error) : Tr("drastic_shader_failed"));
                 return;
             }
         }
@@ -443,7 +456,7 @@ struct TicoMenu {
         if (lsfg != drastic_renderer_lsfg_enabled()) {
             if (!drastic_renderer_lsfg_available() ||
                 !drastic_renderer_lsfg_request_enabled(lsfg))
-                OverlayUI::ShowToast("Frame generation applies the next time the game starts",
+                OverlayUI::ShowToast(Tr("drastic_lsfg_next_launch"),
                                      OverlayUI::ToastCorner::TopRight);
         }
     }
@@ -454,7 +467,8 @@ struct TicoMenu {
             return;
         std::string value;
         const std::size_t length = option->max_length > 0 ? option->max_length : 64;
-        if (!PromptKeyboard(option->fallback, nullptr, TicoConfig::GetOptionValue(*option),
+        const std::string header = Tr(option->label_key ? option->label_key : option->fallback);
+        if (!PromptKeyboard(header.c_str(), nullptr, TicoConfig::GetOptionValue(*option),
                             length, false, value))
             return;
         TicoConfig::SetOptionValue(*option, value);
@@ -523,8 +537,28 @@ struct TicoMenu {
 
 extern "C" {
 
-void tico_menu_load_config(void) {
+void tico_config_load(void) {
     TicoConfig::ReloadConfig();
+}
+
+// The content folders are fixed for the session: they are resolved on first
+// use, after tico_config_load, and read from the core's file threads.
+const char* tico_nds_system_dir(void) {
+    static const std::string path = TicoConfig::SystemPath();
+    return path.c_str();
+}
+
+const char* tico_nds_saves_dir(void) {
+    static const std::string path = TicoConfig::SavesPath();
+    return path.c_str();
+}
+
+const char* tico_nds_states_dir(void) {
+    static const std::string path = TicoConfig::StatesPath();
+    return path.c_str();
+}
+
+void tico_menu_load_config(void) {
     TicoConfig::ApplyToPrefs();
     OverlayUI::ReloadSettings();
 }

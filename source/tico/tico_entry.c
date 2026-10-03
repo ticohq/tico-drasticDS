@@ -75,38 +75,64 @@ static void install_file(const char *target, const char *const *candidates,
   }
 }
 
-void tico_make_directories(void) {
-  static const char *const directories[] = {
-    "/tico", "/tico/system", TICO_NDS_DIR, TICO_NDS_DIR "/debug",
-    "/tico/saves", BACKUPS_DIR,
-    "/tico/states", SAVESTATES_DIR, DATA_ROOT, DATA_ROOT "/cores",
-    SYSTEM_DIR, FALLBACK_ROM_DIR,
-  };
-  for (unsigned index = 0;
-       index < sizeof(directories) / sizeof(*directories); index++)
-    mkdir(directories[index], 0777);
+void tico_make_path(const char *path) {
+  char partial[1024];
+  snprintf(partial, sizeof(partial), "%s", path);
+  /* skip a device prefix such as sdmc:/ */
+  char *cursor = strstr(partial, ":/");
+  cursor = cursor ? cursor + 2 : partial + 1;
+  for (; *cursor; cursor++) {
+    if (*cursor != '/') continue;
+    *cursor = '\0';
+    mkdir(partial, 0777);
+    *cursor = '/';
+  }
+  mkdir(partial, 0777);
 }
 
-/* tico keeps the user's NDS dumps in its shared system folder under either
+void tico_make_directories(void) {
+  /* a custom root from the Paths tab may not exist yet */
+  tico_make_path(tico_nds_system_dir());
+  tico_make_path(BACKUPS_DIR);
+  tico_make_path(SAVESTATES_DIR);
+  tico_make_path(DATA_ROOT "/cores");
+  tico_make_path(SYSTEM_DIR);
+  tico_make_path(FALLBACK_ROM_DIR);
+}
+
+/* tico keeps the user's NDS dumps in the module's system folder under either
  * the Drastic or the melonDS names; Drastic reads them from SYSTEM_DIR. */
 static void stage_system_files(void) {
-  static const char *const arm7[] = {
-    TICO_NDS_DIR "/nds_bios_arm7.bin", TICO_NDS_DIR "/bios7.bin",
-    STANDALONE_ROOT "/system/nds_bios_arm7.bin", NULL,
+  const char *system = tico_nds_system_dir();
+  char arm7_drastic[1024], arm7_melonds[1024], arm9_drastic[1024],
+      arm9_melonds[1024], firmware_drastic[1024], firmware_melonds[1024],
+      user_cheats[1024];
+  snprintf(arm7_drastic, sizeof(arm7_drastic), "%s/nds_bios_arm7.bin", system);
+  snprintf(arm7_melonds, sizeof(arm7_melonds), "%s/bios7.bin", system);
+  snprintf(arm9_drastic, sizeof(arm9_drastic), "%s/nds_bios_arm9.bin", system);
+  snprintf(arm9_melonds, sizeof(arm9_melonds), "%s/bios9.bin", system);
+  snprintf(firmware_drastic, sizeof(firmware_drastic), "%s/nds_firmware.bin",
+           system);
+  snprintf(firmware_melonds, sizeof(firmware_melonds), "%s/firmware.bin",
+           system);
+  snprintf(user_cheats, sizeof(user_cheats), "%s/usrcheat.dat", system);
+  const char *const arm7[] = {
+    arm7_drastic, arm7_melonds, STANDALONE_ROOT "/system/nds_bios_arm7.bin",
+    NULL,
   };
-  static const char *const arm9[] = {
-    TICO_NDS_DIR "/nds_bios_arm9.bin", TICO_NDS_DIR "/bios9.bin",
-    STANDALONE_ROOT "/system/nds_bios_arm9.bin", NULL,
+  const char *const arm9[] = {
+    arm9_drastic, arm9_melonds, STANDALONE_ROOT "/system/nds_bios_arm9.bin",
+    NULL,
   };
-  static const char *const firmware[] = {
-    TICO_NDS_DIR "/nds_firmware.bin", TICO_NDS_DIR "/firmware.bin",
+  const char *const firmware[] = {
+    firmware_drastic, firmware_melonds,
     STANDALONE_ROOT "/system/nds_firmware.bin", NULL,
   };
   static const char *const database[] = {
     BUNDLED_DATABASE, STANDALONE_ROOT "/system/game_database.xml", NULL,
   };
-  static const char *const cheats[] = {
-    TICO_NDS_DIR "/usrcheat.dat", STANDALONE_ROOT "/system/usrcheat.dat", NULL,
+  const char *const cheats[] = {
+    user_cheats, STANDALONE_ROOT "/system/usrcheat.dat", NULL,
   };
   install_file(SYSTEM_DIR "/nds_bios_arm7.bin", arm7, 0);
   install_file(SYSTEM_DIR "/nds_bios_arm9.bin", arm9, 0);

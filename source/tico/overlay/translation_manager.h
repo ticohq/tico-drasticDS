@@ -19,6 +19,7 @@ public:
 private:
     TranslationManager() = default;
 
+    // Adds the file's strings, replacing ones already loaded.
     bool LoadLanguageFile(const std::string& filename);
 
     std::string m_current_language;

@@ -12,8 +12,12 @@
 
 #define TICO_LAUNCHER_PATH "sdmc:/switch/tico/tico.nro"
 
-/* Creates tico's folders; the host's own folders are created inside them. */
+/* Creates tico's folders; the host's own folders are created inside them.
+ * Call once the tico config is loaded, since it names the content folders. */
 void tico_make_directories(void);
+
+/* Creates a directory and any missing parents. */
+void tico_make_path(const char *path);
 
 /* Installs the bundled game database and stages the BIOS/firmware from tico's
  * NDS system folder. Call after prefs_init(); it points Drastic/RomPath and
@@ -27,6 +31,6 @@ bool tico_queue_return(void);
 
 /* Appends to TICO_LOG_PATH. */
 void tico_log(const char *format, ...) __attribute__((format(printf, 1, 2)));
-#define TICO_LOG_PATH "/tico/system/nds/debug/drastic.txt"
+#define TICO_LOG_PATH DATA_ROOT "/tico.log"
 
 #endif

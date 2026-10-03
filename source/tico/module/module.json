@@ -1,0 +1,29 @@
+{
+  "id": "drastic",
+  "name": "DraStic",
+  "nro": "tico-drastic.nro",
+  "launch": "\"{nro}\" \"{rom}\" \"{title}\"",
+  "settings": "config/modules/drastic/settings.json",
+  "config_file": "drastic.jsonc",
+  "is_libretro": false,
+  "systems": [
+    {
+      "slug": "nds",
+      "title": "Nintendo DS",
+      "short_title": "NDS",
+      "extensions": [
+        ".nds",
+        ".zip",
+        ".rar"
+      ],
+      "games_file": "nds.json",
+      "retroachievements_id": 18,
+      "colors": {
+        "start": "A3C4E6",
+        "end": "6FA7E6",
+        "start_dark": "7891A8",
+        "end_dark": "4F78A8"
+      }
+    }
+  ]
+}

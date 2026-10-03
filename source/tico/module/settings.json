@@ -1,0 +1,2832 @@
+{
+  "core_id": "drastic",
+  "display_name": "DraStic",
+  "config_file": "drastic.jsonc",
+  "slugs": [
+    "nds"
+  ],
+  "bool_true_value": "true",
+  "bool_false_value": "false",
+  "tabs": [
+    {
+      "name": "settings_drastic_tab_display",
+      "sections": [
+        {
+          "title": "settings_drastic_tab_display",
+          "options": [
+            {
+              "key": "Wrapper/Layout",
+              "label": "settings_drastic_screen_layout",
+              "type": "enum",
+              "default": "horizontal",
+              "choices": [
+                {
+                  "label": "Vertical",
+                  "value": "vertical"
+                },
+                {
+                  "label": "Horizontal",
+                  "value": "horizontal"
+                },
+                {
+                  "label": "Top screen only",
+                  "value": "top"
+                },
+                {
+                  "label": "Touch screen only",
+                  "value": "bottom"
+                },
+                {
+                  "label": "Hybrid (top large)",
+                  "value": "hybrid_top"
+                },
+                {
+                  "label": "Hybrid (touch large)",
+                  "value": "hybrid_bottom"
+                },
+                {
+                  "label": "Custom",
+                  "value": "custom"
+                }
+              ]
+            },
+            {
+              "key": "Wrapper/CustomAspectLock",
+              "label": "settings_drastic_lock_native_aspect_ratio",
+              "type": "bool",
+              "default": "true"
+            },
+            {
+              "key": "Wrapper/SwapScreens",
+              "label": "settings_drastic_swap_ds_screens",
+              "type": "bool",
+              "default": "false"
+            },
+            {
+              "key": "Wrapper/Rotation",
+              "label": "settings_drastic_rotation",
+              "type": "enum",
+              "default": "0",
+              "choices": [
+                {
+                  "label": "0 degrees",
+                  "value": "0"
+                },
+                {
+                  "label": "90 degrees",
+                  "value": "1"
+                },
+                {
+                  "label": "180 degrees",
+                  "value": "2"
+                },
+                {
+                  "label": "270 degrees",
+                  "value": "3"
+                }
+              ]
+            },
+            {
+              "key": "Wrapper/ScreenGap",
+              "label": "settings_drastic_screen_gap",
+              "type": "enum",
+              "default": "8",
+              "choices": [
+                {
+                  "label": "0",
+                  "value": "0"
+                },
+                {
+                  "label": "2",
+                  "value": "2"
+                },
+                {
+                  "label": "4",
+                  "value": "4"
+                },
+                {
+                  "label": "6",
+                  "value": "6"
+                },
+                {
+                  "label": "8",
+                  "value": "8"
+                },
+                {
+                  "label": "10",
+                  "value": "10"
+                },
+                {
+                  "label": "12",
+                  "value": "12"
+                },
+                {
+                  "label": "14",
+                  "value": "14"
+                },
+                {
+                  "label": "16",
+                  "value": "16"
+                },
+                {
+                  "label": "18",
+                  "value": "18"
+                },
+                {
+                  "label": "20",
+                  "value": "20"
+                },
+                {
+                  "label": "22",
+                  "value": "22"
+                },
+                {
+                  "label": "24",
+                  "value": "24"
+                },
+                {
+                  "label": "26",
+                  "value": "26"
+                },
+                {
+                  "label": "28",
+                  "value": "28"
+                },
+                {
+                  "label": "30",
+                  "value": "30"
+                },
+                {
+                  "label": "32",
+                  "value": "32"
+                },
+                {
+                  "label": "34",
+                  "value": "34"
+                },
+                {
+                  "label": "36",
+                  "value": "36"
+                },
+                {
+                  "label": "38",
+                  "value": "38"
+                },
+                {
+                  "label": "40",
+                  "value": "40"
+                },
+                {
+                  "label": "42",
+                  "value": "42"
+                },
+                {
+                  "label": "44",
+                  "value": "44"
+                },
+                {
+                  "label": "46",
+                  "value": "46"
+                },
+                {
+                  "label": "48",
+                  "value": "48"
+                },
+                {
+                  "label": "50",
+                  "value": "50"
+                },
+                {
+                  "label": "52",
+                  "value": "52"
+                },
+                {
+                  "label": "54",
+                  "value": "54"
+                },
+                {
+                  "label": "56",
+                  "value": "56"
+                },
+                {
+                  "label": "58",
+                  "value": "58"
+                },
+                {
+                  "label": "60",
+                  "value": "60"
+                },
+                {
+                  "label": "62",
+                  "value": "62"
+                },
+                {
+                  "label": "64",
+                  "value": "64"
+                },
+                {
+                  "label": "66",
+                  "value": "66"
+                },
+                {
+                  "label": "68",
+                  "value": "68"
+                },
+                {
+                  "label": "70",
+                  "value": "70"
+                },
+                {
+                  "label": "72",
+                  "value": "72"
+                },
+                {
+                  "label": "74",
+                  "value": "74"
+                },
+                {
+                  "label": "76",
+                  "value": "76"
+                },
+                {
+                  "label": "78",
+                  "value": "78"
+                },
+                {
+                  "label": "80",
+                  "value": "80"
+                },
+                {
+                  "label": "82",
+                  "value": "82"
+                },
+                {
+                  "label": "84",
+                  "value": "84"
+                },
+                {
+                  "label": "86",
+                  "value": "86"
+                },
+                {
+                  "label": "88",
+                  "value": "88"
+                },
+                {
+                  "label": "90",
+                  "value": "90"
+                },
+                {
+                  "label": "92",
+                  "value": "92"
+                },
+                {
+                  "label": "94",
+                  "value": "94"
+                },
+                {
+                  "label": "96",
+                  "value": "96"
+                },
+                {
+                  "label": "98",
+                  "value": "98"
+                },
+                {
+                  "label": "100",
+                  "value": "100"
+                },
+                {
+                  "label": "102",
+                  "value": "102"
+                },
+                {
+                  "label": "104",
+                  "value": "104"
+                },
+                {
+                  "label": "106",
+                  "value": "106"
+                },
+                {
+                  "label": "108",
+                  "value": "108"
+                },
+                {
+                  "label": "110",
+                  "value": "110"
+                },
+                {
+                  "label": "112",
+                  "value": "112"
+                },
+                {
+                  "label": "114",
+                  "value": "114"
+                },
+                {
+                  "label": "116",
+                  "value": "116"
+                },
+                {
+                  "label": "118",
+                  "value": "118"
+                },
+                {
+                  "label": "120",
+                  "value": "120"
+                },
+                {
+                  "label": "122",
+                  "value": "122"
+                },
+                {
+                  "label": "124",
+                  "value": "124"
+                },
+                {
+                  "label": "126",
+                  "value": "126"
+                },
+                {
+                  "label": "128",
+                  "value": "128"
+                }
+              ]
+            },
+            {
+              "key": "Wrapper/IntegerScale",
+              "label": "settings_drastic_integer_scaling",
+              "type": "bool",
+              "default": "false"
+            },
+            {
+              "key": "Wrapper/VideoFilter",
+              "label": "settings_drastic_drastic_filter",
+              "type": "enum",
+              "default": "nearest",
+              "choices": [
+                {
+                  "label": "Nearest",
+                  "value": "nearest"
+                },
+                {
+                  "label": "Linear",
+                  "value": "linear"
+                },
+                {
+                  "label": "Quilez smooth",
+                  "value": "quilez"
+                },
+                {
+                  "label": "Scanline",
+                  "value": "scanline"
+                },
+                {
+                  "label": "Scale2x",
+                  "value": "scale2x"
+                },
+                {
+                  "label": "HQ2x",
+                  "value": "hq2x"
+                },
+                {
+                  "label": "FXAA",
+                  "value": "fxaa"
+                },
+                {
+                  "label": "FXAA high quality",
+                  "value": "fxaa_hq"
+                },
+                {
+                  "label": "SMAA",
+                  "value": "smaa"
+                },
+                {
+                  "label": "FSR 1.0",
+                  "value": "fsr"
+                },
+                {
+                  "label": "Custom shader",
+                  "value": "custom"
+                }
+              ]
+            },
+            {
+              "key": "Wrapper/FsrSharpness",
+              "label": "settings_drastic_fsr_sharpness",
+              "type": "enum",
+              "default": "40",
+              "choices": [
+                {
+                  "label": "0%",
+                  "value": "0"
+                },
+                {
+                  "label": "20%",
+                  "value": "20"
+                },
+                {
+                  "label": "40%",
+                  "value": "40"
+                },
+                {
+                  "label": "60%",
+                  "value": "60"
+                },
+                {
+                  "label": "80%",
+                  "value": "80"
+                },
+                {
+                  "label": "100%",
+                  "value": "100"
+                }
+              ],
+              "depends_on": {
+                "key": "Wrapper/VideoFilter",
+                "value": "fsr"
+              }
+            },
+            {
+              "key": "fps_counter_position",
+              "label": "settings_drastic_fps_counter",
+              "type": "enum",
+              "default": "hidden",
+              "choices": [
+                {
+                  "label": "Hidden",
+                  "value": "hidden"
+                },
+                {
+                  "label": "Top left",
+                  "value": "top_left"
+                },
+                {
+                  "label": "Top right",
+                  "value": "top_right"
+                },
+                {
+                  "label": "Bottom left",
+                  "value": "bottom_left"
+                },
+                {
+                  "label": "Bottom right",
+                  "value": "bottom_right"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "settings_drastic_tab_3d_graphics",
+      "sections": [
+        {
+          "title": "settings_drastic_tab_3d_graphics",
+          "options": [
+            {
+              "key": "Wrapper/Renderer",
+              "label": "settings_drastic_renderer",
+              "type": "enum",
+              "default": "vk",
+              "choices": [
+                {
+                  "label": "Vulkan (NVK)",
+                  "value": "vk"
+                },
+                {
+                  "label": "OpenGL (NVC0)",
+                  "value": "gl"
+                },
+                {
+                  "label": "Zink (OpenGL on NVK)",
+                  "value": "zink"
+                }
+              ],
+              "restart": true
+            },
+            {
+              "key": "Wrapper/VulkanLowLatency",
+              "label": "settings_drastic_low_latency_vulkan",
+              "type": "bool",
+              "default": "false",
+              "restart": true
+            },
+            {
+              "key": "Drastic/Hires3D",
+              "label": "settings_drastic_high_resolution_3d",
+              "type": "bool",
+              "default": "false",
+              "restart": true
+            },
+            {
+              "key": "Drastic/Threaded3D",
+              "label": "settings_drastic_threaded_3d",
+              "type": "bool",
+              "default": "true"
+            },
+            {
+              "key": "Drastic/DisableEdgeMarking",
+              "label": "settings_drastic_disable_edge_marking",
+              "type": "bool",
+              "default": "false",
+              "restart": true
+            },
+            {
+              "key": "Drastic/Use16BitColor",
+              "label": "settings_drastic_16_bit_color",
+              "type": "bool",
+              "default": "false",
+              "restart": true
+            },
+            {
+              "key": "Drastic/Blend",
+              "label": "settings_drastic_frame_blending",
+              "type": "bool",
+              "default": "false",
+              "restart": true
+            },
+            {
+              "key": "Drastic/FixMainEngineScreen",
+              "label": "settings_drastic_fix_main_engine_screen",
+              "type": "bool",
+              "default": "false",
+              "restart": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "settings_drastic_tab_frame_generation",
+      "sections": [
+        {
+          "title": "settings_drastic_tab_frame_generation",
+          "options": [
+            {
+              "key": "Wrapper/LSFGEnabled",
+              "label": "settings_drastic_lsfg_2x_vulkan_only",
+              "type": "bool",
+              "default": "false"
+            },
+            {
+              "key": "Wrapper/LSFGFlowScale",
+              "label": "settings_drastic_flow_resolution",
+              "type": "enum",
+              "default": "0.25",
+              "choices": [
+                {
+                  "label": "Quarter (recommended)",
+                  "value": "0.25"
+                },
+                {
+                  "label": "Half",
+                  "value": "0.5"
+                }
+              ],
+              "restart": true
+            },
+            {
+              "key": "Wrapper/LSFGPerformance",
+              "label": "settings_drastic_performance_mode",
+              "type": "bool",
+              "default": "true",
+              "restart": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "settings_drastic_tab_audio",
+      "sections": [
+        {
+          "title": "settings_drastic_tab_audio",
+          "options": [
+            {
+              "key": "Drastic/SoundEnabled",
+              "label": "settings_drastic_sound",
+              "type": "bool",
+              "default": "true"
+            },
+            {
+              "key": "Wrapper/Volume",
+              "label": "settings_drastic_volume",
+              "type": "enum",
+              "default": "100",
+              "choices": [
+                {
+                  "label": "0%",
+                  "value": "0"
+                },
+                {
+                  "label": "5%",
+                  "value": "5"
+                },
+                {
+                  "label": "10%",
+                  "value": "10"
+                },
+                {
+                  "label": "15%",
+                  "value": "15"
+                },
+                {
+                  "label": "20%",
+                  "value": "20"
+                },
+                {
+                  "label": "25%",
+                  "value": "25"
+                },
+                {
+                  "label": "30%",
+                  "value": "30"
+                },
+                {
+                  "label": "35%",
+                  "value": "35"
+                },
+                {
+                  "label": "40%",
+                  "value": "40"
+                },
+                {
+                  "label": "45%",
+                  "value": "45"
+                },
+                {
+                  "label": "50%",
+                  "value": "50"
+                },
+                {
+                  "label": "55%",
+                  "value": "55"
+                },
+                {
+                  "label": "60%",
+                  "value": "60"
+                },
+                {
+                  "label": "65%",
+                  "value": "65"
+                },
+                {
+                  "label": "70%",
+                  "value": "70"
+                },
+                {
+                  "label": "75%",
+                  "value": "75"
+                },
+                {
+                  "label": "80%",
+                  "value": "80"
+                },
+                {
+                  "label": "85%",
+                  "value": "85"
+                },
+                {
+                  "label": "90%",
+                  "value": "90"
+                },
+                {
+                  "label": "95%",
+                  "value": "95"
+                },
+                {
+                  "label": "100%",
+                  "value": "100"
+                }
+              ]
+            },
+            {
+              "key": "Drastic/AudioLatency",
+              "label": "settings_drastic_audio_latency",
+              "type": "enum",
+              "default": "2",
+              "choices": [
+                {
+                  "label": "Low",
+                  "value": "0"
+                },
+                {
+                  "label": "Balanced",
+                  "value": "1"
+                },
+                {
+                  "label": "High compatibility",
+                  "value": "2"
+                },
+                {
+                  "label": "Maximum",
+                  "value": "3"
+                }
+              ],
+              "restart": true
+            },
+            {
+              "key": "Drastic/MicEnabled",
+              "label": "settings_drastic_microphone",
+              "type": "bool",
+              "default": "true"
+            },
+            {
+              "key": "Wrapper/MicrophoneSource",
+              "label": "settings_drastic_microphone_source",
+              "type": "enum",
+              "default": "noise",
+              "choices": [
+                {
+                  "label": "Simulated noise",
+                  "value": "noise"
+                },
+                {
+                  "label": "External microphone",
+                  "value": "external"
+                }
+              ]
+            },
+            {
+              "key": "Drastic/MicLevel",
+              "label": "settings_drastic_microphone_level",
+              "type": "enum",
+              "default": "1",
+              "choices": [
+                {
+                  "label": "Low",
+                  "value": "0"
+                },
+                {
+                  "label": "Normal",
+                  "value": "1"
+                },
+                {
+                  "label": "High",
+                  "value": "2"
+                },
+                {
+                  "label": "Maximum",
+                  "value": "3"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "settings_drastic_tab_emulation",
+      "sections": [
+        {
+          "title": "settings_drastic_tab_emulation",
+          "options": [
+            {
+              "key": "Drastic/CpuThreads",
+              "label": "settings_drastic_cpu_worker_threads",
+              "type": "enum",
+              "default": "3",
+              "choices": [
+                {
+                  "label": "1",
+                  "value": "1"
+                },
+                {
+                  "label": "2",
+                  "value": "2"
+                },
+                {
+                  "label": "3 (recommended)",
+                  "value": "3"
+                }
+              ],
+              "restart": true
+            },
+            {
+              "key": "Drastic/PreloadRoms",
+              "label": "settings_drastic_preload_rom",
+              "type": "bool",
+              "default": "true",
+              "restart": true
+            },
+            {
+              "key": "Drastic/AutoTrim",
+              "label": "settings_drastic_auto_trim_rom",
+              "type": "bool",
+              "default": "false",
+              "restart": true
+            },
+            {
+              "key": "Drastic/IgnoreGamecardLimit",
+              "label": "settings_drastic_ignore_card_size_limit",
+              "type": "bool",
+              "default": "false",
+              "restart": true
+            },
+            {
+              "key": "Drastic/RtcSystemTime",
+              "label": "settings_drastic_always_sync_rtc",
+              "type": "bool",
+              "default": "true",
+              "restart": true
+            },
+            {
+              "key": "Drastic/AutosaveInterval",
+              "label": "settings_drastic_autosave_interval",
+              "type": "enum",
+              "default": "300",
+              "choices": [
+                {
+                  "label": "Off",
+                  "value": "0"
+                },
+                {
+                  "label": "1 minute",
+                  "value": "60"
+                },
+                {
+                  "label": "5 minutes",
+                  "value": "300"
+                },
+                {
+                  "label": "10 minutes",
+                  "value": "600"
+                },
+                {
+                  "label": "30 minutes",
+                  "value": "1800"
+                }
+              ]
+            },
+            {
+              "key": "Drastic/CheatsEnabled",
+              "label": "settings_drastic_cheats_master_switch",
+              "type": "bool",
+              "default": "true"
+            },
+            {
+              "key": "Drastic/LuaEnabled",
+              "label": "settings_drastic_lua_scripts",
+              "type": "bool",
+              "default": "true",
+              "restart": true
+            },
+            {
+              "key": "Drastic/Slot2Type",
+              "label": "settings_drastic_slot_2_accessory",
+              "type": "enum",
+              "default": "1",
+              "choices": [
+                {
+                  "label": "None",
+                  "value": "0"
+                },
+                {
+                  "label": "GBA Cart",
+                  "value": "1"
+                },
+                {
+                  "label": "SRAM Cart",
+                  "value": "2"
+                },
+                {
+                  "label": "Rumble Pack",
+                  "value": "3"
+                },
+                {
+                  "label": "Motion Pack (Official)",
+                  "value": "4"
+                },
+                {
+                  "label": "Motion Pack (Homebrew)",
+                  "value": "5"
+                }
+              ],
+              "restart": true
+            },
+            {
+              "key": "Drastic/BackupInSavestates",
+              "label": "settings_drastic_savestate_backup_data",
+              "type": "bool",
+              "default": "true",
+              "restart": true
+            },
+            {
+              "key": "Drastic/RawSaveFormat",
+              "label": "settings_drastic_raw_save_file_format",
+              "type": "bool",
+              "default": "false",
+              "restart": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "settings_drastic_tab_frame_rate",
+      "sections": [
+        {
+          "title": "settings_drastic_tab_frame_rate",
+          "options": [
+            {
+              "key": "Drastic/FrameskipValue",
+              "label": "settings_drastic_frames_to_skip",
+              "type": "enum",
+              "default": "0",
+              "choices": [
+                {
+                  "label": "0",
+                  "value": "0"
+                },
+                {
+                  "label": "1",
+                  "value": "1"
+                },
+                {
+                  "label": "2",
+                  "value": "2"
+                },
+                {
+                  "label": "3",
+                  "value": "3"
+                },
+                {
+                  "label": "4",
+                  "value": "4"
+                },
+                {
+                  "label": "5",
+                  "value": "5"
+                },
+                {
+                  "label": "6",
+                  "value": "6"
+                },
+                {
+                  "label": "7",
+                  "value": "7"
+                },
+                {
+                  "label": "8",
+                  "value": "8"
+                },
+                {
+                  "label": "9",
+                  "value": "9"
+                }
+              ]
+            },
+            {
+              "key": "Drastic/FrameskipType",
+              "label": "settings_drastic_frame_skip_method",
+              "type": "enum",
+              "default": "0",
+              "choices": [
+                {
+                  "label": "Automatic",
+                  "value": "0"
+                },
+                {
+                  "label": "Fixed",
+                  "value": "1"
+                },
+                {
+                  "label": "Aggressive",
+                  "value": "2"
+                },
+                {
+                  "label": "Maximum",
+                  "value": "3"
+                }
+              ]
+            },
+            {
+              "key": "Drastic/FrameskipSafe",
+              "label": "settings_drastic_safe_frame_skipping",
+              "type": "bool",
+              "default": "false"
+            },
+            {
+              "key": "Drastic/FastForwardSpeed",
+              "label": "settings_drastic_fast_forward_speed",
+              "type": "enum",
+              "default": "2",
+              "choices": [
+                {
+                  "label": "50%",
+                  "value": "0"
+                },
+                {
+                  "label": "150%",
+                  "value": "1"
+                },
+                {
+                  "label": "200%",
+                  "value": "2"
+                },
+                {
+                  "label": "300%",
+                  "value": "3"
+                },
+                {
+                  "label": "400%",
+                  "value": "4"
+                },
+                {
+                  "label": "Unlimited",
+                  "value": "5"
+                }
+              ]
+            },
+            {
+              "key": "Drastic/AutoFireSpeed",
+              "label": "settings_drastic_auto_fire_speed",
+              "type": "enum",
+              "default": "2",
+              "choices": [
+                {
+                  "label": "Slow",
+                  "value": "0"
+                },
+                {
+                  "label": "Normal",
+                  "value": "2"
+                },
+                {
+                  "label": "Fast",
+                  "value": "4"
+                },
+                {
+                  "label": "Very fast",
+                  "value": "7"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "settings_drastic_tab_controller",
+      "sections": [
+        {
+          "title": "settings_drastic_tab_controller",
+          "options": [
+            {
+              "key": "Wrapper/Vibration",
+              "label": "settings_drastic_rumble_pak_vibration",
+              "type": "bool",
+              "default": "true"
+            },
+            {
+              "key": "Wrapper/Motion",
+              "label": "settings_drastic_gyro_accelerometer",
+              "type": "bool",
+              "default": "true"
+            },
+            {
+              "key": "Wrapper/StylusMode",
+              "label": "settings_drastic_virtual_stylus",
+              "type": "enum",
+              "default": "stick",
+              "choices": [
+                {
+                  "label": "Off",
+                  "value": "off"
+                },
+                {
+                  "label": "Right stick",
+                  "value": "stick"
+                },
+                {
+                  "label": "Motion controls",
+                  "value": "motion"
+                }
+              ]
+            },
+            {
+              "key": "Wrapper/AnalogTouchButton",
+              "label": "settings_drastic_stylus_touch_button",
+              "type": "enum",
+              "default": "StickR",
+              "choices": [
+                {
+                  "label": "A",
+                  "value": "A"
+                },
+                {
+                  "label": "B",
+                  "value": "B"
+                },
+                {
+                  "label": "X",
+                  "value": "X"
+                },
+                {
+                  "label": "Y",
+                  "value": "Y"
+                },
+                {
+                  "label": "L",
+                  "value": "L"
+                },
+                {
+                  "label": "R",
+                  "value": "R"
+                },
+                {
+                  "label": "ZL",
+                  "value": "ZL"
+                },
+                {
+                  "label": "ZR",
+                  "value": "ZR"
+                },
+                {
+                  "label": "Plus",
+                  "value": "Plus"
+                },
+                {
+                  "label": "Minus",
+                  "value": "Minus"
+                },
+                {
+                  "label": "L-Stick",
+                  "value": "StickL"
+                },
+                {
+                  "label": "R-Stick",
+                  "value": "StickR"
+                },
+                {
+                  "label": "D-Up",
+                  "value": "Up"
+                },
+                {
+                  "label": "D-Down",
+                  "value": "Down"
+                },
+                {
+                  "label": "D-Left",
+                  "value": "Left"
+                },
+                {
+                  "label": "D-Right",
+                  "value": "Right"
+                },
+                {
+                  "label": "None",
+                  "value": "None"
+                }
+              ],
+              "restart": true
+            },
+            {
+              "key": "Wrapper/AnalogStylusSpeed",
+              "label": "settings_drastic_stick_cursor_speed",
+              "type": "enum",
+              "default": "8",
+              "choices": [
+                {
+                  "label": "1",
+                  "value": "1"
+                },
+                {
+                  "label": "2",
+                  "value": "2"
+                },
+                {
+                  "label": "3",
+                  "value": "3"
+                },
+                {
+                  "label": "4",
+                  "value": "4"
+                },
+                {
+                  "label": "5",
+                  "value": "5"
+                },
+                {
+                  "label": "6",
+                  "value": "6"
+                },
+                {
+                  "label": "7",
+                  "value": "7"
+                },
+                {
+                  "label": "8",
+                  "value": "8"
+                },
+                {
+                  "label": "9",
+                  "value": "9"
+                },
+                {
+                  "label": "10",
+                  "value": "10"
+                },
+                {
+                  "label": "11",
+                  "value": "11"
+                },
+                {
+                  "label": "12",
+                  "value": "12"
+                },
+                {
+                  "label": "13",
+                  "value": "13"
+                },
+                {
+                  "label": "14",
+                  "value": "14"
+                },
+                {
+                  "label": "15",
+                  "value": "15"
+                },
+                {
+                  "label": "16",
+                  "value": "16"
+                },
+                {
+                  "label": "17",
+                  "value": "17"
+                },
+                {
+                  "label": "18",
+                  "value": "18"
+                },
+                {
+                  "label": "19",
+                  "value": "19"
+                },
+                {
+                  "label": "20",
+                  "value": "20"
+                }
+              ],
+              "restart": true
+            },
+            {
+              "key": "Wrapper/MotionStylusSensitivity",
+              "label": "settings_drastic_motion_sensitivity",
+              "type": "enum",
+              "default": "10",
+              "choices": [
+                {
+                  "label": "1",
+                  "value": "1"
+                },
+                {
+                  "label": "2",
+                  "value": "2"
+                },
+                {
+                  "label": "3",
+                  "value": "3"
+                },
+                {
+                  "label": "4",
+                  "value": "4"
+                },
+                {
+                  "label": "5",
+                  "value": "5"
+                },
+                {
+                  "label": "6",
+                  "value": "6"
+                },
+                {
+                  "label": "7",
+                  "value": "7"
+                },
+                {
+                  "label": "8",
+                  "value": "8"
+                },
+                {
+                  "label": "9",
+                  "value": "9"
+                },
+                {
+                  "label": "10",
+                  "value": "10"
+                },
+                {
+                  "label": "11",
+                  "value": "11"
+                },
+                {
+                  "label": "12",
+                  "value": "12"
+                },
+                {
+                  "label": "13",
+                  "value": "13"
+                },
+                {
+                  "label": "14",
+                  "value": "14"
+                },
+                {
+                  "label": "15",
+                  "value": "15"
+                },
+                {
+                  "label": "16",
+                  "value": "16"
+                },
+                {
+                  "label": "17",
+                  "value": "17"
+                },
+                {
+                  "label": "18",
+                  "value": "18"
+                },
+                {
+                  "label": "19",
+                  "value": "19"
+                },
+                {
+                  "label": "20",
+                  "value": "20"
+                }
+              ]
+            },
+            {
+              "key": "Wrapper/MouseStylus",
+              "label": "settings_drastic_usb_mouse_stylus",
+              "type": "bool",
+              "default": "true"
+            },
+            {
+              "key": "Wrapper/AnalogDpad",
+              "label": "settings_drastic_analog_stick_as_d_pad",
+              "type": "bool",
+              "default": "true",
+              "restart": true
+            },
+            {
+              "key": "Wrapper/AnalogDeadzone",
+              "label": "settings_drastic_analog_deadzone",
+              "type": "enum",
+              "default": "35",
+              "choices": [
+                {
+                  "label": "5",
+                  "value": "5"
+                },
+                {
+                  "label": "10",
+                  "value": "10"
+                },
+                {
+                  "label": "15",
+                  "value": "15"
+                },
+                {
+                  "label": "20",
+                  "value": "20"
+                },
+                {
+                  "label": "25",
+                  "value": "25"
+                },
+                {
+                  "label": "30",
+                  "value": "30"
+                },
+                {
+                  "label": "35",
+                  "value": "35"
+                },
+                {
+                  "label": "40",
+                  "value": "40"
+                },
+                {
+                  "label": "45",
+                  "value": "45"
+                },
+                {
+                  "label": "50",
+                  "value": "50"
+                },
+                {
+                  "label": "55",
+                  "value": "55"
+                },
+                {
+                  "label": "60",
+                  "value": "60"
+                },
+                {
+                  "label": "65",
+                  "value": "65"
+                },
+                {
+                  "label": "70",
+                  "value": "70"
+                },
+                {
+                  "label": "75",
+                  "value": "75"
+                },
+                {
+                  "label": "80",
+                  "value": "80"
+                }
+              ],
+              "restart": true
+            },
+            {
+              "key": "Wrapper/Pad/A",
+              "label": "settings_drastic_ds_a",
+              "type": "enum",
+              "default": "A",
+              "choices": [
+                {
+                  "label": "A",
+                  "value": "A"
+                },
+                {
+                  "label": "B",
+                  "value": "B"
+                },
+                {
+                  "label": "X",
+                  "value": "X"
+                },
+                {
+                  "label": "Y",
+                  "value": "Y"
+                },
+                {
+                  "label": "L",
+                  "value": "L"
+                },
+                {
+                  "label": "R",
+                  "value": "R"
+                },
+                {
+                  "label": "ZL",
+                  "value": "ZL"
+                },
+                {
+                  "label": "ZR",
+                  "value": "ZR"
+                },
+                {
+                  "label": "Plus",
+                  "value": "Plus"
+                },
+                {
+                  "label": "Minus",
+                  "value": "Minus"
+                },
+                {
+                  "label": "L-Stick",
+                  "value": "StickL"
+                },
+                {
+                  "label": "R-Stick",
+                  "value": "StickR"
+                },
+                {
+                  "label": "D-Up",
+                  "value": "Up"
+                },
+                {
+                  "label": "D-Down",
+                  "value": "Down"
+                },
+                {
+                  "label": "D-Left",
+                  "value": "Left"
+                },
+                {
+                  "label": "D-Right",
+                  "value": "Right"
+                },
+                {
+                  "label": "None",
+                  "value": "None"
+                }
+              ],
+              "restart": true
+            },
+            {
+              "key": "Wrapper/Pad/B",
+              "label": "settings_drastic_ds_b",
+              "type": "enum",
+              "default": "B",
+              "choices": [
+                {
+                  "label": "A",
+                  "value": "A"
+                },
+                {
+                  "label": "B",
+                  "value": "B"
+                },
+                {
+                  "label": "X",
+                  "value": "X"
+                },
+                {
+                  "label": "Y",
+                  "value": "Y"
+                },
+                {
+                  "label": "L",
+                  "value": "L"
+                },
+                {
+                  "label": "R",
+                  "value": "R"
+                },
+                {
+                  "label": "ZL",
+                  "value": "ZL"
+                },
+                {
+                  "label": "ZR",
+                  "value": "ZR"
+                },
+                {
+                  "label": "Plus",
+                  "value": "Plus"
+                },
+                {
+                  "label": "Minus",
+                  "value": "Minus"
+                },
+                {
+                  "label": "L-Stick",
+                  "value": "StickL"
+                },
+                {
+                  "label": "R-Stick",
+                  "value": "StickR"
+                },
+                {
+                  "label": "D-Up",
+                  "value": "Up"
+                },
+                {
+                  "label": "D-Down",
+                  "value": "Down"
+                },
+                {
+                  "label": "D-Left",
+                  "value": "Left"
+                },
+                {
+                  "label": "D-Right",
+                  "value": "Right"
+                },
+                {
+                  "label": "None",
+                  "value": "None"
+                }
+              ],
+              "restart": true
+            },
+            {
+              "key": "Wrapper/Pad/X",
+              "label": "settings_drastic_ds_x",
+              "type": "enum",
+              "default": "X",
+              "choices": [
+                {
+                  "label": "A",
+                  "value": "A"
+                },
+                {
+                  "label": "B",
+                  "value": "B"
+                },
+                {
+                  "label": "X",
+                  "value": "X"
+                },
+                {
+                  "label": "Y",
+                  "value": "Y"
+                },
+                {
+                  "label": "L",
+                  "value": "L"
+                },
+                {
+                  "label": "R",
+                  "value": "R"
+                },
+                {
+                  "label": "ZL",
+                  "value": "ZL"
+                },
+                {
+                  "label": "ZR",
+                  "value": "ZR"
+                },
+                {
+                  "label": "Plus",
+                  "value": "Plus"
+                },
+                {
+                  "label": "Minus",
+                  "value": "Minus"
+                },
+                {
+                  "label": "L-Stick",
+                  "value": "StickL"
+                },
+                {
+                  "label": "R-Stick",
+                  "value": "StickR"
+                },
+                {
+                  "label": "D-Up",
+                  "value": "Up"
+                },
+                {
+                  "label": "D-Down",
+                  "value": "Down"
+                },
+                {
+                  "label": "D-Left",
+                  "value": "Left"
+                },
+                {
+                  "label": "D-Right",
+                  "value": "Right"
+                },
+                {
+                  "label": "None",
+                  "value": "None"
+                }
+              ],
+              "restart": true
+            },
+            {
+              "key": "Wrapper/Pad/Y",
+              "label": "settings_drastic_ds_y",
+              "type": "enum",
+              "default": "Y",
+              "choices": [
+                {
+                  "label": "A",
+                  "value": "A"
+                },
+                {
+                  "label": "B",
+                  "value": "B"
+                },
+                {
+                  "label": "X",
+                  "value": "X"
+                },
+                {
+                  "label": "Y",
+                  "value": "Y"
+                },
+                {
+                  "label": "L",
+                  "value": "L"
+                },
+                {
+                  "label": "R",
+                  "value": "R"
+                },
+                {
+                  "label": "ZL",
+                  "value": "ZL"
+                },
+                {
+                  "label": "ZR",
+                  "value": "ZR"
+                },
+                {
+                  "label": "Plus",
+                  "value": "Plus"
+                },
+                {
+                  "label": "Minus",
+                  "value": "Minus"
+                },
+                {
+                  "label": "L-Stick",
+                  "value": "StickL"
+                },
+                {
+                  "label": "R-Stick",
+                  "value": "StickR"
+                },
+                {
+                  "label": "D-Up",
+                  "value": "Up"
+                },
+                {
+                  "label": "D-Down",
+                  "value": "Down"
+                },
+                {
+                  "label": "D-Left",
+                  "value": "Left"
+                },
+                {
+                  "label": "D-Right",
+                  "value": "Right"
+                },
+                {
+                  "label": "None",
+                  "value": "None"
+                }
+              ],
+              "restart": true
+            },
+            {
+              "key": "Wrapper/Pad/L",
+              "label": "settings_drastic_ds_l",
+              "type": "enum",
+              "default": "L",
+              "choices": [
+                {
+                  "label": "A",
+                  "value": "A"
+                },
+                {
+                  "label": "B",
+                  "value": "B"
+                },
+                {
+                  "label": "X",
+                  "value": "X"
+                },
+                {
+                  "label": "Y",
+                  "value": "Y"
+                },
+                {
+                  "label": "L",
+                  "value": "L"
+                },
+                {
+                  "label": "R",
+                  "value": "R"
+                },
+                {
+                  "label": "ZL",
+                  "value": "ZL"
+                },
+                {
+                  "label": "ZR",
+                  "value": "ZR"
+                },
+                {
+                  "label": "Plus",
+                  "value": "Plus"
+                },
+                {
+                  "label": "Minus",
+                  "value": "Minus"
+                },
+                {
+                  "label": "L-Stick",
+                  "value": "StickL"
+                },
+                {
+                  "label": "R-Stick",
+                  "value": "StickR"
+                },
+                {
+                  "label": "D-Up",
+                  "value": "Up"
+                },
+                {
+                  "label": "D-Down",
+                  "value": "Down"
+                },
+                {
+                  "label": "D-Left",
+                  "value": "Left"
+                },
+                {
+                  "label": "D-Right",
+                  "value": "Right"
+                },
+                {
+                  "label": "None",
+                  "value": "None"
+                }
+              ],
+              "restart": true
+            },
+            {
+              "key": "Wrapper/Pad/R",
+              "label": "settings_drastic_ds_r",
+              "type": "enum",
+              "default": "R",
+              "choices": [
+                {
+                  "label": "A",
+                  "value": "A"
+                },
+                {
+                  "label": "B",
+                  "value": "B"
+                },
+                {
+                  "label": "X",
+                  "value": "X"
+                },
+                {
+                  "label": "Y",
+                  "value": "Y"
+                },
+                {
+                  "label": "L",
+                  "value": "L"
+                },
+                {
+                  "label": "R",
+                  "value": "R"
+                },
+                {
+                  "label": "ZL",
+                  "value": "ZL"
+                },
+                {
+                  "label": "ZR",
+                  "value": "ZR"
+                },
+                {
+                  "label": "Plus",
+                  "value": "Plus"
+                },
+                {
+                  "label": "Minus",
+                  "value": "Minus"
+                },
+                {
+                  "label": "L-Stick",
+                  "value": "StickL"
+                },
+                {
+                  "label": "R-Stick",
+                  "value": "StickR"
+                },
+                {
+                  "label": "D-Up",
+                  "value": "Up"
+                },
+                {
+                  "label": "D-Down",
+                  "value": "Down"
+                },
+                {
+                  "label": "D-Left",
+                  "value": "Left"
+                },
+                {
+                  "label": "D-Right",
+                  "value": "Right"
+                },
+                {
+                  "label": "None",
+                  "value": "None"
+                }
+              ],
+              "restart": true
+            },
+            {
+              "key": "Wrapper/Pad/Start",
+              "label": "settings_drastic_ds_start",
+              "type": "enum",
+              "default": "Plus",
+              "choices": [
+                {
+                  "label": "A",
+                  "value": "A"
+                },
+                {
+                  "label": "B",
+                  "value": "B"
+                },
+                {
+                  "label": "X",
+                  "value": "X"
+                },
+                {
+                  "label": "Y",
+                  "value": "Y"
+                },
+                {
+                  "label": "L",
+                  "value": "L"
+                },
+                {
+                  "label": "R",
+                  "value": "R"
+                },
+                {
+                  "label": "ZL",
+                  "value": "ZL"
+                },
+                {
+                  "label": "ZR",
+                  "value": "ZR"
+                },
+                {
+                  "label": "Plus",
+                  "value": "Plus"
+                },
+                {
+                  "label": "Minus",
+                  "value": "Minus"
+                },
+                {
+                  "label": "L-Stick",
+                  "value": "StickL"
+                },
+                {
+                  "label": "R-Stick",
+                  "value": "StickR"
+                },
+                {
+                  "label": "D-Up",
+                  "value": "Up"
+                },
+                {
+                  "label": "D-Down",
+                  "value": "Down"
+                },
+                {
+                  "label": "D-Left",
+                  "value": "Left"
+                },
+                {
+                  "label": "D-Right",
+                  "value": "Right"
+                },
+                {
+                  "label": "None",
+                  "value": "None"
+                }
+              ],
+              "restart": true
+            },
+            {
+              "key": "Wrapper/Pad/Select",
+              "label": "settings_drastic_ds_select",
+              "type": "enum",
+              "default": "Minus",
+              "choices": [
+                {
+                  "label": "A",
+                  "value": "A"
+                },
+                {
+                  "label": "B",
+                  "value": "B"
+                },
+                {
+                  "label": "X",
+                  "value": "X"
+                },
+                {
+                  "label": "Y",
+                  "value": "Y"
+                },
+                {
+                  "label": "L",
+                  "value": "L"
+                },
+                {
+                  "label": "R",
+                  "value": "R"
+                },
+                {
+                  "label": "ZL",
+                  "value": "ZL"
+                },
+                {
+                  "label": "ZR",
+                  "value": "ZR"
+                },
+                {
+                  "label": "Plus",
+                  "value": "Plus"
+                },
+                {
+                  "label": "Minus",
+                  "value": "Minus"
+                },
+                {
+                  "label": "L-Stick",
+                  "value": "StickL"
+                },
+                {
+                  "label": "R-Stick",
+                  "value": "StickR"
+                },
+                {
+                  "label": "D-Up",
+                  "value": "Up"
+                },
+                {
+                  "label": "D-Down",
+                  "value": "Down"
+                },
+                {
+                  "label": "D-Left",
+                  "value": "Left"
+                },
+                {
+                  "label": "D-Right",
+                  "value": "Right"
+                },
+                {
+                  "label": "None",
+                  "value": "None"
+                }
+              ],
+              "restart": true
+            },
+            {
+              "key": "Wrapper/Pad/Up",
+              "label": "settings_drastic_d_pad_up",
+              "type": "enum",
+              "default": "Up",
+              "choices": [
+                {
+                  "label": "A",
+                  "value": "A"
+                },
+                {
+                  "label": "B",
+                  "value": "B"
+                },
+                {
+                  "label": "X",
+                  "value": "X"
+                },
+                {
+                  "label": "Y",
+                  "value": "Y"
+                },
+                {
+                  "label": "L",
+                  "value": "L"
+                },
+                {
+                  "label": "R",
+                  "value": "R"
+                },
+                {
+                  "label": "ZL",
+                  "value": "ZL"
+                },
+                {
+                  "label": "ZR",
+                  "value": "ZR"
+                },
+                {
+                  "label": "Plus",
+                  "value": "Plus"
+                },
+                {
+                  "label": "Minus",
+                  "value": "Minus"
+                },
+                {
+                  "label": "L-Stick",
+                  "value": "StickL"
+                },
+                {
+                  "label": "R-Stick",
+                  "value": "StickR"
+                },
+                {
+                  "label": "D-Up",
+                  "value": "Up"
+                },
+                {
+                  "label": "D-Down",
+                  "value": "Down"
+                },
+                {
+                  "label": "D-Left",
+                  "value": "Left"
+                },
+                {
+                  "label": "D-Right",
+                  "value": "Right"
+                },
+                {
+                  "label": "None",
+                  "value": "None"
+                }
+              ],
+              "restart": true
+            },
+            {
+              "key": "Wrapper/Pad/Down",
+              "label": "settings_drastic_d_pad_down",
+              "type": "enum",
+              "default": "Down",
+              "choices": [
+                {
+                  "label": "A",
+                  "value": "A"
+                },
+                {
+                  "label": "B",
+                  "value": "B"
+                },
+                {
+                  "label": "X",
+                  "value": "X"
+                },
+                {
+                  "label": "Y",
+                  "value": "Y"
+                },
+                {
+                  "label": "L",
+                  "value": "L"
+                },
+                {
+                  "label": "R",
+                  "value": "R"
+                },
+                {
+                  "label": "ZL",
+                  "value": "ZL"
+                },
+                {
+                  "label": "ZR",
+                  "value": "ZR"
+                },
+                {
+                  "label": "Plus",
+                  "value": "Plus"
+                },
+                {
+                  "label": "Minus",
+                  "value": "Minus"
+                },
+                {
+                  "label": "L-Stick",
+                  "value": "StickL"
+                },
+                {
+                  "label": "R-Stick",
+                  "value": "StickR"
+                },
+                {
+                  "label": "D-Up",
+                  "value": "Up"
+                },
+                {
+                  "label": "D-Down",
+                  "value": "Down"
+                },
+                {
+                  "label": "D-Left",
+                  "value": "Left"
+                },
+                {
+                  "label": "D-Right",
+                  "value": "Right"
+                },
+                {
+                  "label": "None",
+                  "value": "None"
+                }
+              ],
+              "restart": true
+            },
+            {
+              "key": "Wrapper/Pad/Left",
+              "label": "settings_drastic_d_pad_left",
+              "type": "enum",
+              "default": "Left",
+              "choices": [
+                {
+                  "label": "A",
+                  "value": "A"
+                },
+                {
+                  "label": "B",
+                  "value": "B"
+                },
+                {
+                  "label": "X",
+                  "value": "X"
+                },
+                {
+                  "label": "Y",
+                  "value": "Y"
+                },
+                {
+                  "label": "L",
+                  "value": "L"
+                },
+                {
+                  "label": "R",
+                  "value": "R"
+                },
+                {
+                  "label": "ZL",
+                  "value": "ZL"
+                },
+                {
+                  "label": "ZR",
+                  "value": "ZR"
+                },
+                {
+                  "label": "Plus",
+                  "value": "Plus"
+                },
+                {
+                  "label": "Minus",
+                  "value": "Minus"
+                },
+                {
+                  "label": "L-Stick",
+                  "value": "StickL"
+                },
+                {
+                  "label": "R-Stick",
+                  "value": "StickR"
+                },
+                {
+                  "label": "D-Up",
+                  "value": "Up"
+                },
+                {
+                  "label": "D-Down",
+                  "value": "Down"
+                },
+                {
+                  "label": "D-Left",
+                  "value": "Left"
+                },
+                {
+                  "label": "D-Right",
+                  "value": "Right"
+                },
+                {
+                  "label": "None",
+                  "value": "None"
+                }
+              ],
+              "restart": true
+            },
+            {
+              "key": "Wrapper/Pad/Right",
+              "label": "settings_drastic_d_pad_right",
+              "type": "enum",
+              "default": "Right",
+              "choices": [
+                {
+                  "label": "A",
+                  "value": "A"
+                },
+                {
+                  "label": "B",
+                  "value": "B"
+                },
+                {
+                  "label": "X",
+                  "value": "X"
+                },
+                {
+                  "label": "Y",
+                  "value": "Y"
+                },
+                {
+                  "label": "L",
+                  "value": "L"
+                },
+                {
+                  "label": "R",
+                  "value": "R"
+                },
+                {
+                  "label": "ZL",
+                  "value": "ZL"
+                },
+                {
+                  "label": "ZR",
+                  "value": "ZR"
+                },
+                {
+                  "label": "Plus",
+                  "value": "Plus"
+                },
+                {
+                  "label": "Minus",
+                  "value": "Minus"
+                },
+                {
+                  "label": "L-Stick",
+                  "value": "StickL"
+                },
+                {
+                  "label": "R-Stick",
+                  "value": "StickR"
+                },
+                {
+                  "label": "D-Up",
+                  "value": "Up"
+                },
+                {
+                  "label": "D-Down",
+                  "value": "Down"
+                },
+                {
+                  "label": "D-Left",
+                  "value": "Left"
+                },
+                {
+                  "label": "D-Right",
+                  "value": "Right"
+                },
+                {
+                  "label": "None",
+                  "value": "None"
+                }
+              ],
+              "restart": true
+            },
+            {
+              "key": "Wrapper/FastForwardMode",
+              "label": "settings_drastic_fast_forward_mode",
+              "type": "enum",
+              "default": "hold",
+              "choices": [
+                {
+                  "label": "Hold",
+                  "value": "hold"
+                },
+                {
+                  "label": "Toggle",
+                  "value": "toggle"
+                }
+              ],
+              "restart": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "settings_drastic_tab_hotkeys",
+      "sections": [
+        {
+          "title": "settings_drastic_tab_hotkeys",
+          "options": [
+            {
+              "key": "Wrapper/HotkeyMenu",
+              "label": "settings_drastic_quick_menu",
+              "type": "string",
+              "default": "Plus+Minus",
+              "max_length": 48,
+              "restart": true
+            },
+            {
+              "key": "Wrapper/HotkeyFastForward",
+              "label": "settings_drastic_fast_forward",
+              "type": "string",
+              "default": "ZR",
+              "max_length": 48,
+              "restart": true
+            },
+            {
+              "key": "Wrapper/HotkeySwapScreens",
+              "label": "settings_drastic_swap_screens",
+              "type": "string",
+              "default": "ZL",
+              "max_length": 48,
+              "restart": true
+            },
+            {
+              "key": "Wrapper/HotkeyMicrophone",
+              "label": "settings_drastic_microphone",
+              "type": "string",
+              "default": "StickL",
+              "max_length": 48,
+              "restart": true
+            },
+            {
+              "key": "Wrapper/HotkeyMotionStylusRecenter",
+              "label": "settings_drastic_recenter_motion_stylus",
+              "type": "string",
+              "default": "L+R+StickR",
+              "max_length": 48,
+              "restart": true
+            },
+            {
+              "key": "Wrapper/HotkeyAutoFire",
+              "label": "settings_drastic_auto_fire_modifier",
+              "type": "string",
+              "default": "None",
+              "max_length": 48,
+              "restart": true
+            },
+            {
+              "key": "Wrapper/HotkeyLid",
+              "label": "settings_drastic_close_open_lid",
+              "type": "string",
+              "default": "None",
+              "max_length": 48,
+              "restart": true
+            },
+            {
+              "key": "Wrapper/HotkeySaveState",
+              "label": "settings_drastic_save_state",
+              "type": "string",
+              "default": "L+R+Minus+Y",
+              "max_length": 48,
+              "restart": true
+            },
+            {
+              "key": "Wrapper/HotkeyLoadState",
+              "label": "settings_drastic_load_state",
+              "type": "string",
+              "default": "L+R+Minus+X",
+              "max_length": 48,
+              "restart": true
+            },
+            {
+              "key": "Wrapper/HotkeyNextSlot",
+              "label": "settings_drastic_next_state_slot",
+              "type": "string",
+              "default": "L+R+Minus+Up",
+              "max_length": 48,
+              "restart": true
+            },
+            {
+              "key": "Wrapper/HotkeyPreviousSlot",
+              "label": "settings_drastic_previous_state_slot",
+              "type": "string",
+              "default": "L+R+Minus+Down",
+              "max_length": 48,
+              "restart": true
+            },
+            {
+              "key": "Wrapper/HotkeyReset",
+              "label": "settings_drastic_reset_game",
+              "type": "string",
+              "default": "L+R+Minus+A",
+              "max_length": 48,
+              "restart": true
+            },
+            {
+              "key": "Wrapper/HotkeyQuit",
+              "label": "settings_drastic_quit_to_tico",
+              "type": "string",
+              "default": "None",
+              "max_length": 48,
+              "restart": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "settings_drastic_tab_firmware",
+      "sections": [
+        {
+          "title": "settings_drastic_tab_firmware",
+          "options": [
+            {
+              "key": "Drastic/FirmwareNickname",
+              "label": "settings_drastic_nickname",
+              "type": "string",
+              "default": "Switch",
+              "max_length": 10,
+              "restart": true
+            },
+            {
+              "key": "Drastic/FirmwareLanguage",
+              "label": "settings_drastic_language",
+              "type": "enum",
+              "default": "-1",
+              "choices": [
+                {
+                  "label": "Auto",
+                  "value": "-1"
+                },
+                {
+                  "label": "Japanese",
+                  "value": "0"
+                },
+                {
+                  "label": "English",
+                  "value": "1"
+                },
+                {
+                  "label": "French",
+                  "value": "2"
+                },
+                {
+                  "label": "German",
+                  "value": "3"
+                },
+                {
+                  "label": "Italian",
+                  "value": "4"
+                },
+                {
+                  "label": "Spanish",
+                  "value": "5"
+                },
+                {
+                  "label": "Korean",
+                  "value": "6"
+                }
+              ],
+              "restart": true
+            },
+            {
+              "key": "Drastic/FirmwareColor",
+              "label": "settings_drastic_favorite_color",
+              "type": "enum",
+              "default": "0",
+              "choices": [
+                {
+                  "label": "Gray",
+                  "value": "0"
+                },
+                {
+                  "label": "Brown",
+                  "value": "1"
+                },
+                {
+                  "label": "Red",
+                  "value": "2"
+                },
+                {
+                  "label": "Pink",
+                  "value": "3"
+                },
+                {
+                  "label": "Orange",
+                  "value": "4"
+                },
+                {
+                  "label": "Yellow",
+                  "value": "5"
+                },
+                {
+                  "label": "Lime green",
+                  "value": "6"
+                },
+                {
+                  "label": "Green",
+                  "value": "7"
+                },
+                {
+                  "label": "Dark green",
+                  "value": "8"
+                },
+                {
+                  "label": "Sea green",
+                  "value": "9"
+                },
+                {
+                  "label": "Turquoise",
+                  "value": "10"
+                },
+                {
+                  "label": "Blue",
+                  "value": "11"
+                },
+                {
+                  "label": "Dark blue",
+                  "value": "12"
+                },
+                {
+                  "label": "Dark purple",
+                  "value": "13"
+                },
+                {
+                  "label": "Violet",
+                  "value": "14"
+                },
+                {
+                  "label": "Magenta",
+                  "value": "15"
+                }
+              ],
+              "restart": true
+            },
+            {
+              "key": "Drastic/FirmwareBirthdayMonth",
+              "label": "settings_drastic_birthday_month",
+              "type": "enum",
+              "default": "6",
+              "choices": [
+                {
+                  "label": "1",
+                  "value": "1"
+                },
+                {
+                  "label": "2",
+                  "value": "2"
+                },
+                {
+                  "label": "3",
+                  "value": "3"
+                },
+                {
+                  "label": "4",
+                  "value": "4"
+                },
+                {
+                  "label": "5",
+                  "value": "5"
+                },
+                {
+                  "label": "6",
+                  "value": "6"
+                },
+                {
+                  "label": "7",
+                  "value": "7"
+                },
+                {
+                  "label": "8",
+                  "value": "8"
+                },
+                {
+                  "label": "9",
+                  "value": "9"
+                },
+                {
+                  "label": "10",
+                  "value": "10"
+                },
+                {
+                  "label": "11",
+                  "value": "11"
+                },
+                {
+                  "label": "12",
+                  "value": "12"
+                }
+              ],
+              "restart": true
+            },
+            {
+              "key": "Drastic/FirmwareBirthdayDay",
+              "label": "settings_drastic_birthday_day",
+              "type": "enum",
+              "default": "6",
+              "choices": [
+                {
+                  "label": "1",
+                  "value": "1"
+                },
+                {
+                  "label": "2",
+                  "value": "2"
+                },
+                {
+                  "label": "3",
+                  "value": "3"
+                },
+                {
+                  "label": "4",
+                  "value": "4"
+                },
+                {
+                  "label": "5",
+                  "value": "5"
+                },
+                {
+                  "label": "6",
+                  "value": "6"
+                },
+                {
+                  "label": "7",
+                  "value": "7"
+                },
+                {
+                  "label": "8",
+                  "value": "8"
+                },
+                {
+                  "label": "9",
+                  "value": "9"
+                },
+                {
+                  "label": "10",
+                  "value": "10"
+                },
+                {
+                  "label": "11",
+                  "value": "11"
+                },
+                {
+                  "label": "12",
+                  "value": "12"
+                },
+                {
+                  "label": "13",
+                  "value": "13"
+                },
+                {
+                  "label": "14",
+                  "value": "14"
+                },
+                {
+                  "label": "15",
+                  "value": "15"
+                },
+                {
+                  "label": "16",
+                  "value": "16"
+                },
+                {
+                  "label": "17",
+                  "value": "17"
+                },
+                {
+                  "label": "18",
+                  "value": "18"
+                },
+                {
+                  "label": "19",
+                  "value": "19"
+                },
+                {
+                  "label": "20",
+                  "value": "20"
+                },
+                {
+                  "label": "21",
+                  "value": "21"
+                },
+                {
+                  "label": "22",
+                  "value": "22"
+                },
+                {
+                  "label": "23",
+                  "value": "23"
+                },
+                {
+                  "label": "24",
+                  "value": "24"
+                },
+                {
+                  "label": "25",
+                  "value": "25"
+                },
+                {
+                  "label": "26",
+                  "value": "26"
+                },
+                {
+                  "label": "27",
+                  "value": "27"
+                },
+                {
+                  "label": "28",
+                  "value": "28"
+                },
+                {
+                  "label": "29",
+                  "value": "29"
+                },
+                {
+                  "label": "30",
+                  "value": "30"
+                },
+                {
+                  "label": "31",
+                  "value": "31"
+                }
+              ],
+              "restart": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

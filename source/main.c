@@ -880,6 +880,7 @@ int main(void) {
   bool cpu_boost_active = true;
 #ifdef DRASTIC_TICO
   romfsInit();
+  tico_config_load();
   tico_make_directories();
 #endif
   setup_directories();

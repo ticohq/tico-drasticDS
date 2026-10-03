@@ -16,6 +16,14 @@ namespace SwitchFrontend::TicoConfig {
 // to call repeatedly; a missing file simply yields an empty option set.
 void ReloadConfig();
 
+// Content folders chosen in tico's module Paths tab (tico_system_path,
+// tico_saves_path, tico_states_path in drastic.jsonc), with the console slug
+// appended like tico's own placeholders: <root>/nds, without a trailing slash.
+// A missing or empty key means sdmc:/tico/<kind>/nds.
+std::string SystemPath();
+std::string SavesPath();
+std::string StatesPath();
+
 // Returns the string value for `key`, or `default_value` if the key is absent.
 std::string GetConfigValue(std::string_view key, std::string_view default_value = {});
 
@@ -34,16 +42,15 @@ std::string GetLoadedConfigPath();
 std::size_t GetLoadedOptionCount();
 
 // ---------------------------------------------------------------------------
-// Option catalogue: one table describes every setting, and drives both the
-// config file and the overlay's settings menu.
+// Option catalogue. The module's settings.json (source/tico/module) describes
+// every setting; tico builds its settings screen from the copy in the
+// installed module, and the overlay reads the same file from this NRO's romfs.
 
 enum class OptionType {
     // true / false
     Toggle,
     // one of a fixed list of values
     Choice,
-    // an integer between Min and Max, changed in Step increments
-    Range,
     // free text, edited with the system keyboard
     Text,
 };
@@ -65,9 +72,6 @@ struct OptionDef {
     const char* default_value;
     const OptionChoice* choices;
     std::size_t choice_count;
-    int min;
-    int max;
-    int step;
     // only read when a game starts
     bool needs_restart;
     // maximum length for Text options

@@ -1,0 +1,919 @@
+[
+  {
+    "category": "Applications",
+    "description": "Board Checker CTR (World) (Ver1.0) (2011-02-18) (Program)",
+    "rom": {
+      "_name": "Board Checker CTR (World) (Ver1.0) (2011-02-18) (Program).dsi",
+      "_size": "134217728",
+      "_crc": "53c2cc8f",
+      "_md5": "ad2e3fb57b15633cd9633b10af812dc5",
+      "_sha1": "751a99695f929c9126cca16b7d4f954a4f1f6f42",
+      "_sha256": "c2fc529d905162c90b85e6869300a419b188c210b9aad93c6e0e7f47a6875c6d",
+      "_serial": "NTRJ"
+    },
+    "_name": "Board Checker CTR (World) (Ver1.0) (2011-02-18) (Program)",
+    "_id": "z052"
+  },
+  {
+    "category": "Applications",
+    "description": "Board Checker CTR (World) (Ver2.0) (2013-08-05) (Program)",
+    "rom": {
+      "_name": "Board Checker CTR (World) (Ver2.0) (2013-08-05) (Program).dsi",
+      "_size": "134217728",
+      "_crc": "f9c29ee7",
+      "_md5": "870b32205262f68a281100d7dfc8d5af",
+      "_sha1": "1867edc4828b6ef8587e7442ee1832861d59a1fb",
+      "_sha256": "e6a38e70a038770bc60c203f401e87e6f9a81308efc0dc086e5199992d1ec915",
+      "_serial": "NTRJ"
+    },
+    "_name": "Board Checker CTR (World) (Ver2.0) (2013-08-05) (Program)",
+    "_id": "z053"
+  },
+  {
+    "description": "Face Training (Europe) (En,Fr,De,Es,It)",
+    "game_id": "0003000055534B56",
+    "rom": {
+      "_name": "Face Training (Europe) (En,Fr,De,Es,It).dsi",
+      "_size": "134217728",
+      "_crc": "eaa58bcd",
+      "_md5": "0a020966db338bb0eb2c68112da5d8ec",
+      "_sha1": "90816e7aac1d61fd88de02074abf2e6639c2ec94",
+      "_sha256": "c97a690c4abb9868dcd9a43cfad338f56bc8a681c94b3fbfb07cb56f1acb46ed",
+      "_status": "verified",
+      "_serial": "USKV"
+    },
+    "_name": "Face Training (Europe) (En,Fr,De,Es,It)",
+    "_id": "0009"
+  },
+  {
+    "description": "Foto Showdown (USA)",
+    "game_id": "00030000444D4645",
+    "rom": {
+      "_name": "Foto Showdown (USA).dsi",
+      "_size": "33554432",
+      "_crc": "5da3fe1e",
+      "_md5": "8f253dddef53fa682c48cb168e59b160",
+      "_sha1": "46f55062c1b4f7d489f3b75dc587d2108d8d9f12",
+      "_sha256": "3cdf3251ddc1d5042baf152c858fb6d7ef80a6b7cd3b7230ae4bb218876fccea",
+      "_status": "verified",
+      "_serial": "DMFE"
+    },
+    "_name": "Foto Showdown (USA)",
+    "_id": "0005",
+    "_cloneofid": "0001"
+  },
+  {
+    "description": "Hair Salon (Europe) (En,Fr,De,Es,It)",
+    "game_id": "0003000044485356",
+    "rom": {
+      "_name": "Hair Salon (Europe) (En,Fr,De,Es,It).dsi",
+      "_size": "33554432",
+      "_crc": "7e0b1ce4",
+      "_md5": "4fa4f1edfc97373d3e218d796a5391cd",
+      "_sha1": "774e69102cf32f7013166f5ba2cde08599ccc1e5",
+      "_sha256": "6c2efe11181fac362e641da1b20d527ff69f05bac82183727de16299ccedb46e",
+      "_status": "verified",
+      "_serial": "DHSV"
+    },
+    "_name": "Hair Salon (Europe) (En,Fr,De,Es,It)",
+    "_id": "0002"
+  },
+  {
+    "description": "Hidden Photo (Europe) (En,Fr,Es,It)",
+    "game_id": "0003000044443350",
+    "rom": {
+      "_name": "Hidden Photo (Europe) (En,Fr,Es,It).dsi",
+      "_size": "33554432",
+      "_crc": "850f299d",
+      "_md5": "79cb43b40988a5210b916101cb723a54",
+      "_sha1": "5388272c092e31fc34b1c7958f1110d33f43fb7c",
+      "_sha256": "0faf87f6fa532dc6288e2b72b10de00da0a6a8ea5cc04d4b69b4daa8376a469c",
+      "_status": "verified",
+      "_serial": "DD3P"
+    },
+    "_name": "Hidden Photo (Europe) (En,Fr,Es,It)",
+    "_id": "0007"
+  },
+  {
+    "category": "Applications",
+    "description": "MCU FIRM WRITER (World) (Program)",
+    "rom": {
+      "_name": "MCU FIRM WRITER (World) (Program).dsi",
+      "_size": "268435456",
+      "_crc": "cd9b1ac2",
+      "_md5": "5c38b4b944c69ed9fbcdb9b4c60e2f95",
+      "_sha1": "ea8296fc116359a178e64d4a09157e8baba3a453",
+      "_sha256": "96837db893bf1338dcd91f42d7198bbf06bf885faaab5e6022dafa17b0f97352",
+      "_serial": "NTRJ"
+    },
+    "_name": "MCU FIRM WRITER (World) (Program)",
+    "_id": "z042"
+  },
+  {
+    "description": "Monster Finder (Japan)",
+    "game_id": "00030000444D464A",
+    "rom": {
+      "_name": "Monster Finder (Japan).dsi",
+      "_size": "33554432",
+      "_crc": "dff3893d",
+      "_md5": "ffd8bf48a9294a6957dc928e34f03537",
+      "_sha1": "aa3b28446ef8ed43d09cbb4aa367e153e69fd07a",
+      "_sha256": "0218ddcd075e5013f59991475e7c6bd43761d589034acd81b044a01c97c89f15",
+      "_status": "verified",
+      "_serial": "DMFJ"
+    },
+    "_name": "Monster Finder (Japan)",
+    "_id": "0001"
+  },
+  {
+    "description": "MySims (World) (Proto)",
+    "game_id": "000300004E54524A",
+    "rom": {
+      "_name": "MySims (World) (Proto).dsi",
+      "_size": "33554432",
+      "_crc": "3735a91a",
+      "_md5": "5ad66e2c18d18248678a565d2ee4b15a",
+      "_sha1": "628169f84f680483f330f5f48d70471f8328ec93",
+      "_sha256": "282f091e4d9eb5e9505f2a2c354fed44685c397c9587ed468e55c8b2cd8adbb1",
+      "_serial": "NTRJ"
+    },
+    "_name": "MySims (World) (Proto)",
+    "_id": "z017"
+  },
+  {
+    "category": "Demos",
+    "description": "Nintendo DSi XL Demo Video (USA)",
+    "game_id": "00030000444D4545",
+    "rom": {
+      "_name": "Nintendo DSi XL Demo Video (USA).dsi",
+      "_size": "536870912",
+      "_crc": "d01a06f5",
+      "_md5": "1b43bf617b1f168de512833dfed2e7eb",
+      "_sha1": "14fda323f6e5132777f033f1912078cab51ce9f9",
+      "_sha256": "86e0d3adacd269ce4fc49fecd46c2f1e2734c0a0f649130af11e7a187174d7b9",
+      "_status": "verified",
+      "_serial": "DMEE"
+    },
+    "_name": "Nintendo DSi XL Demo Video (USA)",
+    "_id": "0010"
+  },
+  {
+    "category": "Demos",
+    "description": "Nintendo DSi XL Demo Video Volume 2 (USA)",
+    "game_id": "00030000444D4445",
+    "rom": {
+      "_name": "Nintendo DSi XL Demo Video Volume 2 (USA).dsi",
+      "_size": "536870912",
+      "_crc": "d9a938ec",
+      "_md5": "0f75373b187adb45fc0ae89c5fc74e27",
+      "_sha1": "ed3b0e4148928067fcdb1804d760d97091413ca1",
+      "_sha256": "5c285d8fd3b31d22e4c27929d843747f6c435c198c22b9e3ef7394af1dbf7fcb",
+      "_status": "verified",
+      "_serial": "DMDE"
+    },
+    "_name": "Nintendo DSi XL Demo Video Volume 2 (USA)",
+    "_id": "0011"
+  },
+  {
+    "description": "NOE Movie Player Vol.1 (Europe) (En,Fr,De,Es,It)",
+    "game_id": "00030000444D5050",
+    "rom": {
+      "_name": "NOE Movie Player Vol.1 (Europe) (En,Fr,De,Es,It).dsi",
+      "_size": "268435456",
+      "_crc": "434f423b",
+      "_md5": "f277a49a1a108d8bdda1c50f406db812",
+      "_sha1": "e589cab2eb62b1938dd3aeafc764e0454c99c5aa",
+      "_sha256": "a9920e197528722faa2fec34e152eaf7f574ec112758efef55a64a0f37a85b3f",
+      "_status": "verified",
+      "_serial": "DMPP"
+    },
+    "_name": "NOE Movie Player Vol.1 (Europe) (En,Fr,De,Es,It)",
+    "_id": "z002"
+  },
+  {
+    "description": "Picture Perfect Hair Salon (USA) (En,Fr,Es)",
+    "game_id": "0003000044485345",
+    "rom": {
+      "_name": "Picture Perfect Hair Salon (USA) (En,Fr,Es).dsi",
+      "_size": "33554432",
+      "_crc": "92bdc940",
+      "_md5": "23b9f85d5c5aac0cc58e91f9c8903a8c",
+      "_sha1": "712e784b185b31388452202a4003ae7859dfcc4b",
+      "_sha256": "9bfbcc1f513ec9b4d42b2a7431125b23538d0d5b345d57ff7e5b9fe7cb198598",
+      "_serial": "DHSE"
+    },
+    "_name": "Picture Perfect Hair Salon (USA) (En,Fr,Es)",
+    "_id": "0003",
+    "_cloneofid": "0002"
+  },
+  {
+    "description": "System - Flaw (USA) (En,Fr,Es)",
+    "game_id": "0003000044535945",
+    "rom": {
+      "_name": "System - Flaw (USA) (En,Fr,Es).dsi",
+      "_size": "33554432",
+      "_crc": "319870fd",
+      "_md5": "e45cc21a32b73a9b0e80e11b23e304ce",
+      "_sha1": "8177108efddab15226b4add1837eba560d7b9f11",
+      "_sha256": "518ff403ca24f2eb715726ae7643d445936a2ea4a9c79e135a52be07ae1827cf",
+      "_status": "verified",
+      "_serial": "DSYE"
+    },
+    "_name": "System - Flaw (USA) (En,Fr,Es)",
+    "_id": "0004",
+    "_cloneofid": "0006"
+  },
+  {
+    "description": "System - Flaw (Europe) (En,Fr,De,Es,It)",
+    "game_id": "0003000044535950",
+    "rom": {
+      "_name": "System - Flaw (Europe) (En,Fr,De,Es,It).dsi",
+      "_size": "33554432",
+      "_crc": "ac1b0e9b",
+      "_md5": "7bcb9dc3a5bad4ebfbd6fed6e892e20e",
+      "_sha1": "29ae360e84de1eaaff7ebdb41866353f39ee2f3b",
+      "_sha256": "7a884b0a5b8bffeb42e27be8d0929e78a6a17d430880f3621787f41b05025966",
+      "_status": "verified",
+      "_serial": "DSYP"
+    },
+    "_name": "System - Flaw (Europe) (En,Fr,De,Es,It)",
+    "_id": "0006"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. AGING (World) (Ver1.0) (2008-06-26) (Program)",
+    "game_id": "0003001154574C41",
+    "rom": {
+      "_name": "TWL EVA. AGING (World) (Ver1.0) (2008-06-26) (Program).dsi",
+      "_size": "134217728",
+      "_crc": "0195b5a7",
+      "_md5": "8330ee54cd139659c45acc4800f27307",
+      "_sha1": "07bd503b91b54def22b87398913576bd6bb9dac8",
+      "_sha256": "205dcfd2dae939fb7bad8f5cd2323ba06e01478b2246a37b7bbe5e096c4e3f74",
+      "_status": "verified",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. AGING (World) (Ver1.0) (2008-06-26) (Program)",
+    "_id": "z044"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. CAMERA (World) (Ver2.1) (2008-11-27) (Program)",
+    "rom": {
+      "_name": "TWL EVA. CAMERA (World) (Ver2.1) (2008-11-27) (Program).dsi",
+      "_size": "134217728",
+      "_crc": "58562b97",
+      "_md5": "e8f46d377b38e1889e9c8be3ea33c094",
+      "_sha1": "f251fe040b838642b07ba0398240207d38c1346e",
+      "_sha256": "5c0bf0fc4acdaae678e5cda8ff7dd141cb530d274424cacb379389bbfd0e0137",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. CAMERA (World) (Ver2.1) (2008-11-27) (Program)",
+    "_id": "z014",
+    "_cloneofid": "z016"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. CAMERA ASSY (World) (Ver2.1) (2008-11-27) (Program)",
+    "rom": {
+      "_name": "TWL EVA. CAMERA ASSY (World) (Ver2.1) (2008-11-27) (Program).dsi",
+      "_size": "134217728",
+      "_crc": "81a5dcb5",
+      "_md5": "d513abefeb7b1653455ac177c60ef77e",
+      "_sha1": "4621ce81115bce3ca30921f55fd677da9baf2aca",
+      "_sha256": "5d0c1d67adb18297b3673d8b4a01f69827544290716314e98ac6d7b27e1f2752",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. CAMERA ASSY (World) (Ver2.1) (2008-11-27) (Program)",
+    "_id": "z018"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. DEV AGING (World) (Ver1.0) (2008-06-26) (Program)",
+    "rom": {
+      "_name": "TWL EVA. DEV AGING (World) (Ver1.0) (2008-06-26) (Program).dsi",
+      "_size": "134217728",
+      "_crc": "72905a38",
+      "_md5": "771d1b07b50e23640271c159de352382",
+      "_sha1": "b207addf51396b98af6d4729f6bf0f7b1a04128c",
+      "_sha256": "d9fd75d079a7039bfa8cf16bdb3a0b66f632a9882c2c3c2a0037781183f1abac",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. DEV AGING (World) (Ver1.0) (2008-06-26) (Program)",
+    "_id": "z047"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. FINAL (World) (Ver3.1) (2009-11-19) (Program)",
+    "rom": {
+      "_name": "TWL EVA. FINAL (World) (Ver3.1) (2009-11-19) (Program).dsi",
+      "_size": "134217728",
+      "_crc": "ace62109",
+      "_md5": "41a0c9a6e64a29f2e38c80edb0dd8cf9",
+      "_sha1": "0270390e20b11ae65438af0ddb36431047f31242",
+      "_sha256": "32aba478beb960b973b3d6aaea23bf62026501be313d5d357c870501f882732d",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. FINAL (World) (Ver3.1) (2009-11-19) (Program)",
+    "_id": "z016"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. FINAL (World) (Ver3.0) (2009-07-02) (Program)",
+    "rom": {
+      "_name": "TWL EVA. FINAL (World) (Ver3.0) (2009-07-02) (Program).dsi",
+      "_size": "134217728",
+      "_crc": "9c207173",
+      "_md5": "30a5cf68607ab6e088dc0d4d47fed68c",
+      "_sha1": "9edce136542419eb6eb1bf96911e0a640fb6f0cb",
+      "_sha256": "248211b3b1393b0ae58d6d23f43a303bf0e4dca173170dc89e2e69a491535107",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. FINAL (World) (Ver3.0) (2009-07-02) (Program)",
+    "_id": "z019"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. FLICKER (World) (Ver1.0) (2008-09-05) (Program)",
+    "rom": {
+      "_name": "TWL EVA. FLICKER (World) (Ver1.0) (2008-09-05) (Program).dsi",
+      "_size": "134217728",
+      "_crc": "b465b202",
+      "_md5": "a83d734d2c2c15c544fa71234e445bf7",
+      "_sha1": "c2ad2b68e3c95865cc5a4cb6515a1ba114d5817b",
+      "_sha256": "f3a6532be2fe72fb79a5b345bf2677e6e6c22d43f2a96d9c690479e3cae6d9b1",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. FLICKER (World) (Ver1.0) (2008-09-05) (Program)",
+    "_id": "z013",
+    "_cloneofid": "z016"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. IMPORT EUR (World) (Ver1.7) (2011-06-24) (Program)",
+    "rom": {
+      "_name": "TWL EVA. IMPORT EUR (World) (Ver1.7) (2011-06-24) (Program).dsi",
+      "_size": "67108864",
+      "_crc": "8e849d43",
+      "_md5": "4b6cc511f23ef33b0354089bd765f53b",
+      "_sha1": "5c5cd4c671c1028b99ef5571bfb7306fcb01423f",
+      "_sha256": "89bdf2b05f8cee252abb1127fe45bbffd1db132bd3456292a1a974c9dae7f3a2",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. IMPORT EUR (World) (Ver1.7) (2011-06-24) (Program)",
+    "_id": "z056"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. IMPORT EUR (World) (Ver1.3) (2009-11-06) (Program)",
+    "rom": {
+      "_name": "TWL EVA. IMPORT EUR (World) (Ver1.3) (2009-11-06) (Program).dsi",
+      "_size": "67108864",
+      "_crc": "4906de93",
+      "_md5": "b23d353d872abfa46d3caa5442ff3565",
+      "_sha1": "7bb55c69d1bd47231a5b88fb48c2e8e2c3e499a9",
+      "_sha256": "60e07923fe977b21857d0e5faac8a8ed388818f5cab0aed16ffd0d6b83882a7b",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. IMPORT EUR (World) (Ver1.3) (2009-11-06) (Program)",
+    "_id": "z020"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. IMPORT JPN (World) (Ver1.5) (2009-08-20) (Program)",
+    "rom": {
+      "_name": "TWL EVA. IMPORT JPN (World) (Ver1.5) (2009-08-20) (Program).dsi",
+      "_size": "67108864",
+      "_crc": "50275b8c",
+      "_md5": "3eb49fbbbfbbf8c1c493ed1647d35dfd",
+      "_sha1": "bb56f0f8873a239605415c6cdd88e9886be9de1d",
+      "_sha256": "52bc937d247c6ae1f6a23ef627b4f75c64686aa79c81c58b3569993c5d07b06f",
+      "_status": "verified",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. IMPORT JPN (World) (Ver1.5) (2009-08-20) (Program)",
+    "_id": "z021"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. IMPORT USA (World) (Ver1.3) (2009-08-20) (Program)",
+    "rom": {
+      "_name": "TWL EVA. IMPORT USA (World) (Ver1.3) (2009-08-20) (Program).dsi",
+      "_size": "67108864",
+      "_crc": "4c87b35d",
+      "_md5": "efaf956a0bf21d93fef6596281d9196c",
+      "_sha1": "6179a8256da2b0e6794829c49b4f99dcdfec4a0c",
+      "_sha256": "6b4bfde2b511166366e45fdbedac65a797aca0e10dfd5836f88a3cf60ac51a76",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. IMPORT USA (World) (Ver1.3) (2009-08-20) (Program)",
+    "_id": "z022"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. IMPORT USA (World) (Ver1.7) (2011-06-24) (Program)",
+    "rom": {
+      "_name": "TWL EVA. IMPORT USA (World) (Ver1.7) (2011-06-24) (Program).dsi",
+      "_size": "67108864",
+      "_crc": "cd5d7b70",
+      "_md5": "bbe7ad743b2ee1f589b423c79d0e6cfb",
+      "_sha1": "b01f70fb81bc6e25b76c50c63fa4fdc7fecddae3",
+      "_sha256": "cff82038592a0a534a03ac0faaa122391a7fcf23f5b133db819e7982d45e3fcc",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. IMPORT USA (World) (Ver1.7) (2011-06-24) (Program)",
+    "_id": "z055"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. IMPORT USA (World) (Ver1.4) (2010-03-12) (Program)",
+    "rom": {
+      "_name": "TWL EVA. IMPORT USA (World) (Ver1.4) (2010-03-12) (Program).dsi",
+      "_size": "67108864",
+      "_crc": "282e3d3e",
+      "_md5": "c2b416a637ac7ccee91e90634dbd79c6",
+      "_sha1": "b1bd1e4ee1a348d05dfe9f93f7f71e12cdacb297",
+      "_sha256": "a34dd8dae93917e1a980fc8439fd5db21b98e6850b5ad7695b16e18ac336402f",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. IMPORT USA (World) (Ver1.4) (2010-03-12) (Program)",
+    "_id": "z054"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. IMPORT USA_B (World) (Ver1.0) (2009-09-10) (Program)",
+    "rom": {
+      "_name": "TWL EVA. IMPORT USA_B (World) (Ver1.0) (2009-09-10) (Program).dsi",
+      "_size": "134217728",
+      "_crc": "45a928e2",
+      "_md5": "efa5762b97d2dff1a7803939a2992e54",
+      "_sha1": "dfa20a9a639e56da77337c7b722dc4033c1adfa3",
+      "_sha256": "3836b710ed1eb6b3d19493542f19b111519e382ac4d4aadbff30e3c189074313",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. IMPORT USA_B (World) (Ver1.0) (2009-09-10) (Program)",
+    "_id": "z023"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. LOG VIEWER (World) (Ver2.2) (2010-04-13) (Program)",
+    "rom": {
+      "_name": "TWL EVA. LOG VIEWER (World) (Ver2.2) (2010-04-13) (Program).dsi",
+      "_size": "134217728",
+      "_crc": "c568b56b",
+      "_md5": "88041a3c64a619d97d20828ea05ad472",
+      "_sha1": "0ff108fc05c4c99711d445c9a1cdfebbeec9634e",
+      "_sha256": "9b72646baf3487efa917daf4970990b1b1533dcbf39f4146bbfc76001d7ad097",
+      "_status": "verified",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. LOG VIEWER (World) (Ver2.2) (2010-04-13) (Program)",
+    "_id": "z051"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. MIC (World) (Ver3.0) (2009-08-19) (Program)",
+    "rom": {
+      "_name": "TWL EVA. MIC (World) (Ver3.0) (2009-08-19) (Program).dsi",
+      "_size": "134217728",
+      "_crc": "450bfaaf",
+      "_md5": "e6b704f68688727a5bf259f290d93350",
+      "_sha1": "47456cf6d318070593503229b49b25a7cc490263",
+      "_sha256": "723560bc079cdc16ab03ddf4e11d7e02eeedf478b0a75e476fa56ada118e0457",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. MIC (World) (Ver3.0) (2009-08-19) (Program)",
+    "_id": "z015",
+    "_cloneofid": "z016"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. MIC (World) (Ver3.0) (2009-08-17) (Program)",
+    "rom": {
+      "_name": "TWL EVA. MIC (World) (Ver3.0) (2009-08-17) (Program).dsi",
+      "_size": "134217728",
+      "_crc": "2c61754b",
+      "_md5": "8d1080c922f215b33a83773418fd9d12",
+      "_sha1": "85c76b3c3151730a739c1e36a8f526e036e553b0",
+      "_sha256": "0cc7f9ac71cc588f454a3350189cbe07521ba018b00a2166fc8190b7307e2f4d",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. MIC (World) (Ver3.0) (2009-08-17) (Program)",
+    "_id": "z024"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. NCHECK ASI (World) (Ver1.0) (2009-12-04) (Program)",
+    "rom": {
+      "_name": "TWL EVA. NCHECK ASI (World) (Ver1.0) (2009-12-04) (Program).dsi",
+      "_size": "134217728",
+      "_crc": "1b875b20",
+      "_md5": "162582477f64dd21ac6d14ba4106d203",
+      "_sha1": "9f5e1df9524320a536ae0092091589e1375fa7ad",
+      "_sha256": "c218e0a8c916ee3fe46a3dd47f21dc18610fcd5bfa8f8ec2509a543782cb8745",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. NCHECK ASI (World) (Ver1.0) (2009-12-04) (Program)",
+    "_id": "z025"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. NCHECK EUR (World) (Ver1.0) (2009-01-05) (Program)",
+    "rom": {
+      "_name": "TWL EVA. NCHECK EUR (World) (Ver1.0) (2009-01-05) (Program).dsi",
+      "_size": "134217728",
+      "_crc": "c01912a6",
+      "_md5": "6dbd025d6dd3b37311d278141e4468e1",
+      "_sha1": "40c036714d9bc70365f28f7f6f120f7eb13aa577",
+      "_sha256": "cbec1f68546c78c44311155e99bc274dc0845dfd864e7d2ca931cddd3c4c992a",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. NCHECK EUR (World) (Ver1.0) (2009-01-05) (Program)",
+    "_id": "z026"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. NCHECK EUR (World) (Ver1.2) (2009-09-14) (Program)",
+    "rom": {
+      "_name": "TWL EVA. NCHECK EUR (World) (Ver1.2) (2009-09-14) (Program).dsi",
+      "_size": "134217728",
+      "_crc": "368da452",
+      "_md5": "aee7488c4ef36c9cef3294c97e8f8dcd",
+      "_sha1": "81c4ebaa8ab853fefb140d8ca98378bf9a106625",
+      "_sha256": "89768ca66b3d4a56049a9e3d7539480c4664b0c299b677e78acb8029ee82c8e6",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. NCHECK EUR (World) (Ver1.2) (2009-09-14) (Program)",
+    "_id": "z027"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. NCHECK JPN (World) (Ver1.6) (2009-09-14) (Program)",
+    "rom": {
+      "_name": "TWL EVA. NCHECK JPN (World) (Ver1.6) (2009-09-14) (Program).dsi",
+      "_size": "134217728",
+      "_crc": "75173018",
+      "_md5": "9f76a9d41014d57bf9d207099d8be0d6",
+      "_sha1": "c7528497be9b696851edf7a4c6a27496fd7c8a32",
+      "_sha256": "2953bf796681653c19f58bc333cc870029358f49b7ac80b0bb7a7a23841419ad",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. NCHECK JPN (World) (Ver1.6) (2009-09-14) (Program)",
+    "_id": "z028"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. NCHECK KOR (World) (Ver1.0) (2010-02-23) (Program)",
+    "rom": {
+      "_name": "TWL EVA. NCHECK KOR (World) (Ver1.0) (2010-02-23) (Program).dsi",
+      "_size": "134217728",
+      "_crc": "58d29ed3",
+      "_md5": "482ae9b3e9de5fe79f883ba43418ff52",
+      "_sha1": "1b4c69c2e326e64ce5299c6acf3034b6cca7a4dc",
+      "_sha256": "07fb4b5f9cce3eb96360fd5b250e2859d3824f66726dcbabe26c57c89845cea8",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. NCHECK KOR (World) (Ver1.0) (2010-02-23) (Program)",
+    "_id": "z029"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. NCHECK USA (World) (Ver1.2) (2009-08-24) (Program)",
+    "rom": {
+      "_name": "TWL EVA. NCHECK USA (World) (Ver1.2) (2009-08-24) (Program).dsi",
+      "_size": "134217728",
+      "_crc": "f6609011",
+      "_md5": "0f184774964c2d88c406fb2ed71ca3b1",
+      "_sha1": "456cf12c0cff1955f9cb938d36b5d81e89b27cb3",
+      "_sha256": "e9491f1febc036b92f0d9237ef7658eebcf29fc5191536c28ba31faf41efc933",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. NCHECK USA (World) (Ver1.2) (2009-08-24) (Program)",
+    "_id": "z030"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. NCHECK USA (World) (Ver1.3) (2009-09-14) (Program)",
+    "rom": {
+      "_name": "TWL EVA. NCHECK USA (World) (Ver1.3) (2009-09-14) (Program).dsi",
+      "_size": "134217728",
+      "_crc": "63b54d4c",
+      "_md5": "63ad8d3605cb0df563fec8c151ea3b80",
+      "_sha1": "3f4e8192addcca53eced6415d0df2fe64846d812",
+      "_sha256": "d3ebdd613cc6306317f5c907a282cc00d11a2b1bf6d199973e02fc640904dc35",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. NCHECK USA (World) (Ver1.3) (2009-09-14) (Program)",
+    "_id": "z031"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. PRE IMPORT (World) (Ver1.0) (2008-09-05) (Program)",
+    "rom": {
+      "_name": "TWL EVA. PRE IMPORT (World) (Ver1.0) (2008-09-05) (Program).dsi",
+      "_size": "16808960",
+      "_crc": "7f298211",
+      "_md5": "3f1a1c4801f04abb6e837e2df662b38c",
+      "_sha1": "025e045b68c1b97c66d503b0334f498eb20c4627",
+      "_sha256": "0075af889337101523837e60a5d5ee0bb4860502d3ca197273b899a4b9d3db80",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. PRE IMPORT (World) (Ver1.0) (2008-09-05) (Program)",
+    "_id": "z050"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. PRE IMPORT (World) (Ver1.3) (2009-12-10) (Program)",
+    "rom": {
+      "_name": "TWL EVA. PRE IMPORT (World) (Ver1.3) (2009-12-10) (Program).dsi",
+      "_size": "16834560",
+      "_crc": "495c5cdd",
+      "_md5": "1c78776fd11299e5fb06bc822ab6fef8",
+      "_sha1": "f7f84385659bca632b6e58708767a6925bf41f80",
+      "_sha256": "b61f285d8d083a57c3be8212ec08b005d606df0866d6b3213b8ea5f5ad4184f0",
+      "_status": "verified",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. PRE IMPORT (World) (Ver1.3) (2009-12-10) (Program)",
+    "_id": "z043"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. SELFTEST (World) (Ver0.7) (2009-12-02) (Program)",
+    "rom": {
+      "_name": "TWL EVA. SELFTEST (World) (Ver0.7) (2009-12-02) (Program).dsi",
+      "_size": "134217728",
+      "_crc": "e4b10f8d",
+      "_md5": "62fb1a47986e3ab2ae47b05a36baea52",
+      "_sha1": "328e7e660f2c4cddfaff2cc3b0dfc4bf7857a4a8",
+      "_sha256": "0ac1335a03ab24e81c0ed8accbf4a5bc7fcc108b64104fa2662d389be5cc309e",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. SELFTEST (World) (Ver0.7) (2009-12-02) (Program)",
+    "_id": "z032"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. TP_CAL (World) (Ver2.1) (2009-11-17) (Program)",
+    "rom": {
+      "_name": "TWL EVA. TP_CAL (World) (Ver2.1) (2009-11-17) (Program).dsi",
+      "_size": "134217728",
+      "_crc": "b6dbba0c",
+      "_md5": "673d5f43cd940eeaf583e762826708ff",
+      "_sha1": "425ca0954b784cb177ad1cf7dea40fc4924fc37e",
+      "_sha256": "dbec5ebdc4d75e07a4090398d8be943e11358eef47b0adabdf5aa476f705ba34",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. TP_CAL (World) (Ver2.1) (2009-11-17) (Program)",
+    "_id": "z048"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. TP_CAL (World) (Ver2.0) (2008-09-12) (Program)",
+    "rom": {
+      "_name": "TWL EVA. TP_CAL (World) (Ver2.0) (2008-09-12) (Program).dsi",
+      "_size": "134217728",
+      "_crc": "517c804e",
+      "_md5": "7f5d1ed498b4eccdc4d5b1dbb3cd9b2d",
+      "_sha1": "bdd6ee5bff2dc0a7b5e8208bad21710ad460fe40",
+      "_sha256": "52a6af557672c49f0fc168cb943079d02db77ce4852343b836fa83fabfa81dcb",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. TP_CAL (World) (Ver2.0) (2008-09-12) (Program)",
+    "_id": "z033"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. UTL IMPORT EUR (World) (Ver1.2) (2010-05-14) (Program)",
+    "rom": {
+      "_name": "TWL EVA. UTL IMPORT EUR (World) (Ver1.2) (2010-05-14) (Program).dsi",
+      "_size": "134217728",
+      "_crc": "22eed744",
+      "_md5": "06e266ccf981b635f9ecb890b815676b",
+      "_sha1": "df45194434a6d90b7512dc46779c276589ddb047",
+      "_sha256": "4dac8eb1654316a5f9c14b9a572bb950a807f4b9604de25ceeef10b44f91d3ec",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. UTL IMPORT EUR (World) (Ver1.2) (2010-05-14) (Program)",
+    "_id": "z036"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. UTL IMPORT EUR (World) (Ver1.1) (2010-03-12) (Program)",
+    "rom": {
+      "_name": "TWL EVA. UTL IMPORT EUR (World) (Ver1.1) (2010-03-12) (Program).dsi",
+      "_size": "134217728",
+      "_crc": "8e496917",
+      "_md5": "2005727ec5fc7507c04618ca68f8ff79",
+      "_sha1": "53e63d0e928dbb6ae5a403b369c9d07675b53086",
+      "_sha256": "f804ee1dd2286be4310cabb587bf506e8484fcd8bfc7e5cb894a625d6e9f0607",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. UTL IMPORT EUR (World) (Ver1.1) (2010-03-12) (Program)",
+    "_id": "z035"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. UTL IMPORT EUR (World) (Ver1.0) (2009-11-02) (Program)",
+    "rom": {
+      "_name": "TWL EVA. UTL IMPORT EUR (World) (Ver1.0) (2009-11-02) (Program).dsi",
+      "_size": "134217728",
+      "_crc": "aa96ebc4",
+      "_md5": "97e9e492dd2bfd0594471b6c7f01dddd",
+      "_sha1": "177eb6a3b685de4614f70d7e1a235e8f68024468",
+      "_sha256": "44fae8e73409d1f6037cbdecfc4472a6feca8c518ac5c0e99f62ecf1695d4607",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. UTL IMPORT EUR (World) (Ver1.0) (2009-11-02) (Program)",
+    "_id": "z034"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. UTL IMPORT EUR (World) (Ver1.4) (2011-04-14) (Program)",
+    "rom": {
+      "_name": "TWL EVA. UTL IMPORT EUR (World) (Ver1.4) (2011-04-14) (Program).dsi",
+      "_size": "134217728",
+      "_crc": "b0c1187c",
+      "_md5": "10124675f8c482b38d046ab289056fcb",
+      "_sha1": "f8aea9b2123e5d7d4a97aee52654e1ce5fcefc90",
+      "_sha256": "4f1177fd87f29d04be993b34ab25bd0b98e73814b1621ba79079d56c3e61eba0",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. UTL IMPORT EUR (World) (Ver1.4) (2011-04-14) (Program)",
+    "_id": "z049"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. UTL IMPORT JPN (World) (Ver1.1) (2010-02-03) (Program)",
+    "rom": {
+      "_name": "TWL EVA. UTL IMPORT JPN (World) (Ver1.1) (2010-02-03) (Program).dsi",
+      "_size": "134217728",
+      "_crc": "19b1d31c",
+      "_md5": "91f1fe8cf3875bb2a177a4eeacf6714c",
+      "_sha1": "5326f5145ed5dd48b03458b1dfc44c84d6b0e889",
+      "_sha256": "ea6d853c782fc086200277a8afa7663544a855ccf5898078192e4d14be167995",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. UTL IMPORT JPN (World) (Ver1.1) (2010-02-03) (Program)",
+    "_id": "z037"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. UTL IMPORT JPN_A (World) (Ver1.0) (2010-01-19) (Program)",
+    "game_id": "0003001154574C41",
+    "rom": {
+      "_name": "TWL EVA. UTL IMPORT JPN_A (World) (Ver1.0) (2010-01-19) (Program).dsi",
+      "_size": "134217728",
+      "_crc": "2ec98f68",
+      "_md5": "a436be11816e2f9013541979d6e64c42",
+      "_sha1": "53dcefc464183031b733fd6d242c7864f398f5d8",
+      "_sha256": "f75f4f0579737c7ed2f51509b6665dff4c66e6fecc193e1056571b13e50fdc0c",
+      "_status": "verified",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. UTL IMPORT JPN_A (World) (Ver1.0) (2010-01-19) (Program)",
+    "_id": "z038"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. UTL IMPORT USA (World) (Ver1.0) (2009-12-28) (Program)",
+    "rom": {
+      "_name": "TWL EVA. UTL IMPORT USA (World) (Ver1.0) (2009-12-28) (Program).dsi",
+      "_size": "134217728",
+      "_crc": "8003ab83",
+      "_md5": "520bb33f3bcc64e9cbcf8e3aef1b7a27",
+      "_sha1": "c1618fc40e99cfef73187505d831f6865543cc17",
+      "_sha256": "a9404074c4b98ed8d69c413d899faa28ed47ebebacaf153c87cc80b4b21e5f18",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. UTL IMPORT USA (World) (Ver1.0) (2009-12-28) (Program)",
+    "_id": "z039"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. UTL IMPORT USA (World) (Ver1.1) (2010-03-12) (Program)",
+    "rom": {
+      "_name": "TWL EVA. UTL IMPORT USA (World) (Ver1.1) (2010-03-12) (Program).dsi",
+      "_size": "134217728",
+      "_crc": "3fd0bc4a",
+      "_md5": "af87bd0d079a7bf411cb01551350a755",
+      "_sha1": "acdf8cddb527d11278a081ef108788cb3aa3b72e",
+      "_sha256": "32d1142291e11d9b5c49d75a8449b28bc61eeb6746aef2c124871f8a7fa42711",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. UTL IMPORT USA (World) (Ver1.1) (2010-03-12) (Program)",
+    "_id": "z040"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. UTL NCHECK USA (World) (Ver1.0) (2009-11-02) (Program)",
+    "rom": {
+      "_name": "TWL EVA. UTL NCHECK USA (World) (Ver1.0) (2009-11-02) (Program).dsi",
+      "_size": "134217728",
+      "_crc": "65efd284",
+      "_md5": "8948004b375a3b0575e6f61df9a6affa",
+      "_sha1": "bf9364f377f0e15dd1ab23ffae54bd0f8bff39bd",
+      "_sha256": "e1f110dc966393e4fee13b0d8dc7038fec58bf23c0dab14adf11e86ab50a7b25",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. UTL NCHECK USA (World) (Ver1.0) (2009-11-02) (Program)",
+    "_id": "z041"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. WRITE SDMC-LNC (World) (Ver1.1) (2009-10-26) (Program)",
+    "rom": {
+      "_name": "TWL EVA. WRITE SDMC-LNC (World) (Ver1.1) (2009-10-26) (Program).dsi",
+      "_size": "134217728",
+      "_crc": "af93a36d",
+      "_md5": "8601b5c049a6b27a5463c1e46c2c2ed6",
+      "_sha1": "97651d0248a0faa48ca2e3f8793d76ece4c2649c",
+      "_sha256": "a5b94ad1b5cc184144f548dcadb6414ec9da410047b4e9aff41b5b92cb5602d0",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. WRITE SDMC-LNC (World) (Ver1.1) (2009-10-26) (Program)",
+    "_id": "z046"
+  },
+  {
+    "category": "Applications",
+    "description": "TWL EVA. WRITE SDMC-LNC (World) (Ver1.0) (2008-11-20) (Program)",
+    "rom": {
+      "_name": "TWL EVA. WRITE SDMC-LNC (World) (Ver1.0) (2008-11-20) (Program).dsi",
+      "_size": "134217728",
+      "_crc": "eed0f971",
+      "_md5": "b77448d54d9244eac2749a4491049be9",
+      "_sha1": "83238688d031076260b9f8ffc8dbdb86c6da95f1",
+      "_sha256": "ce75ef25a2fe14e80f909fa59f46e21726b6d7d21a0912c469eba95fa4412e94",
+      "_serial": "NTRJ"
+    },
+    "_name": "TWL EVA. WRITE SDMC-LNC (World) (Ver1.0) (2008-11-20) (Program)",
+    "_id": "z045"
+  },
+  {
+    "description": "Wimmelbild-Creator (Germany)",
+    "game_id": "0003000044443344",
+    "rom": {
+      "_name": "Wimmelbild-Creator (Germany).dsi",
+      "_size": "33554432",
+      "_crc": "d686f0bc",
+      "_md5": "33e9db9a240cba9902b6547d1404e92e",
+      "_sha1": "5f068ea1f7d2559e74b85bc6f52c5266b985e3b6",
+      "_sha256": "bf4de7588904010727b483065b5534f877c95e9852d6c391ffeff248745889bf",
+      "_status": "verified",
+      "_serial": "DD3D"
+    },
+    "_name": "Wimmelbild-Creator (Germany)",
+    "_id": "0008",
+    "_cloneofid": "0007"
+  },
+  {
+    "category": "Applications",
+    "description": "WRFU Tester (World) (v0.60) (2008-08-21) (Program)",
+    "rom": {
+      "_name": "WRFU Tester (World) (v0.60) (2008-08-21) (Program).dsi",
+      "_size": "268435456",
+      "_crc": "b0d48934",
+      "_md5": "c2610a5ed6ebc8e9404ae61fecbcd0ca",
+      "_sha1": "8106f1ed5178c046d56b3bcb8fb6c3f70af51fe2",
+      "_sha256": "0eece6e0b17c197cdc93dddfbd2b9d6d72f630e10809c29ea5f6cbd3b78633b4",
+      "_serial": "NTRJ"
+    },
+    "_name": "WRFU Tester (World) (v0.60) (2008-08-21) (Program)",
+    "_id": "z012",
+    "_cloneofid": "z001"
+  },
+  {
+    "category": "Applications",
+    "description": "WRFU Tester (World) (v2.01) (2009-05-18) (Program)",
+    "rom": {
+      "_name": "WRFU Tester (World) (v2.01) (2009-05-18) (Program).dsi",
+      "_size": "268435456",
+      "_crc": "d91aa0e7",
+      "_md5": "19955df5753a2b1a59a4e6c84e94c3e2",
+      "_sha1": "8e5c11412cd5459b94e84909770bdada4c91276a",
+      "_sha256": "81f2c4c35616960a62a8c4d7ce1838929e94ebb4d4565eed2bb048ff7365b058",
+      "_status": "verified",
+      "_serial": "NTRJ"
+    },
+    "_name": "WRFU Tester (World) (v2.01) (2009-05-18) (Program)",
+    "_id": "z011",
+    "_cloneofid": "z001"
+  },
+  {
+    "category": "Applications",
+    "description": "WRFU Tester (World) (v3.01) (2010-06-17) (Program)",
+    "game_id": "000300114142434A",
+    "rom": {
+      "_name": "WRFU Tester (World) (v3.01) (2010-06-17) (Program).dsi",
+      "_size": "268435456",
+      "_crc": "eb638291",
+      "_md5": "edab04f62d562ba8421f7eddeade6601",
+      "_sha1": "329a255a946bdcb70bc76077ab6ddad75617519d",
+      "_sha256": "06e42b845323f4729952489090d8d8d1b1582fc64897c66ad1dd0dc417f6dc37",
+      "_status": "verified",
+      "_serial": "NTRJ"
+    },
+    "_name": "WRFU Tester (World) (v3.01) (2010-06-17) (Program)",
+    "_id": "z001"
+  }
+]

@@ -11,10 +11,19 @@
 #define SO_NAME "libdrastic_arm64.so"
 
 #ifdef DRASTIC_TICO
-/* tico build: Drastic's own files live under tico's NDS system folder, while
- * cartridge saves and save states use tico's shared per-system folders. */
-#define TICO_NDS_DIR    "/tico/system/nds"
-#define DATA_ROOT       TICO_NDS_DIR "/drastic"
+/* tico build: cartridge saves, save states and the BIOS come from the folders
+ * set in tico's module Paths tab (tico/tico_menu.cpp); Drastic's own files
+ * stay under tico's default NDS system folder. */
+#ifdef __cplusplus
+extern "C" {
+#endif
+const char *tico_nds_system_dir(void);
+const char *tico_nds_saves_dir(void);
+const char *tico_nds_states_dir(void);
+#ifdef __cplusplus
+}
+#endif
+#define DATA_ROOT       "/tico/system/nds/drastic"
 #else
 #define DATA_ROOT       "/switch/drastic"
 #endif
@@ -29,8 +38,8 @@
 #define SLOT2_DIR       DATA_ROOT "/slot2"
 #define MICROPHONE_DIR  DATA_ROOT "/microphone"
 #ifdef DRASTIC_TICO
-#define SAVESTATES_DIR  "/tico/states/nds"
-#define BACKUPS_DIR     "/tico/saves/nds"
+#define SAVESTATES_DIR  tico_nds_states_dir()
+#define BACKUPS_DIR     tico_nds_saves_dir()
 #else
 #define SAVESTATES_DIR  USER_DIR "/savestates"
 #define BACKUPS_DIR     USER_DIR "/backup"

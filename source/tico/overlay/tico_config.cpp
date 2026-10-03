@@ -9,6 +9,7 @@
 #include <cctype>
 #include <cstdio>
 #include <cstring>
+#include <deque>
 #include <map>
 #include <optional>
 #include <string>
@@ -154,302 +155,156 @@ std::optional<bool> ParseBool(std::string_view value) {
     return std::nullopt;
 }
 
-std::optional<int> ParseInt(std::string_view value) {
-    if (value.empty()) {
-        return std::nullopt;
-    }
-    try {
-        std::size_t consumed = 0;
-        const int result = std::stoi(std::string(value), &consumed);
-        if (consumed == value.size()) {
-            return result;
+// ---------------------------------------------------------------------------
+// Option catalogue, read from the module's settings.json packed in this NRO's
+// romfs. tico reads its own copy from the installed module, so both list the
+// same options. Option and tab labels are translation keys (lang/*.json);
+// choice labels are English, translated through settings_drastic_value_<slug>
+// keys when the language files have one (tools/tico_translations.py).
+
+constexpr const char* kSettingsPath = "romfs:/module/settings.json";
+constexpr const char* kSlug = "nds";
+
+// Listed only in game: tico cannot see the shaders on the SD card.
+constexpr const char* kShaderKey = "Wrapper/CustomShader";
+constexpr const char* kFilterKey = "Wrapper/VideoFilter";
+constexpr OptionChoice kNoShaderChoices[] = {
+    {"", "settings_drastic_value_none_found", "None found"},
+};
+
+// The translation key of a choice label: settings_drastic_value_ and the label
+// in lower case with runs of other characters turned into one underscore.
+std::string ValueKey(std::string_view label) {
+    std::string key = "settings_drastic_value_";
+    bool separator = false;
+    for (const char c : label) {
+        if (std::isalnum(static_cast<unsigned char>(c))) {
+            if (separator && key.back() != '_') {
+                key.push_back('_');
+            }
+            separator = false;
+            key.push_back(static_cast<char>(std::tolower(static_cast<unsigned char>(c))));
+        } else {
+            separator = true;
         }
-    } catch (...) {
     }
-    return std::nullopt;
+    return key;
 }
 
-// ---------------------------------------------------------------------------
-// Option catalogue. Keys, values and labels follow the DrasticDS launcher's
-// settings, so a setting means the same thing in drastic.ini and here.
+struct Catalogue {
+    // the catalogue's strings and arrays never move once built
+    std::deque<std::string> strings;
+    std::deque<std::vector<OptionChoice>> choice_lists;
+    std::deque<std::vector<OptionDef>> option_lists;
+    std::vector<OptionCategory> categories;
 
-#define CHOICES(name) name, sizeof(name) / sizeof(name[0])
-#define NO_CHOICES nullptr, 0
-
-constexpr OptionChoice kRendererChoices[] = {
-    {"vk", nullptr, "Vulkan (NVK)"},
-    {"gl", nullptr, "OpenGL (NVC0)"},
-    {"zink", nullptr, "Zink (OpenGL on NVK)"},
-};
-constexpr OptionChoice kLayoutChoices[] = {
-    {"vertical", nullptr, "Vertical"},
-    {"horizontal", nullptr, "Horizontal"},
-    {"top", nullptr, "Top screen only"},
-    {"bottom", nullptr, "Touch screen only"},
-    {"hybrid_top", nullptr, "Hybrid (top large)"},
-    {"hybrid_bottom", nullptr, "Hybrid (touch large)"},
-    {"custom", nullptr, "Custom"},
-};
-constexpr OptionChoice kRotationChoices[] = {
-    {"0", nullptr, "0 degrees"},
-    {"1", nullptr, "90 degrees"},
-    {"2", nullptr, "180 degrees"},
-    {"3", nullptr, "270 degrees"},
-};
-constexpr OptionChoice kFilterChoices[] = {
-    {"nearest", nullptr, "Nearest"},
-    {"linear", nullptr, "Linear"},
-    {"quilez", nullptr, "Quilez smooth"},
-    {"scanline", nullptr, "Scanline"},
-    {"scale2x", nullptr, "Scale2x"},
-    {"hq2x", nullptr, "HQ2x"},
-    {"fxaa", nullptr, "FXAA"},
-    {"fxaa_hq", nullptr, "FXAA high quality"},
-    {"smaa", nullptr, "SMAA"},
-    {"fsr", nullptr, "FSR 1.0"},
-    {"custom", nullptr, "Custom shader"},
-};
-// replaced at run time by the shaders found on the SD card
-constexpr OptionChoice kNoShaderChoices[] = {
-    {"", nullptr, "None found"},
-};
-constexpr OptionChoice kHudPositionChoices[] = {
-    {"hidden", "emulator_hidden", "Hidden"},
-    {"top_left", "emulator_top_left", "Top Left"},
-    {"top_right", "emulator_top_right", "Top Right"},
-    {"bottom_left", "emulator_bottom_left", "Bottom Left"},
-    {"bottom_right", "emulator_bottom_right", "Bottom Right"},
-};
-constexpr OptionChoice kLsfgFlowChoices[] = {
-    {"0.25", nullptr, "Quarter (recommended)"},
-    {"0.5", nullptr, "Half"},
-};
-constexpr OptionChoice kLatencyChoices[] = {
-    {"0", nullptr, "Low"},
-    {"1", nullptr, "Balanced"},
-    {"2", nullptr, "High compatibility"},
-    {"3", nullptr, "Maximum"},
-};
-constexpr OptionChoice kMicSourceChoices[] = {
-    {"noise", nullptr, "Simulated noise"},
-    {"external", nullptr, "External microphone"},
-};
-constexpr OptionChoice kMicLevelChoices[] = {
-    {"0", nullptr, "Low"},
-    {"1", nullptr, "Normal"},
-    {"2", nullptr, "High"},
-    {"3", nullptr, "Maximum"},
-};
-constexpr OptionChoice kThreadChoices[] = {
-    {"1", nullptr, "1"},
-    {"2", nullptr, "2"},
-    {"3", nullptr, "3 (recommended)"},
-};
-constexpr OptionChoice kAutosaveChoices[] = {
-    {"0", "emulator_off", "Off"},
-    {"60", nullptr, "1 minute"},
-    {"300", nullptr, "5 minutes"},
-    {"600", nullptr, "10 minutes"},
-    {"1800", nullptr, "30 minutes"},
-};
-// Drastic's native Slot-2 enum (build 109)
-constexpr OptionChoice kSlot2Choices[] = {
-    {"0", nullptr, "None"},
-    {"1", nullptr, "GBA Cart"},
-    {"2", nullptr, "SRAM Cart"},
-    {"3", nullptr, "Rumble Pack"},
-    {"4", nullptr, "Motion Pack (Official)"},
-    {"5", nullptr, "Motion Pack (Homebrew)"},
-};
-constexpr OptionChoice kFrameskipTypeChoices[] = {
-    {"0", nullptr, "Automatic"},
-    {"1", nullptr, "Fixed"},
-    {"2", nullptr, "Aggressive"},
-    {"3", nullptr, "Maximum"},
-};
-constexpr OptionChoice kFastForwardChoices[] = {
-    {"0", nullptr, "50%"},
-    {"1", nullptr, "150%"},
-    {"2", nullptr, "200%"},
-    {"3", nullptr, "300%"},
-    {"4", nullptr, "400%"},
-    {"5", "emulator_unlimited", "Unlimited"},
-};
-constexpr OptionChoice kAutofireChoices[] = {
-    {"0", nullptr, "Slow"},
-    {"2", nullptr, "Normal"},
-    {"4", nullptr, "Fast"},
-    {"7", nullptr, "Very fast"},
-};
-constexpr OptionChoice kStylusChoices[] = {
-    {"off", "emulator_off", "Off"},
-    {"stick", nullptr, "Right stick"},
-    {"motion", nullptr, "Motion controls"},
-};
-constexpr OptionChoice kHoldToggleChoices[] = {
-    {"hold", nullptr, "Hold"},
-    {"toggle", nullptr, "Toggle"},
-};
-constexpr OptionChoice kButtonChoices[] = {
-    {"A", nullptr, "A"},         {"B", nullptr, "B"},
-    {"X", nullptr, "X"},         {"Y", nullptr, "Y"},
-    {"L", nullptr, "L"},         {"R", nullptr, "R"},
-    {"ZL", nullptr, "ZL"},       {"ZR", nullptr, "ZR"},
-    {"Plus", nullptr, "Plus"},   {"Minus", nullptr, "Minus"},
-    {"StickL", nullptr, "L-Stick"}, {"StickR", nullptr, "R-Stick"},
-    {"Up", nullptr, "D-Up"},     {"Down", nullptr, "D-Down"},
-    {"Left", nullptr, "D-Left"}, {"Right", nullptr, "D-Right"},
-    {"None", nullptr, "None"},
-};
-constexpr OptionChoice kFirmwareLanguageChoices[] = {
-    {"-1", "emulator_auto", "Auto"},
-    {"0", nullptr, "Japanese"},
-    {"1", nullptr, "English"},
-    {"2", nullptr, "French"},
-    {"3", nullptr, "German"},
-    {"4", nullptr, "Italian"},
-    {"5", nullptr, "Spanish"},
-    {"6", nullptr, "Korean"},
-};
-constexpr OptionChoice kFirmwareColorChoices[] = {
-    {"0", nullptr, "Gray"},        {"1", nullptr, "Brown"},
-    {"2", nullptr, "Red"},         {"3", nullptr, "Pink"},
-    {"4", nullptr, "Orange"},      {"5", nullptr, "Yellow"},
-    {"6", nullptr, "Lime green"},  {"7", nullptr, "Green"},
-    {"8", nullptr, "Dark green"},  {"9", nullptr, "Sea green"},
-    {"10", nullptr, "Turquoise"},  {"11", nullptr, "Blue"},
-    {"12", nullptr, "Dark blue"},  {"13", nullptr, "Dark purple"},
-    {"14", nullptr, "Violet"},     {"15", nullptr, "Magenta"},
+    const char* Keep(std::string text) {
+        strings.push_back(std::move(text));
+        return strings.back().c_str();
+    }
 };
 
-#define TOGGLE(key, label, def, restart) \
-    {key, nullptr, label, OptionType::Toggle, def, NO_CHOICES, 0, 0, 0, restart, 0}
-#define CHOICE(key, label, choices, def, restart) \
-    {key, nullptr, label, OptionType::Choice, def, CHOICES(choices), 0, 0, 0, restart, 0}
-#define RANGE(key, label, min, max, step, def, restart) \
-    {key, nullptr, label, OptionType::Range, def, NO_CHOICES, min, max, step, restart, 0}
-#define TEXT(key, label, def, length) \
-    {key, nullptr, label, OptionType::Text, def, NO_CHOICES, 0, 0, 0, true, length}
+OptionDef ShaderOption() {
+    OptionDef option{kShaderKey, "settings_drastic_custom_shader", "Custom shader",
+                     OptionType::Choice, "", kNoShaderChoices, 1, false, 0};
+    option.shown_when_key = kFilterKey;
+    option.shown_when_value = "custom";
+    return option;
+}
 
-// Not constexpr: the custom shader choices are filled in at run time.
-OptionDef kDisplayOptions[] = {
-    CHOICE("Wrapper/Layout", "Screen layout", kLayoutChoices, "horizontal", false),
-    TOGGLE("Wrapper/CustomAspectLock", "Lock native aspect ratio", "true", false),
-    TOGGLE("Wrapper/SwapScreens", "Swap DS screens", "false", false),
-    CHOICE("Wrapper/Rotation", "Rotation", kRotationChoices, "0", false),
-    RANGE("Wrapper/ScreenGap", "Screen gap", 0, 128, 2, "8", false),
-    TOGGLE("Wrapper/IntegerScale", "Integer scaling", "false", false),
-    CHOICE("Wrapper/VideoFilter", "Drastic filter", kFilterChoices, "nearest", false),
-    {"Wrapper/FsrSharpness", nullptr, "FSR sharpness %", OptionType::Range, "40", NO_CHOICES, 0,
-     100, 20, false, 0, "Wrapper/VideoFilter", "fsr"},
-    {"Wrapper/CustomShader", nullptr, "Custom shader", OptionType::Choice, "",
-     CHOICES(kNoShaderChoices), 0, 0, 0, false, 0, "Wrapper/VideoFilter", "custom"},
-    {"fps_counter_position", "emulator_fps_counter", "FPS Counter", OptionType::Choice, "hidden",
-     CHOICES(kHudPositionChoices), 0, 0, 0, false, 0},
-};
-constexpr OptionDef kGraphicsOptions[] = {
-    CHOICE("Wrapper/Renderer", "Renderer", kRendererChoices, "vk", true),
-    TOGGLE("Wrapper/VulkanLowLatency", "Low-latency Vulkan", "false", true),
-    TOGGLE("Drastic/Hires3D", "High-resolution 3D", "false", true),
-    TOGGLE("Drastic/Threaded3D", "Threaded 3D", "true", false),
-    TOGGLE("Drastic/DisableEdgeMarking", "Disable edge marking", "false", true),
-    TOGGLE("Drastic/Use16BitColor", "16-bit color", "false", true),
-    TOGGLE("Drastic/Blend", "Frame blending", "false", true),
-    TOGGLE("Drastic/FixMainEngineScreen", "Fix main-engine screen", "false", true),
-};
-constexpr OptionDef kFrameGenerationOptions[] = {
-    TOGGLE("Wrapper/LSFGEnabled", "LSFG 2x (Vulkan only)", "false", false),
-    CHOICE("Wrapper/LSFGFlowScale", "Flow resolution", kLsfgFlowChoices, "0.25", true),
-    TOGGLE("Wrapper/LSFGPerformance", "Performance mode", "true", true),
-};
-constexpr OptionDef kAudioOptions[] = {
-    TOGGLE("Drastic/SoundEnabled", "Sound", "true", false),
-    RANGE("Wrapper/Volume", "Volume", 0, 100, 5, "100", false),
-    CHOICE("Drastic/AudioLatency", "Audio latency", kLatencyChoices, "2", true),
-    TOGGLE("Drastic/MicEnabled", "Microphone", "true", false),
-    CHOICE("Wrapper/MicrophoneSource", "Microphone source", kMicSourceChoices, "noise", false),
-    CHOICE("Drastic/MicLevel", "Microphone level", kMicLevelChoices, "1", false),
-};
-constexpr OptionDef kEmulationOptions[] = {
-    CHOICE("Drastic/CpuThreads", "CPU worker threads", kThreadChoices, "3", true),
-    TOGGLE("Drastic/PreloadRoms", "Preload ROM", "true", true),
-    TOGGLE("Drastic/AutoTrim", "Auto-trim ROM", "false", true),
-    TOGGLE("Drastic/IgnoreGamecardLimit", "Ignore card size limit", "false", true),
-    TOGGLE("Drastic/RtcSystemTime", "Always sync RTC", "true", true),
-    CHOICE("Drastic/AutosaveInterval", "Autosave interval", kAutosaveChoices, "300", false),
-    TOGGLE("Drastic/CheatsEnabled", "Cheats master switch", "true", false),
-    TOGGLE("Drastic/LuaEnabled", "Lua scripts", "true", true),
-    CHOICE("Drastic/Slot2Type", "Slot-2 accessory", kSlot2Choices, "1", true),
-    TOGGLE("Drastic/BackupInSavestates", "Savestate backup data", "true", true),
-    TOGGLE("Drastic/RawSaveFormat", "Raw save-file format", "false", true),
-};
-constexpr OptionDef kFrameRateOptions[] = {
-    RANGE("Drastic/FrameskipValue", "Frames to skip", 0, 9, 1, "0", false),
-    CHOICE("Drastic/FrameskipType", "Frame-skip method", kFrameskipTypeChoices, "0", false),
-    TOGGLE("Drastic/FrameskipSafe", "Safe frame skipping", "false", false),
-    CHOICE("Drastic/FastForwardSpeed", "Fast-forward speed", kFastForwardChoices, "2", false),
-    CHOICE("Drastic/AutoFireSpeed", "Auto-fire speed", kAutofireChoices, "2", false),
-};
-constexpr OptionDef kControllerOptions[] = {
-    TOGGLE("Wrapper/Vibration", "Rumble Pak vibration", "true", false),
-    TOGGLE("Wrapper/Motion", "Gyro & accelerometer", "true", false),
-    CHOICE("Wrapper/StylusMode", "Virtual stylus", kStylusChoices, "stick", false),
-    CHOICE("Wrapper/AnalogTouchButton", "Stylus touch button", kButtonChoices, "StickR", true),
-    RANGE("Wrapper/AnalogStylusSpeed", "Stick cursor speed", 1, 20, 1, "8", true),
-    RANGE("Wrapper/MotionStylusSensitivity", "Motion sensitivity", 1, 20, 1, "10", false),
-    TOGGLE("Wrapper/MouseStylus", "USB mouse stylus", "true", false),
-    TOGGLE("Wrapper/AnalogDpad", "Analog stick as D-Pad", "true", true),
-    RANGE("Wrapper/AnalogDeadzone", "Analog deadzone %", 5, 80, 5, "35", true),
-    CHOICE("Wrapper/Pad/A", "DS A", kButtonChoices, "A", true),
-    CHOICE("Wrapper/Pad/B", "DS B", kButtonChoices, "B", true),
-    CHOICE("Wrapper/Pad/X", "DS X", kButtonChoices, "X", true),
-    CHOICE("Wrapper/Pad/Y", "DS Y", kButtonChoices, "Y", true),
-    CHOICE("Wrapper/Pad/L", "DS L", kButtonChoices, "L", true),
-    CHOICE("Wrapper/Pad/R", "DS R", kButtonChoices, "R", true),
-    CHOICE("Wrapper/Pad/Start", "DS Start", kButtonChoices, "Plus", true),
-    CHOICE("Wrapper/Pad/Select", "DS Select", kButtonChoices, "Minus", true),
-    CHOICE("Wrapper/Pad/Up", "D-Pad Up", kButtonChoices, "Up", true),
-    CHOICE("Wrapper/Pad/Down", "D-Pad Down", kButtonChoices, "Down", true),
-    CHOICE("Wrapper/Pad/Left", "D-Pad Left", kButtonChoices, "Left", true),
-    CHOICE("Wrapper/Pad/Right", "D-Pad Right", kButtonChoices, "Right", true),
-    CHOICE("Wrapper/FastForwardMode", "Fast-forward mode", kHoldToggleChoices, "hold", true),
-};
-constexpr OptionDef kHotkeyOptions[] = {
-    TEXT("Wrapper/HotkeyMenu", "Quick menu", "Plus+Minus", 48),
-    TEXT("Wrapper/HotkeyFastForward", "Fast-forward", "ZR", 48),
-    TEXT("Wrapper/HotkeySwapScreens", "Swap screens", "ZL", 48),
-    TEXT("Wrapper/HotkeyMicrophone", "Microphone", "StickL", 48),
-    TEXT("Wrapper/HotkeyMotionStylusRecenter", "Recenter motion stylus", "L+R+StickR", 48),
-    TEXT("Wrapper/HotkeyAutoFire", "Auto-fire modifier", "None", 48),
-    TEXT("Wrapper/HotkeyLid", "Close/open lid", "None", 48),
-    TEXT("Wrapper/HotkeySaveState", "Save state", "L+R+Minus+Y", 48),
-    TEXT("Wrapper/HotkeyLoadState", "Load state", "L+R+Minus+X", 48),
-    TEXT("Wrapper/HotkeyNextSlot", "Next state slot", "L+R+Minus+Up", 48),
-    TEXT("Wrapper/HotkeyPreviousSlot", "Previous state slot", "L+R+Minus+Down", 48),
-    TEXT("Wrapper/HotkeyReset", "Reset game", "L+R+Minus+A", 48),
-    TEXT("Wrapper/HotkeyQuit", "Quit to tico", "None", 48),
-};
-constexpr OptionDef kFirmwareOptions[] = {
-    TEXT("Drastic/FirmwareNickname", "Nickname", "Switch", 10),
-    CHOICE("Drastic/FirmwareLanguage", "Language", kFirmwareLanguageChoices, "-1", true),
-    CHOICE("Drastic/FirmwareColor", "Favorite color", kFirmwareColorChoices, "0", true),
-    RANGE("Drastic/FirmwareBirthdayMonth", "Birthday month", 1, 12, 1, "6", true),
-    RANGE("Drastic/FirmwareBirthdayDay", "Birthday day", 1, 31, 1, "6", true),
-};
+bool ParseOption(Catalogue& catalogue, const nlohmann::json& source, OptionDef& option) {
+    const std::string type = source.value("type", "");
+    if (!source.contains("key") || !source["key"].is_string()) {
+        return false;
+    }
+    if (type == "bool") {
+        option.type = OptionType::Toggle;
+    } else if (type == "enum") {
+        option.type = OptionType::Choice;
+    } else if (type == "string") {
+        option.type = OptionType::Text;
+    } else {
+        // actions and anything newer are tico's own
+        return false;
+    }
+    option.key = catalogue.Keep(source["key"].get<std::string>());
+    option.fallback = catalogue.Keep(source.value("label", source["key"].get<std::string>()));
+    option.label_key = option.fallback;
+    option.default_value =
+        catalogue.Keep(source.contains("default") ? JsonScalarToString(source["default"]) : "");
+    option.needs_restart = source.value("restart", false);
+    option.max_length = source.value("max_length", 0);
+    option.choices = nullptr;
+    option.choice_count = 0;
+    if (option.type == OptionType::Choice) {
+        std::vector<OptionChoice> choices;
+        for (const nlohmann::json& choice : source.value("choices", nlohmann::json::array())) {
+            const std::string value =
+                choice.contains("value") ? JsonScalarToString(choice["value"]) : "";
+            const std::string label = choice.value("label", value);
+            choices.push_back({catalogue.Keep(value), catalogue.Keep(ValueKey(label)),
+                               catalogue.Keep(label)});
+        }
+        if (choices.empty()) {
+            return false;
+        }
+        catalogue.choice_lists.push_back(std::move(choices));
+        option.choices = catalogue.choice_lists.back().data();
+        option.choice_count = catalogue.choice_lists.back().size();
+    }
+    if (source.contains("depends_on") && source["depends_on"].is_object()) {
+        const nlohmann::json& depends_on = source["depends_on"];
+        option.shown_when_key = catalogue.Keep(depends_on.value("key", ""));
+        option.shown_when_value = catalogue.Keep(
+            depends_on.contains("value") ? JsonScalarToString(depends_on["value"]) : "");
+    }
+    return true;
+}
 
-#define OPTIONS(name) name, sizeof(name) / sizeof(name[0])
+Catalogue LoadCatalogue() {
+    Catalogue catalogue;
+    std::string content;
+    nlohmann::json root;
+    if (ReadWholeFile(kSettingsPath, content)) {
+        root = nlohmann::json::parse(StripJsonComments(content), nullptr, false);
+    }
+    if (!root.is_object()) {
+        tico_log("could not read the settings definition at %s\n", kSettingsPath);
+    }
 
-const std::vector<OptionCategory> kCategories = {
-    {"emulator_category_display", "Display", OPTIONS(kDisplayOptions)},
-    {nullptr, "3D / Graphics", OPTIONS(kGraphicsOptions)},
-    {nullptr, "Frame Generation", OPTIONS(kFrameGenerationOptions)},
-    {"emulator_category_audio", "Audio", OPTIONS(kAudioOptions)},
-    {"emulator_category_system", "Emulation", OPTIONS(kEmulationOptions)},
-    {nullptr, "Frame Rate", OPTIONS(kFrameRateOptions)},
-    {nullptr, "Controller", OPTIONS(kControllerOptions)},
-    {nullptr, "Hotkeys", OPTIONS(kHotkeyOptions)},
-    {"emulator_category_firmware", "Firmware", OPTIONS(kFirmwareOptions)},
-};
+    for (const nlohmann::json& tab : root.value("tabs", nlohmann::json::array())) {
+        std::vector<OptionDef> options;
+        for (const nlohmann::json& section : tab.value("sections", nlohmann::json::array())) {
+            for (const nlohmann::json& source : section.value("options", nlohmann::json::array())) {
+                OptionDef option{};
+                if (!ParseOption(catalogue, source, option)) {
+                    continue;
+                }
+                options.push_back(option);
+                if (std::strcmp(option.key, kFilterKey) == 0) {
+                    options.push_back(ShaderOption());
+                }
+            }
+        }
+        if (options.empty()) {
+            continue;
+        }
+        catalogue.option_lists.push_back(std::move(options));
+        const std::vector<OptionDef>& stored = catalogue.option_lists.back();
+        const char* name = catalogue.Keep(tab.value("name", "Settings"));
+        catalogue.categories.push_back({name, name, stored.data(), stored.size()});
+    }
+    // the menu always has a category to show, even without a definition
+    if (catalogue.categories.empty()) {
+        catalogue.categories.push_back({nullptr, "Settings", nullptr, 0});
+    }
+    return catalogue;
+}
+
+Catalogue& GetCatalogue() {
+    static Catalogue catalogue = LoadCatalogue();
+    return catalogue;
+}
 
 // Index of the choice whose stored value matches, or 0 when none does.
 std::size_t FindChoice(const OptionDef& option, std::string_view value) {
@@ -466,6 +321,7 @@ class Manager {
 public:
     void ReloadConfig() {
         options.clear();
+        original = nlohmann::json::object();
         loaded_path.clear();
 
         for (const char* path : kConfigPaths) {
@@ -485,6 +341,7 @@ public:
                 }
                 options[it.key()] = JsonScalarToString(it.value());
             }
+            original = std::move(root);
             loaded_path = path;
             tico_log("tico config loaded from %s (%zu options)\n", path, options.size());
             return;
@@ -502,22 +359,16 @@ public:
 
     void SetConfigValue(const std::string& key, const std::string& value) {
         options[key] = value;
+        changed[key] = value;
     }
 
+    // Writes back what was read, with this session's changes as strings, the
+    // way tico stores them (bools as settings.json's bool_true_value and
+    // bool_false_value). Keys tico wrote keep their own JSON types.
     bool SaveConfig() {
-        nlohmann::json root = nlohmann::json::object();
-        for (const auto& [key, value] : options) {
-            const OptionDef* option = FindOption(key);
-            // text is kept as text even when it looks like a number
-            if (option && option->type == OptionType::Text) {
-                root[key] = value;
-            } else if (const auto b = ParseBool(value); b && (!option || option->type == OptionType::Toggle)) {
-                root[key] = *b;
-            } else if (const auto i = ParseInt(value)) {
-                root[key] = *i;
-            } else {
-                root[key] = value;
-            }
+        nlohmann::json root = original.is_object() ? original : nlohmann::json::object();
+        for (const auto& [key, value] : changed) {
+            root[key] = value;
         }
         const std::string serialized = root.dump(2);
 
@@ -550,14 +401,6 @@ public:
         return ParseBool(option.default_value).value_or(false);
     }
 
-    int GetInt(const OptionDef& option) const {
-        int value = ParseInt(GetOptionValue(option)).value_or(ParseInt(option.default_value).value_or(0));
-        if (option.type == OptionType::Range) {
-            value = std::clamp(value, option.min, option.max);
-        }
-        return value;
-    }
-
     // For Choice options: the position of the stored value in the choice list.
     int GetChoiceIndex(const OptionDef& option) const {
         return static_cast<int>(FindChoice(option, GetOptionValue(option)));
@@ -573,6 +416,8 @@ public:
 
 private:
     OptionMap options;
+    OptionMap changed;
+    nlohmann::json original = nlohmann::json::object();
     std::string loaded_path;
 };
 
@@ -583,15 +428,13 @@ Manager& GetManager() {
 
 std::vector<OptionChoice> s_dynamic_choices;
 
-// The value written to prefs: toggles as true/false, ranges clamped, and a
-// choice that the file names but the list does not know replaced by a known one.
+// The value written to prefs: toggles as true/false, and a choice that the file
+// names but the list does not know replaced by a known one.
 std::string PrefsValue(const OptionDef& option) {
     const Manager& config = GetManager();
     switch (option.type) {
     case OptionType::Toggle:
         return config.GetBool(option) ? "true" : "false";
-    case OptionType::Range:
-        return std::to_string(config.GetInt(option));
     case OptionType::Choice:
         if (option.choice_count == 0) {
             return config.GetOptionValue(option);
@@ -611,10 +454,33 @@ void StoreInPrefs(const OptionDef& option) {
     prefs_set_string(option.key, PrefsValue(option).c_str());
 }
 
+std::string ContentPath(const char* key, const char* default_root) {
+    std::string root = GetManager().GetConfigValue(key, "");
+    if (root.empty()) {
+        root = default_root;
+    }
+    while (root.size() > 1 && root.back() == '/') {
+        root.pop_back();
+    }
+    return root + "/" + kSlug;
+}
+
 } // namespace
 
 void ReloadConfig() {
     GetManager().ReloadConfig();
+}
+
+std::string SystemPath() {
+    return ContentPath("tico_system_path", "sdmc:/tico/system");
+}
+
+std::string SavesPath() {
+    return ContentPath("tico_saves_path", "sdmc:/tico/saves");
+}
+
+std::string StatesPath() {
+    return ContentPath("tico_states_path", "sdmc:/tico/states");
 }
 
 std::string GetConfigValue(std::string_view key, std::string_view default_value) {
@@ -630,11 +496,11 @@ bool SaveConfig() {
 }
 
 void ApplyToPrefs() {
-    for (const OptionCategory& category : kCategories) {
+    for (const OptionCategory& category : GetCategories()) {
         for (std::size_t i = 0; i < category.option_count; ++i) {
             const OptionDef& option = category.options[i];
             // the shader list is not known yet when the config is first applied
-            if (option.type == OptionType::Choice && option.choices == kNoShaderChoices) {
+            if (std::strcmp(option.key, kShaderKey) == 0) {
                 prefs_set_string(option.key, GetManager().GetOptionValue(option).c_str());
                 continue;
             }
@@ -644,11 +510,11 @@ void ApplyToPrefs() {
 }
 
 const std::vector<OptionCategory>& GetCategories() {
-    return kCategories;
+    return GetCatalogue().categories;
 }
 
 const OptionDef* FindOption(std::string_view key) {
-    for (const OptionCategory& category : kCategories) {
+    for (const OptionCategory& category : GetCategories()) {
         for (std::size_t i = 0; i < category.option_count; ++i) {
             if (key == category.options[i].key) {
                 return &category.options[i];
@@ -659,19 +525,21 @@ const OptionDef* FindOption(std::string_view key) {
 }
 
 void SetDynamicChoices(std::string_view key, std::vector<OptionChoice> choices) {
-    for (OptionDef& option : kDisplayOptions) {
-        if (key != option.key) {
-            continue;
+    for (std::vector<OptionDef>& options : GetCatalogue().option_lists) {
+        for (OptionDef& option : options) {
+            if (key != option.key) {
+                continue;
+            }
+            s_dynamic_choices = std::move(choices);
+            if (s_dynamic_choices.empty()) {
+                option.choices = kNoShaderChoices;
+                option.choice_count = 1;
+            } else {
+                option.choices = s_dynamic_choices.data();
+                option.choice_count = s_dynamic_choices.size();
+            }
+            return;
         }
-        s_dynamic_choices = std::move(choices);
-        if (s_dynamic_choices.empty()) {
-            option.choices = kNoShaderChoices;
-            option.choice_count = 1;
-        } else {
-            option.choices = s_dynamic_choices.data();
-            option.choice_count = s_dynamic_choices.size();
-        }
-        return;
     }
 }
 
@@ -684,7 +552,7 @@ bool IsOptionShown(const OptionDef& option) {
         return true;
     }
     const OptionDef* controller = FindOption(option.shown_when_key);
-    return controller && GetManager().GetOptionValue(*controller) == option.shown_when_value;
+    return controller && PrefsValue(*controller) == option.shown_when_value;
 }
 
 OptionValueLabel GetOptionValueLabel(const OptionDef& option) {
@@ -697,8 +565,6 @@ OptionValueLabel GetOptionValueLabel(const OptionDef& option) {
         const OptionChoice& choice = option.choices[config.GetChoiceIndex(option)];
         return {choice.label_key, choice.fallback};
     }
-    case OptionType::Range:
-        return {nullptr, std::to_string(config.GetInt(option))};
     case OptionType::Text:
     default:
         return {nullptr, config.GetOptionValue(option)};
@@ -727,13 +593,6 @@ void StepOption(const OptionDef& option, int direction) {
         }
         const int index = (config.GetChoiceIndex(option) + (direction > 0 ? 1 : count - 1)) % count;
         SetOptionValue(option, option.choices[index].value);
-        break;
-    }
-    case OptionType::Range: {
-        const int value = std::clamp(
-            config.GetInt(option) + (direction > 0 ? option.step : -option.step), option.min,
-            option.max);
-        SetOptionValue(option, std::to_string(value));
         break;
     }
     case OptionType::Text:

@@ -146,14 +146,13 @@ bool TranslationManager::Init() {
     m_current_language = language;
     m_translations.clear();
 
+    // English first, so a string missing from a translation still reads as text
+    const bool english = LoadLanguageFile("en.json");
     const std::string filename(GetLanguageFilename(language));
-    if (LoadLanguageFile(filename)) {
+    if (filename != "en.json" && LoadLanguageFile(filename)) {
         return true;
     }
-    if (filename != "en.json") {
-        return LoadLanguageFile("en.json");
-    }
-    return false;
+    return english;
 }
 
 bool TranslationManager::LoadLanguageFile(const std::string& filename) {
@@ -166,13 +165,11 @@ bool TranslationManager::LoadLanguageFile(const std::string& filename) {
         return false;
     }
 
-    std::unordered_map<std::string, std::string> translations;
     for (auto it = root.begin(); it != root.end(); ++it) {
         if (it.value().is_string()) {
-            translations.emplace(it.key(), it.value().get<std::string>());
+            m_translations.insert_or_assign(it.key(), it.value().get<std::string>());
         }
     }
-    m_translations = std::move(translations);
     return true;
 }
 

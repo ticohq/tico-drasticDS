@@ -24,3 +24,4 @@ __pycache__/
 !third_party/nds-i-cheat-databases/usrcheat.dat
 *.apk
 .DS_Store
+/tico-*-module.zip

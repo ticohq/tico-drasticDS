@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Builds tico-drastic.nro, the Drastic host as the tico frontend's entrypoint.
+# Builds tico-drastic.nro, the Drastic host as the tico frontend's entrypoint,
+# and tico-drastic-module.zip, the module tico installs into sdmc:/tico/modules/.
 # The Drastic core, game database and post-FX shader sources come from the
 # user's Drastic APK (DRASTIC_APK_DIR, same default as build_all.sh). Uses a
 # local devkitPro install when there is one, otherwise the switch-dev Docker
@@ -16,6 +17,7 @@ DEVKITPRO=${DEVKITPRO:-/opt/devkitpro}
 IMAGE=${SWITCH_DEV_IMAGE:-}
 
 CORE="$APK_DIR/lib/arm64-v8a/libdrastic_arm64.so"
+MODULE_SRC="$APP/source/tico/module"
 ASSETS="$APK_DIR/assets"
 for file in "$CORE" "$ASSETS/game_database.xml" "$ASSETS/shaders/None.dfx"; do
   [[ -f "$file" ]] || {
@@ -67,6 +69,9 @@ python3 "$APP/tools/patch_game_database.py" \
   --output "$WORK/romfs/res/game_database.xml"
 # the tico overlay's fonts and translations
 cp -R "$APP/source/tico/fonts" "$APP/source/tico/lang" "$WORK/romfs/"
+# the overlay builds its settings menu from the module's own definition
+mkdir -p "$WORK/romfs/module"
+cp -f "$MODULE_SRC/settings.json" "$WORK/romfs/module/"
 
 echo "==== tico-drastic host ===="
 # Vulkan headers come after the repo's lsfg-vk headers: the image ships its own
@@ -80,5 +85,29 @@ make -C "$APP" -j"$JOBS" TICO=1 ELF_LIB= \
   DFX_GENERATED="$WORK/dfx" \
   TICO_ROMFS="$WORK/romfs"
 
+#---------------------------------------------------------------------------------
+# Module bundle
+#
+# A module is a directory, not a bare NRO: tico discovers it by reading
+# module.json, and everything the module owns -- its settings definition and
+# gamelist -- travels with it. The NRO sits beside module.json, so the bundle
+# extracts straight into sdmc:/tico/modules/<id>/.
+#---------------------------------------------------------------------------------
+echo "==== tico module bundle ===="
+MODULE_ID=$(sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$MODULE_SRC/module.json" | head -1)
+MODULE_OUT="$WORK/module/$MODULE_ID"
+mkdir -p "$MODULE_OUT"
+cp -r "$MODULE_SRC/." "$MODULE_OUT/"
+cp -f "$APP/tico-drastic.nro" "$MODULE_OUT/"
+# tico prefers .json.gz when resolving a gamelist
+if [[ -d "$MODULE_OUT/gamelists" ]]; then
+  gzip -f -9 "$MODULE_OUT"/gamelists/*.json
+fi
+BUNDLE="$APP/tico-$MODULE_ID-module.zip"
+rm -f "$BUNDLE"
+( cd "$WORK/module" && zip -qr "$BUNDLE" "$MODULE_ID" )
+
 echo
-ls -la "$APP/tico-drastic.nro"
+ls -la "$APP/tico-drastic.nro" "$BUNDLE"
+echo "The module extracts to sdmc:/tico/modules/$MODULE_ID/:"
+find "$MODULE_OUT" -type f | sed "s|$WORK/module/|    |"

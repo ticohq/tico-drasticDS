@@ -16,8 +16,12 @@ extern "C" {
 
 typedef struct TicoMenu TicoMenu;
 
-/* Loads sdmc:/tico/config/cores/drastic.jsonc into the preference store.
- * Call after prefs_init() and before the runtime config is read. */
+/* Reads sdmc:/tico/config/cores/drastic.jsonc. Call first: it names the
+ * content folders (tico_nds_*_dir in config.h). */
+void tico_config_load(void);
+
+/* Copies the loaded settings into the preference store. Call after
+ * prefs_init() and before the runtime config is read. */
 void tico_menu_load_config(void);
 
 /* Creates the overlay for the renderer chosen by drastic_renderer_select().
