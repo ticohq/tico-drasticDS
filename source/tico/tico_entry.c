@@ -21,7 +21,16 @@
 #define BUNDLED_CORE     "romfs:/cores/" SO_NAME
 #define BUNDLED_DATABASE "romfs:/res/game_database.xml"
 
+/* Restart relaunches this NRO with this argument added, so the game starts
+ * over instead of offering to continue from the auto save. */
+#define RESTART_ARGUMENT "--tico-restart"
+
 static char display_title[256];
+static char rom_path[1024];
+static bool restarted;
+static char self_path[512];
+/* the launch arguments, quoted, for Restart */
+static char launch_arguments[2048];
 
 static int file_size(const char *path, long *size) {
   struct stat status;
@@ -180,7 +189,8 @@ static int find_fallback_rom(char *output, size_t output_size) {
 static const char *rom_argument(int argc, char **argv) {
   for (int index = 1; index < argc; index++) {
     /* some tico launch paths pass this guard word before the ROM */
-    if (!argv[index] || !argv[index][0] || !strcmp(argv[index], "ticoSetup"))
+    if (!argv[index] || !argv[index][0] || !strcmp(argv[index], "ticoSetup") ||
+        !strcmp(argv[index], RESTART_ARGUMENT))
       continue;
     return argv[index];
   }
@@ -201,18 +211,49 @@ static void set_display_title(int argc, char **argv, const char *rom) {
   if (extension) *extension = '\0';
 }
 
+/* tico names a game on a USB drive usb://<volume-id>/<path>. The host finds
+ * umsN:/<path> on whichever drive has it, so any drive number will do. */
+static void resolve_usb_token(char *rom, size_t rom_size) {
+  if (strncmp(rom, "usb://", 6) != 0) return;
+  const char *rest = strchr(rom + 6, '/');
+  char resolved[1024];
+  snprintf(resolved, sizeof(resolved), "ums0:/%s", rest ? rest + 1 : "");
+  snprintf(rom, rom_size, "%s", resolved);
+}
+
+static void remember_launch(int argc, char **argv) {
+  if (argc > 0 && argv[0] && argv[0][0])
+    snprintf(self_path, sizeof(self_path), "%s", argv[0]);
+  size_t used = 0;
+  for (int index = 0; index < argc && argv[index]; index++) {
+    if (!strcmp(argv[index], RESTART_ARGUMENT)) {
+      restarted = true;
+      continue;
+    }
+    const int written = snprintf(launch_arguments + used, sizeof(launch_arguments) - used,
+                                 "%s\"%s\"", used ? " " : "", argv[index]);
+    if (written < 0 || (size_t)written >= sizeof(launch_arguments) - used) break;
+    used += (size_t)written;
+  }
+}
+
 void tico_prepare(int argc, char **argv) {
   stage_system_files();
+  remember_launch(argc, argv);
 
   char rom[1024] = "";
   const char *argument = rom_argument(argc, argv);
-  if (argument)
+  if (argument) {
     snprintf(rom, sizeof(rom), "%s", argument);
+    snprintf(rom_path, sizeof(rom_path), "%s", argument);
+    resolve_usb_token(rom, sizeof(rom));
+  }
   else if (!find_fallback_rom(rom, sizeof(rom)))
     fatal_error("No game was passed by tico, and none was found in\n"
                 "sdmc:" FALLBACK_ROM_DIR "/\n\n"
                 "Put a .nds, .zip or .rar there to test without tico.");
   if (rom[0]) prefs_set_disc_path(rom);
+  if (!rom_path[0]) snprintf(rom_path, sizeof(rom_path), "%s", rom);
   set_display_title(argc, argv, rom);
 
   prefs_set_string("Wrapper/CoreSo", select_core());
@@ -222,6 +263,17 @@ void tico_prepare(int argc, char **argv) {
 }
 
 const char *tico_display_title(void) { return display_title; }
+
+const char *tico_rom_path(void) { return rom_path; }
+
+bool tico_was_restarted(void) { return restarted; }
+
+bool tico_queue_restart(void) {
+  if (!envHasNextLoad() || !self_path[0] || !file_size(self_path, NULL)) return false;
+  static char arguments[sizeof(launch_arguments) + 32];
+  snprintf(arguments, sizeof(arguments), "%s \"" RESTART_ARGUMENT "\"", launch_arguments);
+  return R_SUCCEEDED(envSetNextLoad(self_path, arguments));
+}
 
 void tico_log(const char *format, ...) {
   static FILE *file;

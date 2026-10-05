@@ -26,6 +26,17 @@ void tico_prepare(int argc, char **argv);
 
 const char *tico_display_title(void);
 
+/* The game as tico named it (the archive, or usb://...), which names its
+ * per-game settings. */
+const char *tico_rom_path(void);
+
+/* True when this launch is a Restart (tico_queue_restart): the game starts
+ * over instead of offering to continue from the auto save. */
+bool tico_was_restarted(void);
+
+/* Queues this NRO with the same game for when this process exits. */
+bool tico_queue_restart(void);
+
 /* Queues tico to be loaded with --resume when this process exits. */
 bool tico_queue_return(void);
 

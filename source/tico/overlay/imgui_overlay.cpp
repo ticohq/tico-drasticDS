@@ -10,6 +10,10 @@
 #include <array>
 #include <cstdint>
 #include <cstring>
+#include <algorithm>
+#include <initializer_list>
+#include <map>
+#include <string>
 #include <vector>
 
 #include <imgui.h>
@@ -17,6 +21,10 @@
 #include <imgui_impl_vulkan.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+#define NANOSVG_IMPLEMENTATION
+#include <nanosvg.h>
+#define NANOSVGRAST_IMPLEMENTATION
+#include <nanosvgrast.h>
 
 #include "drastic_overlay_hook.h"
 extern "C" {
@@ -24,6 +32,7 @@ extern "C" {
 }
 
 #include "tico/overlay/imgui_overlay.h"
+#include "tico/overlay/tico_config.h"
 
 namespace SwitchFrontend::ImGuiOverlay {
 namespace {
@@ -42,6 +51,14 @@ constexpr std::array<const char*, 6> kAvatarPaths = {{
     "romfs:/assets/avatar.jpeg",
     "romfs:/assets/avatar.png",
 }};
+// Selection border strips, as tico-nx ships them: index 0 and "original" (the
+// last) use the cyan/violet strip, every other tint has its own. The slugs
+// mirror tico-nx's TintPalette::GetBorderGradientFile.
+constexpr const char* kBorderDir = "romfs:/assets/border/";
+constexpr std::array<const char*, 13> kBorderSlugs = {{
+    "default", "aqua", "violet", "sunset", "lime", "rose", "gold", "ice", "ember", "mint",
+    "lagoon", "cobalt", "original",
+}};
 // the overlay's layout is designed for a 720p display
 constexpr float kDesignHeight = 720.0f;
 
@@ -52,22 +69,56 @@ bool s_psm_initialized = false;
 OverlayUI::NavInput s_nav{};
 OverlayUI::Action s_action = OverlayUI::Action::None;
 
-// The avatar, decoded once and uploaded when a backend is ready.
-std::vector<unsigned char> s_avatar_rgba;
-int s_avatar_width = 0;
-int s_avatar_height = 0;
+// An image decoded once and uploaded when a backend is ready.
+struct DecodedImage {
+    std::vector<unsigned char> rgba;
+    int width = 0;
+    int height = 0;
+};
+DecodedImage s_avatar;
+DecodedImage s_border;
+// the quick menu sidebar's icons: Settings, Restart, Exit Game
+std::array<DecodedImage, 3> s_icons;
 bool s_avatar_decoded = false;
 
-bool DecodeAvatar(unsigned char* rgba, int width, int height, const char* source) {
+// Textures made while drawing (the Save/Load State pictures): destroyed at
+// the start of the next drawn frame, once the GPU is done with them.
+std::vector<unsigned long long> s_retired_textures;
+
+bool DecodeImage(DecodedImage& image, unsigned char* rgba, int width, int height,
+                 const char* source) {
     if (!rgba) {
         return false;
     }
-    s_avatar_rgba.assign(rgba, rgba + static_cast<std::size_t>(width) * height * 4);
-    s_avatar_width = width;
-    s_avatar_height = height;
+    image.rgba.assign(rgba, rgba + static_cast<std::size_t>(width) * height * 4);
+    image.width = width;
+    image.height = height;
     stbi_image_free(rgba);
-    tico_log("%s loaded avatar: %s (%dx%d)\n", TAG, source, width, height);
+    tico_log("%s loaded %s (%dx%d)\n", TAG, source, width, height);
     return true;
+}
+
+bool DecodeAvatar(unsigned char* rgba, int width, int height, const char* source) {
+    return DecodeImage(s_avatar, rgba, width, height, source);
+}
+
+void DecodeBorder() {
+    const int tint = TicoConfig::BorderTint();
+    const int original = static_cast<int>(kBorderSlugs.size()) - 1;
+    std::string path = kBorderDir;
+    if (tint <= 0 || tint >= original) {
+        path += "border_gradient.png";
+    } else {
+        path += std::string("border_gradient_") + kBorderSlugs[static_cast<std::size_t>(tint)] +
+                ".png";
+    }
+    int width = 0;
+    int height = 0;
+    int channels = 0;
+    if (!DecodeImage(s_border, stbi_load(path.c_str(), &width, &height, &channels, 4), width,
+                     height, path.c_str())) {
+        tico_log("%s no selection border strip at %s\n", TAG, path.c_str());
+    }
 }
 
 bool DecodeAvatarFromAccount() {
@@ -135,6 +186,35 @@ void DecodeAvatarOnce() {
     }
 }
 
+// A white SVG icon rasterized to a size x size image.
+void DecodeSvgIcon(DecodedImage& image, const std::string& path, int size) {
+    NSVGimage* svg = nsvgParseFromFile(path.c_str(), "px", 96.0f);
+    if (!svg) {
+        tico_log("%s no icon at %s\n", TAG, path.c_str());
+        return;
+    }
+    if (NSVGrasterizer* rast = nsvgCreateRasterizer()) {
+        image.rgba.assign(static_cast<std::size_t>(size) * size * 4, 0);
+        const float longest = std::max(svg->width, svg->height);
+        const float scale = longest > 0.0f ? size / longest : 1.0f;
+        // centre the shorter side
+        const float dx = (size - (svg->width * scale)) * 0.5f;
+        const float dy = (size - (svg->height * scale)) * 0.5f;
+        nsvgRasterize(rast, svg, dx, dy, scale, image.rgba.data(), size, size, size * 4);
+        nsvgDeleteRasterizer(rast);
+        image.width = size;
+        image.height = size;
+    }
+    nsvgDelete(svg);
+}
+
+void DecodeSidebarIcons() {
+    const char* names[] = {"gear.svg", "rotate-left.svg", "right-from-bracket.svg"};
+    for (std::size_t i = 0; i < s_icons.size(); ++i) {
+        DecodeSvgIcon(s_icons[i], std::string("romfs:/assets/icons/") + names[i], 64);
+    }
+}
+
 void BeginFrame(float width, float height) {
     ImGuiIO& io = ImGui::GetIO();
     io.DisplaySize = ImVec2(width, height);
@@ -172,13 +252,21 @@ struct VulkanState {
     VkRenderPass render_pass = VK_NULL_HANDLE;
     VkDescriptorPool descriptor_pool = VK_NULL_HANDLE;
     VkCommandPool command_pool = VK_NULL_HANDLE;
-    VkImage avatar_image = VK_NULL_HANDLE;
-    VkDeviceMemory avatar_memory = VK_NULL_HANDLE;
-    VkImageView avatar_view = VK_NULL_HANDLE;
-    VkSampler avatar_sampler = VK_NULL_HANDLE;
-    VkDescriptorSet avatar_descriptor = VK_NULL_HANDLE;
+};
+
+struct VulkanTexture {
+    VkImage image = VK_NULL_HANDLE;
+    VkDeviceMemory memory = VK_NULL_HANDLE;
+    VkImageView view = VK_NULL_HANDLE;
+    VkSampler sampler = VK_NULL_HANDLE;
+    VkDescriptorSet descriptor = VK_NULL_HANDLE;
 };
 VulkanState s_vk;
+VulkanTexture s_vk_avatar;
+VulkanTexture s_vk_border;
+std::array<VulkanTexture, 3> s_vk_icons;
+// textures made with CreateTexture, by ImGui id
+std::map<unsigned long long, VulkanTexture> s_vk_dynamic;
 
 bool FindMemoryType(u32 type_filter, VkMemoryPropertyFlags properties, u32& out_index) {
     VkPhysicalDeviceMemoryProperties memory{};
@@ -211,34 +299,30 @@ void TransitionImage(VkCommandBuffer cmd, VkImage image, VkImageLayout old_layou
     vkCmdPipelineBarrier(cmd, src_stage, dst_stage, 0, 0, nullptr, 0, nullptr, 1, &barrier);
 }
 
-void DestroyVulkanAvatar() {
-    if (s_vk.avatar_descriptor) {
-        ImGui_ImplVulkan_RemoveTexture(s_vk.avatar_descriptor);
-        s_vk.avatar_descriptor = VK_NULL_HANDLE;
-    }
-    if (s_vk.avatar_sampler)
-        vkDestroySampler(s_vk.device, s_vk.avatar_sampler, nullptr);
-    if (s_vk.avatar_view)
-        vkDestroyImageView(s_vk.device, s_vk.avatar_view, nullptr);
-    if (s_vk.avatar_image)
-        vkDestroyImage(s_vk.device, s_vk.avatar_image, nullptr);
-    if (s_vk.avatar_memory)
-        vkFreeMemory(s_vk.device, s_vk.avatar_memory, nullptr);
-    s_vk.avatar_sampler = VK_NULL_HANDLE;
-    s_vk.avatar_view = VK_NULL_HANDLE;
-    s_vk.avatar_image = VK_NULL_HANDLE;
-    s_vk.avatar_memory = VK_NULL_HANDLE;
-    OverlayUI::SetAvatarTextureId(0);
+void DestroyVulkanTexture(VulkanTexture& texture) {
+    if (texture.descriptor)
+        ImGui_ImplVulkan_RemoveTexture(texture.descriptor);
+    if (texture.sampler)
+        vkDestroySampler(s_vk.device, texture.sampler, nullptr);
+    if (texture.view)
+        vkDestroyImageView(s_vk.device, texture.view, nullptr);
+    if (texture.image)
+        vkDestroyImage(s_vk.device, texture.image, nullptr);
+    if (texture.memory)
+        vkFreeMemory(s_vk.device, texture.memory, nullptr);
+    texture = {};
 }
 
-// Uploads the decoded avatar with a one-off submission. Runs before the
-// renderer submits the frame being recorded, so the queue is free.
-void UploadVulkanAvatar() {
-    if (s_avatar_rgba.empty() || s_vk.avatar_descriptor) {
-        return;
+// Uploads RGBA pixels with a one-off submission. Runs before the renderer
+// submits the frame being recorded, so the queue is free. Returns the ImGui
+// texture id, or 0 when the upload failed.
+unsigned long long UploadVulkanPixels(const unsigned char* rgba, int source_width,
+                                      int source_height, VulkanTexture& texture) {
+    if (!rgba || source_width <= 0 || source_height <= 0 || texture.descriptor) {
+        return 0;
     }
-    const u32 width = static_cast<u32>(s_avatar_width);
-    const u32 height = static_cast<u32>(s_avatar_height);
+    const u32 width = static_cast<u32>(source_width);
+    const u32 height = static_cast<u32>(source_height);
     const VkDeviceSize size = static_cast<VkDeviceSize>(width) * height * 4;
 
     VkBuffer staging = VK_NULL_HANDLE;
@@ -252,11 +336,10 @@ void UploadVulkanAvatar() {
         if (staging_memory)
             vkFreeMemory(s_vk.device, staging_memory, nullptr);
         if (failure) {
-            tico_log("%s avatar upload failed: %s\n", TAG, failure);
-            DestroyVulkanAvatar();
-            // do not retry every frame
-            s_avatar_rgba.clear();
+            tico_log("%s texture upload failed: %s\n", TAG, failure);
+            DestroyVulkanTexture(texture);
         }
+        return 0ull;
     };
 
     VkBufferCreateInfo buffer_info{};
@@ -279,7 +362,7 @@ void UploadVulkanAvatar() {
         vkBindBufferMemory(s_vk.device, staging, staging_memory, 0) != VK_SUCCESS ||
         vkMapMemory(s_vk.device, staging_memory, 0, size, 0, &mapped) != VK_SUCCESS)
         return finish("staging memory");
-    std::memcpy(mapped, s_avatar_rgba.data(), static_cast<std::size_t>(size));
+    std::memcpy(mapped, rgba, static_cast<std::size_t>(size));
     vkUnmapMemory(s_vk.device, staging_memory);
 
     VkImageCreateInfo image_info{};
@@ -293,26 +376,26 @@ void UploadVulkanAvatar() {
     image_info.tiling = VK_IMAGE_TILING_OPTIMAL;
     image_info.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
     image_info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    if (vkCreateImage(s_vk.device, &image_info, nullptr, &s_vk.avatar_image) != VK_SUCCESS)
+    if (vkCreateImage(s_vk.device, &image_info, nullptr, &texture.image) != VK_SUCCESS)
         return finish("image");
-    vkGetImageMemoryRequirements(s_vk.device, s_vk.avatar_image, &requirements);
+    vkGetImageMemoryRequirements(s_vk.device, texture.image, &requirements);
     alloc.allocationSize = requirements.size;
     if (!FindMemoryType(requirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
                         alloc.memoryTypeIndex))
         return finish("no device-local memory");
-    if (vkAllocateMemory(s_vk.device, &alloc, nullptr, &s_vk.avatar_memory) != VK_SUCCESS ||
-        vkBindImageMemory(s_vk.device, s_vk.avatar_image, s_vk.avatar_memory, 0) != VK_SUCCESS)
+    if (vkAllocateMemory(s_vk.device, &alloc, nullptr, &texture.memory) != VK_SUCCESS ||
+        vkBindImageMemory(s_vk.device, texture.image, texture.memory, 0) != VK_SUCCESS)
         return finish("image memory");
 
     VkImageViewCreateInfo view_info{};
     view_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-    view_info.image = s_vk.avatar_image;
+    view_info.image = texture.image;
     view_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
     view_info.format = VK_FORMAT_R8G8B8A8_UNORM;
     view_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     view_info.subresourceRange.levelCount = 1;
     view_info.subresourceRange.layerCount = 1;
-    if (vkCreateImageView(s_vk.device, &view_info, nullptr, &s_vk.avatar_view) != VK_SUCCESS)
+    if (vkCreateImageView(s_vk.device, &view_info, nullptr, &texture.view) != VK_SUCCESS)
         return finish("image view");
 
     VkSamplerCreateInfo sampler_info{};
@@ -322,7 +405,7 @@ void UploadVulkanAvatar() {
     sampler_info.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
     sampler_info.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
     sampler_info.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-    if (vkCreateSampler(s_vk.device, &sampler_info, nullptr, &s_vk.avatar_sampler) != VK_SUCCESS)
+    if (vkCreateSampler(s_vk.device, &sampler_info, nullptr, &texture.sampler) != VK_SUCCESS)
         return finish("sampler");
 
     VkCommandBufferAllocateInfo command_info{};
@@ -336,16 +419,16 @@ void UploadVulkanAvatar() {
     begin.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     begin.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
     vkBeginCommandBuffer(command, &begin);
-    TransitionImage(command, s_vk.avatar_image, VK_IMAGE_LAYOUT_UNDEFINED,
+    TransitionImage(command, texture.image, VK_IMAGE_LAYOUT_UNDEFINED,
                     VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 0, VK_ACCESS_TRANSFER_WRITE_BIT,
                     VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT);
     VkBufferImageCopy region{};
     region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     region.imageSubresource.layerCount = 1;
     region.imageExtent = {width, height, 1};
-    vkCmdCopyBufferToImage(command, staging, s_vk.avatar_image,
+    vkCmdCopyBufferToImage(command, staging, texture.image,
                            VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
-    TransitionImage(command, s_vk.avatar_image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+    TransitionImage(command, texture.image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                     VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_ACCESS_TRANSFER_WRITE_BIT,
                     VK_ACCESS_SHADER_READ_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
                     VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT);
@@ -359,11 +442,75 @@ void UploadVulkanAvatar() {
         return finish("queue submit");
     vkQueueWaitIdle(s_vk.queue);
 
-    s_vk.avatar_descriptor = ImGui_ImplVulkan_AddTexture(
-        s_vk.avatar_sampler, s_vk.avatar_view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-    OverlayUI::SetAvatarTextureId(
-        static_cast<unsigned long long>(reinterpret_cast<std::uintptr_t>(s_vk.avatar_descriptor)));
+    texture.descriptor = ImGui_ImplVulkan_AddTexture(
+        texture.sampler, texture.view, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
     finish(nullptr);
+    return static_cast<unsigned long long>(reinterpret_cast<std::uintptr_t>(texture.descriptor));
+}
+
+// A decoded image, uploaded once; the pixels are dropped either way so a
+// failed upload is not retried every frame.
+unsigned long long UploadVulkanTexture(DecodedImage& source, VulkanTexture& texture) {
+    if (source.rgba.empty() || texture.descriptor) {
+        return 0;
+    }
+    const unsigned long long id =
+        UploadVulkanPixels(source.rgba.data(), source.width, source.height, texture);
+    source.rgba.clear();
+    return id;
+}
+
+unsigned long long VulkanId(const VulkanTexture& texture) {
+    return static_cast<unsigned long long>(reinterpret_cast<std::uintptr_t>(texture.descriptor));
+}
+
+void UploadVulkanTextures() {
+    if (const unsigned long long id = UploadVulkanTexture(s_avatar, s_vk_avatar)) {
+        OverlayUI::SetAvatarTextureId(id);
+    }
+    if (const unsigned long long id = UploadVulkanTexture(s_border, s_vk_border)) {
+        OverlayUI::SetBorderTextureId(id);
+    }
+    bool icons = false;
+    for (std::size_t i = 0; i < s_icons.size(); ++i) {
+        icons |= UploadVulkanTexture(s_icons[i], s_vk_icons[i]) != 0;
+    }
+    if (icons) {
+        OverlayUI::SetSidebarIconTextures(VulkanId(s_vk_icons[0]), VulkanId(s_vk_icons[1]),
+                                          VulkanId(s_vk_icons[2]));
+    }
+}
+
+void DestroyRetiredVulkanTextures() {
+    if (s_retired_textures.empty()) {
+        return;
+    }
+    // the frames that drew them may still be in flight
+    vkQueueWaitIdle(s_vk.queue);
+    for (const unsigned long long id : s_retired_textures) {
+        const auto it = s_vk_dynamic.find(id);
+        if (it != s_vk_dynamic.end()) {
+            DestroyVulkanTexture(it->second);
+            s_vk_dynamic.erase(it);
+        }
+    }
+    s_retired_textures.clear();
+}
+
+void DestroyVulkanTextures() {
+    DestroyVulkanTexture(s_vk_avatar);
+    DestroyVulkanTexture(s_vk_border);
+    for (VulkanTexture& icon : s_vk_icons) {
+        DestroyVulkanTexture(icon);
+    }
+    for (auto& [id, texture] : s_vk_dynamic) {
+        DestroyVulkanTexture(texture);
+    }
+    s_vk_dynamic.clear();
+    s_retired_textures.clear();
+    OverlayUI::SetAvatarTextureId(0);
+    OverlayUI::SetBorderTextureId(0);
+    OverlayUI::SetSidebarIconTextures(0, 0, 0);
 }
 
 void DestroyVulkanBackend() {
@@ -371,7 +518,7 @@ void DestroyVulkanBackend() {
         vkDeviceWaitIdle(s_vk.device);
     }
     if (s_vk.ready) {
-        DestroyVulkanAvatar();
+        DestroyVulkanTextures();
         ImGui_ImplVulkan_Shutdown();
     }
     if (s_vk.descriptor_pool)
@@ -423,11 +570,11 @@ bool EnsureVulkanBackend(const DrasticVkOverlayContext& context) {
     init.QueueFamily = context.queue_family;
     init.Queue = context.queue;
     init.DescriptorPool = s_vk.descriptor_pool;
-    init.RenderPass = context.render_pass;
     init.MinImageCount = image_count;
     init.ImageCount = image_count;
-    init.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
-    init.Subpass = 0;
+    init.PipelineInfoMain.RenderPass = context.render_pass;
+    init.PipelineInfoMain.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+    init.PipelineInfoMain.Subpass = 0;
     if (!ImGui_ImplVulkan_Init(&init)) {
         tico_log("%s ImGui_ImplVulkan_Init failed\n", TAG);
         DestroyVulkanBackend();
@@ -449,7 +596,8 @@ void VulkanHook(const DrasticVkOverlayContext* context) {
     if (!EnsureVulkanBackend(*context)) {
         return;
     }
-    UploadVulkanAvatar();
+    DestroyRetiredVulkanTextures();
+    UploadVulkanTextures();
     ImGui_ImplVulkan_NewFrame();
     if (BuildFrame(static_cast<float>(context->width), static_cast<float>(context->height))) {
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), context->command_buffer);
@@ -461,20 +609,58 @@ void VulkanHook(const DrasticVkOverlayContext* context) {
 
 bool s_gl_ready = false;
 GLuint s_gl_avatar = 0;
+GLuint s_gl_border = 0;
+std::array<GLuint, 3> s_gl_icons = {};
+std::vector<GLuint> s_gl_dynamic;
 
-void UploadGlAvatar() {
-    if (s_avatar_rgba.empty() || s_gl_avatar) {
-        return;
-    }
-    glGenTextures(1, &s_gl_avatar);
-    glBindTexture(GL_TEXTURE_2D, s_gl_avatar);
+GLuint UploadGlPixels(const unsigned char* rgba, int width, int height) {
+    GLuint texture = 0;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, s_avatar_width, s_avatar_height, 0, GL_RGBA,
-                 GL_UNSIGNED_BYTE, s_avatar_rgba.data());
-    OverlayUI::SetAvatarTextureId(static_cast<unsigned long long>(s_gl_avatar));
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, rgba);
+    return texture;
+}
+
+// Returns the texture's ImGui id, or 0 when there was nothing to upload.
+unsigned long long UploadGlTexture(DecodedImage& source, GLuint& texture) {
+    if (source.rgba.empty() || texture) {
+        return 0;
+    }
+    texture = UploadGlPixels(source.rgba.data(), source.width, source.height);
+    source.rgba.clear();
+    return static_cast<unsigned long long>(texture);
+}
+
+void UploadGlTextures() {
+    if (const unsigned long long id = UploadGlTexture(s_avatar, s_gl_avatar)) {
+        OverlayUI::SetAvatarTextureId(id);
+    }
+    if (const unsigned long long id = UploadGlTexture(s_border, s_gl_border)) {
+        OverlayUI::SetBorderTextureId(id);
+    }
+    bool icons = false;
+    for (std::size_t i = 0; i < s_icons.size(); ++i) {
+        icons |= UploadGlTexture(s_icons[i], s_gl_icons[i]) != 0;
+    }
+    if (icons) {
+        OverlayUI::SetSidebarIconTextures(s_gl_icons[0], s_gl_icons[1], s_gl_icons[2]);
+    }
+}
+
+void DestroyRetiredGlTextures() {
+    for (const unsigned long long id : s_retired_textures) {
+        GLuint texture = static_cast<GLuint>(id);
+        const auto it = std::find(s_gl_dynamic.begin(), s_gl_dynamic.end(), texture);
+        if (it != s_gl_dynamic.end()) {
+            glDeleteTextures(1, &texture);
+            s_gl_dynamic.erase(it);
+        }
+    }
+    s_retired_textures.clear();
 }
 
 void GlHook(int width, int height) {
@@ -493,7 +679,8 @@ void GlHook(int width, int height) {
         s_gl_ready = true;
         tico_log("%s OpenGL backend ready\n", TAG);
     }
-    UploadGlAvatar();
+    DestroyRetiredGlTextures();
+    UploadGlTextures();
     ImGui_ImplOpenGL3_NewFrame();
     if (BuildFrame(static_cast<float>(width), static_cast<float>(height))) {
         glViewport(0, 0, width, height);
@@ -502,11 +689,21 @@ void GlHook(int width, int height) {
 }
 
 void DestroyGlBackend() {
-    if (s_gl_avatar) {
-        glDeleteTextures(1, &s_gl_avatar);
-        s_gl_avatar = 0;
-        OverlayUI::SetAvatarTextureId(0);
+    for (GLuint* texture : {&s_gl_avatar, &s_gl_border, &s_gl_icons[0], &s_gl_icons[1],
+                            &s_gl_icons[2]}) {
+        if (*texture) {
+            glDeleteTextures(1, texture);
+            *texture = 0;
+        }
     }
+    for (GLuint texture : s_gl_dynamic) {
+        glDeleteTextures(1, &texture);
+    }
+    s_gl_dynamic.clear();
+    s_retired_textures.clear();
+    OverlayUI::SetAvatarTextureId(0);
+    OverlayUI::SetBorderTextureId(0);
+    OverlayUI::SetSidebarIconTextures(0, 0, 0);
     if (s_gl_ready) {
         ImGui_ImplOpenGL3_Shutdown();
         s_gl_ready = false;
@@ -542,6 +739,8 @@ bool Init(bool vulkan) {
         s_psm_initialized = true;
     }
     DecodeAvatarOnce();
+    DecodeBorder();
+    DecodeSidebarIcons();
 
     s_vulkan = vulkan;
     s_visible = false;
@@ -594,6 +793,39 @@ void FeedNav(const OverlayUI::NavInput& nav) {
     s_nav.right |= nav.right;
     s_nav.accept |= nav.accept;
     s_nav.cancel |= nav.cancel;
+}
+
+void FeedTouch(const OverlayUI::TouchInput& touch) {
+    OverlayUI::FeedTouch(touch);
+}
+
+unsigned long long CreateTexture(const unsigned char* rgba, int width, int height) {
+    if (!s_initialized || !rgba || width <= 0 || height <= 0) {
+        return 0;
+    }
+    if (s_vulkan) {
+        if (!s_vk.ready) {
+            return 0;
+        }
+        VulkanTexture texture;
+        const unsigned long long id = UploadVulkanPixels(rgba, width, height, texture);
+        if (id) {
+            s_vk_dynamic[id] = texture;
+        }
+        return id;
+    }
+    if (!s_gl_ready) {
+        return 0;
+    }
+    const GLuint texture = UploadGlPixels(rgba, width, height);
+    s_gl_dynamic.push_back(texture);
+    return texture;
+}
+
+void DestroyTexture(unsigned long long texture) {
+    if (texture) {
+        s_retired_textures.push_back(texture);
+    }
 }
 
 OverlayUI::Action ConsumeAction() {

@@ -21,6 +21,15 @@ bool IsVisible();
 // Edge-triggered menu navigation for the next drawn frame.
 void FeedNav(const OverlayUI::NavInput& nav);
 
+// The touchscreen, for the menu.
+void FeedTouch(const OverlayUI::TouchInput& touch);
+
+// A texture from RGBA pixels, for ImGui to draw (0 on failure). Only while the
+// overlay draws: the Save/Load State picture callback runs then. Textures are
+// destroyed at the start of the next drawn frame.
+unsigned long long CreateTexture(const unsigned char* rgba, int width, int height);
+void DestroyTexture(unsigned long long texture);
+
 // The action the menu returned while drawing, once; None when there was none.
 OverlayUI::Action ConsumeAction();
 

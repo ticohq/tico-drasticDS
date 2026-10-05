@@ -821,13 +821,34 @@ typedef struct {
   int suspended;
   int resume_core;
   int resumed;
+  /* the game has shown its first frames, so there is something to save */
+  int started;
 } AppletLifecycle;
+
+#ifdef DRASTIC_TICO
+/* Saves the game into the auto slot, presenting frames meanwhile as the menu
+ * does while it is open: the core writes the state on its own thread. */
+static void tico_auto_save(AppletLifecycle *lifecycle) {
+  if (!tico_menu_begin_auto_save(lifecycle->menu)) return;
+  while (!tico_menu_auto_save_done(lifecycle->menu)) {
+    drastic_renderer_present(lifecycle->runtime, core.renderFrame, fake_env,
+                             lifecycle->clazz, overlay_frame(), false);
+    svcSleepThread(16 * 1000 * 1000LL);
+  }
+}
+#endif
 
 static void suspend_emulation(AppletLifecycle *lifecycle) {
   if (!lifecycle || lifecycle->suspended) return;
   lifecycle->suspended = 1;
   drastic_input_sampler_update_runtime(
       lifecycle->input_sampler, lifecycle->runtime, false);
+#ifdef DRASTIC_TICO
+  /* HOME may be the last chance: the game can be closed from there */
+  if (!__atomic_load_n(&lifecycle->game->finished, __ATOMIC_ACQUIRE) &&
+      lifecycle->started)
+    tico_auto_save(lifecycle);
+#endif
   lifecycle->resume_core =
       !__atomic_load_n(&lifecycle->game->finished, __ATOMIC_ACQUIRE) &&
       !drastic_menu_is_open(lifecycle->menu);
@@ -1051,6 +1072,7 @@ int main(void) {
   if (!menu) fatal_error("Could not allocate the in-game menu.");
 #ifdef DRASTIC_TICO
   tico_menu_set_toggle_combo(menu, controls.hotkeys.menu);
+  tico_menu_set_core_rom(menu, prepared_rom_path);
 #endif
 
   CoreGameThread game = {
@@ -1173,6 +1195,12 @@ int main(void) {
     /* Complete the waitScreen/renderFrame pair before pauseSystem() opens the
      * menu; the request is local to this frame and needs no persistent state. */
     if (open_menu) drastic_menu_open(menu);
+#ifdef DRASTIC_TICO
+    if (boot_frames == 1) {
+      lifecycle.started = 1;
+      tico_menu_offer_resume(menu);
+    }
+#endif
     boot_frames++;
   }
   if (lifecycle_hooked) {
@@ -1185,11 +1213,18 @@ int main(void) {
     fatal_error("Drastic could not start:\n%s", runtime.rom_path);
   prefs_set_int("Wrapper/StateSlot", controls.state_slot);
   prefs_save();
+#ifdef DRASTIC_TICO
+  const bool restart = tico_menu_take_restart_request(menu);
+  if (controls.exit_requested && lifecycle.started &&
+      !__atomic_load_n(&game.finished, __ATOMIC_ACQUIRE))
+    tico_auto_save(&lifecycle);
+#endif
 
   /* Match NetherSX2's chainload ordering: schedule the launcher while the
    * libnx environment is still intact, before core/JIT/runtime teardown. */
 #ifdef DRASTIC_TICO
-  if (controls.exit_requested) tico_queue_return();
+  if (controls.exit_requested && !(restart && tico_queue_restart()))
+    tico_queue_return();
 #else
   if (controls.exit_requested && envHasNextLoad() && runtime.launcher_path[0])
     envSetNextLoad(runtime.launcher_path, runtime.launcher_path);

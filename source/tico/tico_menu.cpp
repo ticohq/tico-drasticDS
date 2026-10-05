@@ -4,11 +4,14 @@
 
 #include <switch.h>
 
+#include <array>
 #include <cctype>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
+#include <ctime>
 #include <string>
+#include <sys/stat.h>
 #include <vector>
 
 extern "C" {
@@ -29,6 +32,7 @@ extern "C" {
 #include "tico/overlay/overlay_ui.h"
 #include "tico/overlay/tico_config.h"
 #include "tico/overlay/translation_manager.h"
+#include "tico/TicoSafeFile.h"
 
 namespace OverlayUI = SwitchFrontend::OverlayUI;
 namespace ImGuiOverlay = SwitchFrontend::ImGuiOverlay;
@@ -36,9 +40,19 @@ namespace TicoConfig = SwitchFrontend::TicoConfig;
 
 namespace {
 
-constexpr int kSnapshotPixels = 256 * 192;
-// the overlay's save-state slots 1..4 are Drastic's slots 0..3
-constexpr int kOverlaySlotCount = 4;
+constexpr int kSnapshotWidth = 256;
+constexpr int kSnapshotHeight = 192;
+constexpr int kSnapshotPixels = kSnapshotWidth * kSnapshotHeight;
+// the overlay's save-state slots 1..6 are Drastic's slots 0..5; the sixth is
+// the auto save (OverlayUI::kAutoStateSlot)
+constexpr int kOverlaySlotCount = OverlayUI::kAutoStateSlot;
+constexpr int kAutoSlot = OverlayUI::kAutoStateSlot - 1;
+// cartridge saves keep the last few sessions, each state slot the state it
+// held before being saved over
+constexpr int kSaveBackups = 3;
+constexpr int kStateBackups = 1;
+// how long closing the game waits for the auto save
+constexpr u64 kAutoSaveTimeoutMs = 5000;
 // the cheat list's first row adds a custom cheat
 constexpr int kAddCheatRow = -1;
 constexpr u64 kRepeatDelayMs = 400;
@@ -87,6 +101,39 @@ std::string TrFormat(const char* key, T value) {
     char text[256];
     std::snprintf(text, sizeof(text), format.c_str(), value);
     return text;
+}
+
+u64 NowMs() {
+    return armTicksToNs(armGetSystemTick()) / 1000000;
+}
+
+// Drastic's snapshot pixels: RGB565 from some builds, ARGB from others.
+void SnapshotToRgba(const int32_t* pixels, unsigned char* out) {
+    bool argb = false;
+    for (int i = 0; i < kSnapshotPixels; i += 257) {
+        const uint32_t pixel = static_cast<uint32_t>(pixels[i]);
+        if ((pixel & 0xffff0000u) && pixel != 0xffffffffu) {
+            argb = true;
+            break;
+        }
+    }
+    for (int i = 0; i < kSnapshotPixels; i++) {
+        const uint32_t pixel = static_cast<uint32_t>(pixels[i]);
+        unsigned char* rgba = out + static_cast<std::size_t>(i) * 4;
+        if (argb) {
+            rgba[0] = static_cast<unsigned char>(pixel >> 16);
+            rgba[1] = static_cast<unsigned char>(pixel >> 8);
+            rgba[2] = static_cast<unsigned char>(pixel);
+        } else {
+            const uint32_t r = (pixel >> 11) & 0x1f;
+            const uint32_t g = (pixel >> 5) & 0x3f;
+            const uint32_t b = pixel & 0x1f;
+            rgba[0] = static_cast<unsigned char>((r << 3) | (r >> 2));
+            rgba[1] = static_cast<unsigned char>((g << 2) | (g >> 4));
+            rgba[2] = static_cast<unsigned char>((b << 3) | (b >> 2));
+        }
+        rgba[3] = 255;
+    }
 }
 
 std::string JavaBytes(void* array) {
@@ -170,6 +217,18 @@ struct TicoMenu {
 
     void* snapshot_top_array = nullptr;
     void* snapshot_bottom_array = nullptr;
+    // the Save/Load State pictures, one per slot
+    std::array<unsigned long long, kOverlaySlotCount> slot_pictures{};
+
+    // the name Drastic gives this game's files (<name>.dsv, <name>_<slot>.dss)
+    std::string file_stem;
+    bool restart_requested = false;
+    bool resume_offered = false;
+    bool auto_save_pending = false;
+    bool auto_save_existed = false;
+    bool auto_save_saw_saving = false;
+    time_t auto_save_old_time = 0;
+    u64 auto_save_deadline = 0;
 
     std::vector<Cheat> cheats;
     std::vector<int> folder_single_select;
@@ -198,7 +257,16 @@ struct TicoMenu {
     // ---------------------------------------------------------------------
     // Save states
 
-    bool SlotOccupied(int slot) {
+    std::string StatePath(int slot) const {
+        return std::string(SAVESTATES_DIR) + "/" + file_stem + "_" + std::to_string(slot) + ".dss";
+    }
+
+    std::string SavePath() const {
+        return std::string(BACKUPS_DIR) + "/" + file_stem + ".dsv";
+    }
+
+    // Reads a slot's snapshot into the snapshot arrays; false when it is empty.
+    bool ReadSnapshot(int slot) {
         if (!core.get_snapshots || !snapshot_top_array || !snapshot_bottom_array)
             return false;
         int32_t* top = jni_int_array_data(snapshot_top_array);
@@ -215,17 +283,120 @@ struct TicoMenu {
         return false;
     }
 
+    bool SlotOccupied(int slot) {
+        return ReadSnapshot(slot);
+    }
+
+    // The picture Drastic keeps in the state (both screens, stacked) and when
+    // the state was saved. Runs while the overlay draws.
+    OverlayUI::SlotPreview SlotPreview(int overlay_slot) {
+        OverlayUI::SlotPreview preview;
+        if (overlay_slot < 1 || overlay_slot > kOverlaySlotCount)
+            return preview;
+        unsigned long long& picture = slot_pictures[static_cast<std::size_t>(overlay_slot - 1)];
+        ImGuiOverlay::DestroyTexture(picture); // the slot may have been saved again
+        picture = 0;
+        const int slot = overlay_slot - 1;
+        if (!ReadSnapshot(slot))
+            return preview;
+        struct stat status;
+        if (stat(StatePath(slot).c_str(), &status) == 0) {
+            char when[32];
+            std::strftime(when, sizeof(when), "%Y-%m-%d %H:%M", std::localtime(&status.st_mtime));
+            preview.saved_at = when;
+        } else {
+            preview.saved_at = " "; // in use, but the file is named differently
+        }
+        std::vector<unsigned char> rgba(static_cast<std::size_t>(kSnapshotPixels) * 2 * 4);
+        SnapshotToRgba(jni_int_array_data(snapshot_top_array), rgba.data());
+        SnapshotToRgba(jni_int_array_data(snapshot_bottom_array),
+                       rgba.data() + static_cast<std::size_t>(kSnapshotPixels) * 4);
+        picture = ImGuiOverlay::CreateTexture(rgba.data(), kSnapshotWidth, kSnapshotHeight * 2);
+        preview.texture = picture;
+        preview.aspect = static_cast<float>(kSnapshotWidth) / (kSnapshotHeight * 2);
+        return preview;
+    }
+
+    bool RequestSave(int slot) {
+        // the state it replaces is kept, in case this one is a mistake
+        if (!file_stem.empty())
+            TicoSafeFile::BackupCopy(StatePath(slot), kStateBackups);
+        return core.save_state && core.save_state(core.env, core.clazz, slot, 1);
+    }
+
     void SaveState(int slot) {
-        const bool requested =
-            core.save_state && core.save_state(core.env, core.clazz, slot, 1);
+        const bool requested = RequestSave(slot);
         OverlayUI::ShowToast(
             TrFormat(requested ? "drastic_saving_state" : "drastic_save_failed", slot + 1));
     }
 
     void LoadState(int slot) {
         const bool loaded = core.load_state && core.load_state(core.env, core.clazz, slot);
-        OverlayUI::ShowToast(
-            TrFormat(loaded ? "drastic_state_loaded" : "drastic_load_failed", slot + 1));
+        if (loaded && slot == kAutoSlot)
+            OverlayUI::ShowToast(Tr("emulator_auto_loaded"));
+        else
+            OverlayUI::ShowToast(
+                TrFormat(loaded ? "drastic_state_loaded" : "drastic_load_failed", slot + 1));
+    }
+
+    // Asks Drastic to save the game as it is into the auto slot. It saves on
+    // its own thread: AutoSaveDone says when the file is written.
+    bool BeginAutoSave() {
+        auto_save_pending = false;
+        if (file_stem.empty() || !core.save_state)
+            return false;
+        struct stat before {};
+        auto_save_existed = stat(StatePath(kAutoSlot).c_str(), &before) == 0;
+        auto_save_old_time = before.st_mtime;
+        auto_save_saw_saving = false;
+        if (!RequestSave(kAutoSlot))
+            return false;
+        auto_save_pending = true;
+        auto_save_deadline = NowMs() + kAutoSaveTimeoutMs;
+        return true;
+    }
+
+    bool AutoSaveDone() {
+        if (!auto_save_pending)
+            return true;
+        const bool saving = core.is_saving && core.is_saving(core.env, core.clazz);
+        auto_save_saw_saving |= saving;
+        struct stat after {};
+        // BackupCopy left the old file in place, so look for a newer one
+        const bool written = !saving && stat(StatePath(kAutoSlot).c_str(), &after) == 0 &&
+                             (!auto_save_existed || after.st_mtime != auto_save_old_time ||
+                              auto_save_saw_saving);
+        if (written || NowMs() >= auto_save_deadline)
+            auto_save_pending = false;
+        return !auto_save_pending;
+    }
+
+    // A game with an auto save offers to continue from it, as tico's General >
+    // Continue Last Game says, unless this launch is a Restart.
+    void OfferResume() {
+        if (resume_offered)
+            return;
+        resume_offered = true;
+        if (tico_was_restarted() || !SlotOccupied(kAutoSlot))
+            return;
+        const std::string mode = TicoConfig::ResumeOnLaunch();
+        if (mode == "never")
+            return;
+        if (mode == "always") {
+            LoadState(kAutoSlot);
+            return;
+        }
+        Open();
+        OverlayUI::ShowResumePrompt();
+    }
+
+    void Open() {
+        if (open)
+            return;
+        open = true;
+        repeat_button = 0;
+        Pause(true);
+        ImGuiOverlay::SetVisible(true);
     }
 
     // ---------------------------------------------------------------------
@@ -378,6 +549,9 @@ struct TicoMenu {
     // Brings the running game in line with the settings just changed in the
     // menu. Settings only read at launch are left for the next start.
     void ApplySettings() {
+        // per-game settings may have been saved or deleted: the host reads
+        // the values that now apply from its preference store
+        TicoConfig::ApplyToPrefs();
         DrasticRuntimeConfig fresh;
         drastic_config_load(&fresh);
         DrasticRuntimeConfig& live = *config;
@@ -495,6 +669,13 @@ struct TicoMenu {
                 core.reset_ds(core.env, core.clazz);
             Close(true);
             return;
+        case Action::Restart:
+            // the game is launched again from disk; like Exit, the core stays
+            // paused while the process winds down
+            restart_requested = true;
+            exit_requested = true;
+            Close(false);
+            return;
         case Action::EditText:
             EditText();
             return;
@@ -517,7 +698,7 @@ struct TicoMenu {
     u64 Repeated(u64 held, u64 pressed) {
         constexpr u64 kDirections = HidNpadButton_AnyUp | HidNpadButton_AnyDown |
                                     HidNpadButton_AnyLeft | HidNpadButton_AnyRight;
-        const u64 now = armTicksToNs(armGetSystemTick()) / 1000000;
+        const u64 now = NowMs();
         if (pressed & kDirections) {
             repeat_button = pressed & kDirections;
             repeat_at = now + kRepeatDelayMs;
@@ -559,6 +740,8 @@ const char* tico_nds_states_dir(void) {
 }
 
 void tico_menu_load_config(void) {
+    // a game's own settings are read over the core's
+    TicoConfig::SetGame(tico_rom_path());
     TicoConfig::ApplyToPrefs();
     OverlayUI::ReloadSettings();
 }
@@ -578,6 +761,7 @@ TicoMenu* tico_menu_create(DrasticRuntimeConfig* config, const DrasticMenuCore* 
     OverlayUI::SetGameTitle(tico_display_title());
     OverlayUI::SetSlotOccupiedCallback(
         [menu](int slot) { return slot >= 1 && slot <= kOverlaySlotCount && menu->SlotOccupied(slot - 1); });
+    OverlayUI::SetSlotPreviewCallback([menu](int slot) { return menu->SlotPreview(slot); });
     OverlayUI::SetCheatCallbacks([menu] { return menu->CheatEntries(); },
                                  [menu](int index) { return menu->ToggleCheat(index); });
     ImGuiOverlay::Init(drastic_renderer_is_vulkan());
@@ -589,6 +773,7 @@ void tico_menu_destroy(TicoMenu* menu) {
         return;
     ImGuiOverlay::Shutdown();
     OverlayUI::SetSlotOccupiedCallback(nullptr);
+    OverlayUI::SetSlotPreviewCallback(nullptr);
     OverlayUI::SetCheatCallbacks(nullptr, nullptr);
     jni_release_int_array(menu->snapshot_top_array);
     jni_release_int_array(menu->snapshot_bottom_array);
@@ -596,12 +781,43 @@ void tico_menu_destroy(TicoMenu* menu) {
 }
 
 void tico_menu_open(TicoMenu* menu) {
-    if (!menu || menu->open)
+    if (menu)
+        menu->Open();
+}
+
+void tico_menu_set_core_rom(TicoMenu* menu, const char* core_rom_path) {
+    if (!menu || !core_rom_path)
         return;
-    menu->open = true;
-    menu->repeat_button = 0;
-    menu->Pause(true);
-    ImGuiOverlay::SetVisible(true);
+    std::string name = core_rom_path;
+    const std::size_t slash = name.find_last_of('/');
+    if (slash != std::string::npos)
+        name = name.substr(slash + 1);
+    const std::size_t dot = name.find_last_of('.');
+    if (dot != std::string::npos)
+        name = name.substr(0, dot);
+    menu->file_stem = name;
+    // the core writes the cartridge save in place: keep the last sessions'
+    TicoSafeFile::BackupCopy(menu->SavePath(), kSaveBackups);
+}
+
+void tico_menu_offer_resume(TicoMenu* menu) {
+    if (menu)
+        menu->OfferResume();
+}
+
+bool tico_menu_begin_auto_save(TicoMenu* menu) {
+    return menu && menu->BeginAutoSave();
+}
+
+bool tico_menu_auto_save_done(TicoMenu* menu) {
+    return !menu || menu->AutoSaveDone();
+}
+
+bool tico_menu_take_restart_request(TicoMenu* menu) {
+    if (!menu || !menu->restart_requested)
+        return false;
+    menu->restart_requested = false;
+    return true;
 }
 
 bool tico_menu_is_open(const TicoMenu* menu) {
@@ -625,6 +841,15 @@ void tico_menu_update(TicoMenu* menu, u64 held, u64 pressed, HidAnalogStickState
         (pressed & menu->toggle_combo)) {
         menu->Close(true);
         return;
+    }
+
+    HidTouchScreenState touch{};
+    if (hidGetTouchScreenStates(&touch, 1)) {
+        ImGuiOverlay::FeedTouch({
+            .down = touch.count > 0,
+            .x = touch.count > 0 ? static_cast<float>(touch.touches[0].x) : 0.0f,
+            .y = touch.count > 0 ? static_cast<float>(touch.touches[0].y) : 0.0f,
+        });
     }
 
     pressed = menu->Repeated(held, pressed);

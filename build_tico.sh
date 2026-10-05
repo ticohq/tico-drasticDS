@@ -69,6 +69,11 @@ python3 "$APP/tools/patch_game_database.py" \
   --output "$WORK/romfs/res/game_database.xml"
 # the tico overlay's fonts and translations
 cp -R "$APP/source/tico/fonts" "$APP/source/tico/lang" "$WORK/romfs/"
+# the selection border strips, one per tico Animated Border tint
+mkdir -p "$WORK/romfs/assets"
+cp -R "$APP/source/tico/assets/border" "$WORK/romfs/assets/"
+# the quick menu sidebar's icons
+cp -R "$APP/source/tico/assets/icons" "$WORK/romfs/assets/"
 # the overlay builds its settings menu from the module's own definition
 mkdir -p "$WORK/romfs/module"
 cp -f "$MODULE_SRC/settings.json" "$WORK/romfs/module/"
@@ -89,8 +94,8 @@ make -C "$APP" -j"$JOBS" TICO=1 ELF_LIB= \
 # Module bundle
 #
 # A module is a directory, not a bare NRO: tico discovers it by reading
-# module.json, and everything the module owns -- its settings definition and
-# gamelist -- travels with it. The NRO sits beside module.json, so the bundle
+# module.json, and everything the module owns -- its settings definition, the
+# strings that label it, and gamelist -- travels with it. The NRO sits beside module.json, so the bundle
 # extracts straight into sdmc:/tico/modules/<id>/.
 #---------------------------------------------------------------------------------
 echo "==== tico module bundle ===="
@@ -99,6 +104,8 @@ MODULE_OUT="$WORK/module/$MODULE_ID"
 mkdir -p "$MODULE_OUT"
 cp -r "$MODULE_SRC/." "$MODULE_OUT/"
 cp -f "$APP/tico-drastic.nro" "$MODULE_OUT/"
+# tico merges these into its own strings to label the settings screen
+cp -R "$APP/source/tico/lang" "$MODULE_OUT/"
 # tico prefers .json.gz when resolving a gamelist
 if [[ -d "$MODULE_OUT/gamelists" ]]; then
   gzip -f -9 "$MODULE_OUT"/gamelists/*.json

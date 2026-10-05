@@ -29,6 +29,19 @@ void tico_menu_load_config(void);
 TicoMenu *tico_menu_create(DrasticRuntimeConfig *config,
                            const DrasticMenuCore *core, int *state_slot);
 void tico_menu_destroy(TicoMenu *menu);
+/* Names the ROM file the core was given (a zip's unpacked copy), which names
+ * the game's save and states, and backs up the cartridge save. */
+void tico_menu_set_core_rom(TicoMenu *menu, const char *core_rom_path);
+/* Offers to continue from the auto save; call once the game shows. */
+void tico_menu_offer_resume(TicoMenu *menu);
+/* Asks the core to save the game into the auto slot; call before the game
+ * closes (exit, restart, HOME), then keep presenting frames until
+ * tico_menu_auto_save_done, as the core finishes the save on its own thread
+ * (it gives up after a few seconds). */
+bool tico_menu_begin_auto_save(TicoMenu *menu);
+bool tico_menu_auto_save_done(TicoMenu *menu);
+/* True once after Restart was chosen (with the exit request). */
+bool tico_menu_take_restart_request(TicoMenu *menu);
 void tico_menu_open(TicoMenu *menu);
 bool tico_menu_is_open(const TicoMenu *menu);
 /* Feeds the pad to the open menu and runs what was chosen on the last frame. */
