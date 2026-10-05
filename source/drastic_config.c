@@ -89,16 +89,37 @@ uint64_t drastic_config_build_core_config(void) {
   return value;
 }
 
-static DrasticLayoutMode read_layout(void) {
-  const char *layout = prefs_get_string("Wrapper/Layout", "horizontal");
-  if (!strcmp(layout, "vertical")) return DRASTIC_LAYOUT_VERTICAL;
-  if (!strcmp(layout, "horizontal")) return DRASTIC_LAYOUT_HORIZONTAL;
-  if (!strcmp(layout, "top")) return DRASTIC_LAYOUT_TOP_ONLY;
-  if (!strcmp(layout, "bottom")) return DRASTIC_LAYOUT_BOTTOM_ONLY;
-  if (!strcmp(layout, "hybrid_top")) return DRASTIC_LAYOUT_HYBRID_TOP;
-  if (!strcmp(layout, "hybrid_bottom")) return DRASTIC_LAYOUT_HYBRID_BOTTOM;
-  if (!strcmp(layout, "custom")) return DRASTIC_LAYOUT_CUSTOM;
+static const char *const layout_names[DRASTIC_LAYOUT_COUNT] = {
+  "vertical", "horizontal", "top", "bottom", "hybrid_top", "hybrid_bottom",
+  "custom", "large", "overlay",
+};
+
+const char *drastic_config_layout_name(DrasticLayoutMode layout) {
+  return (unsigned)layout < DRASTIC_LAYOUT_COUNT ? layout_names[layout]
+                                                 : layout_names[1];
+}
+
+DrasticLayoutMode drastic_config_parse_layout(const char *name) {
+  for (int layout = 0; name && layout < DRASTIC_LAYOUT_COUNT; layout++)
+    if (!strcmp(name, layout_names[layout])) return (DrasticLayoutMode)layout;
   return DRASTIC_LAYOUT_HORIZONTAL;
+}
+
+static DrasticLayoutMode read_layout(void) {
+  return drastic_config_parse_layout(
+      prefs_get_string("Wrapper/Layout", "horizontal"));
+}
+
+static DrasticSmallScreenPosition read_small_position(const char *key,
+                                                      const char *fallback) {
+  static const char *const names[] = {
+    "top_right", "middle_right", "bottom_right", "top_left", "middle_left",
+    "bottom_left", "above", "below",
+  };
+  const char *value = prefs_get_string(key, fallback);
+  for (unsigned index = 0; index < sizeof(names) / sizeof(*names); index++)
+    if (!strcmp(value, names[index])) return (DrasticSmallScreenPosition)index;
+  return DRASTIC_SMALL_BOTTOM_RIGHT;
 }
 
 static DrasticVideoFilter read_filter(void) {
@@ -172,8 +193,25 @@ void drastic_config_load(DrasticRuntimeConfig *config) {
   config->layout = read_layout();
   config->swap_screens = prefs_get_bool("Wrapper/SwapScreens", false);
   config->rotation = clamp_int(prefs_get_int("Wrapper/Rotation", 0), 0, 3);
-  config->screen_gap = clamp_int(prefs_get_int("Wrapper/ScreenGap", 8), 0, 128);
+  config->screen_gap = clamp_int(prefs_get_int("Wrapper/ScreenGap", 8), 0, 200);
   config->integer_scale = prefs_get_bool("Wrapper/IntegerScale", false);
+  config->large_proportion = clamp_float(
+      prefs_get_float("Wrapper/LargeScreenProportion", 4.0f), 1.0f, 16.0f);
+  config->small_position =
+      read_small_position("Wrapper/SmallScreenPosition", "middle_right");
+  config->overlay_position =
+      read_small_position("Wrapper/OverlayScreenPosition", "bottom_right");
+  config->overlay_size =
+      clamp_int(prefs_get_int("Wrapper/OverlayScreenSize", 25), 10, 60);
+  config->overlay_opacity =
+      clamp_int(prefs_get_int("Wrapper/OverlayScreenOpacity", 100), 10, 100);
+  config->stretch_single = prefs_get_bool("Wrapper/StretchSingleScreen", false);
+  config->padding[0][0] = clamp_int(prefs_get_int("Wrapper/TopPaddingX", 0), 0, 200);
+  config->padding[0][1] = clamp_int(prefs_get_int("Wrapper/TopPaddingY", 0), 0, 200);
+  config->padding[1][0] = clamp_int(prefs_get_int("Wrapper/BottomPaddingX", 0), 0, 200);
+  config->padding[1][1] = clamp_int(prefs_get_int("Wrapper/BottomPaddingY", 0), 0, 200);
+  config->background = (uint32_t)strtoul(
+      prefs_get_string("Wrapper/BackgroundColor", "000000"), NULL, 16) & 0xffffffu;
   config->custom_aspect_lock =
       prefs_get_bool("Wrapper/CustomAspectLock", true);
   config->vulkan_low_latency =
@@ -229,6 +267,7 @@ void drastic_config_load(DrasticRuntimeConfig *config) {
           1.0f - config->custom_screens[screen].height;
     config->custom_screens[screen].screen = screen;
     config->custom_screens[screen].touch_target = screen == 1;
+    config->custom_screens[screen].opacity = 1.0f;
   }
 }
 
@@ -286,6 +325,123 @@ static void set_rect(DrasticRuntimeConfig *config, int index, int screen,
   config->screens[index].screen = remap_screen(config, screen);
   config->screens[index].touch_target =
       config->screens[index].screen == 1;
+  config->screens[index].opacity = 1.0f;
+}
+
+/* Large screen: the large one fits beside (or above/below) its small copy,
+ * proportion times smaller, and the small one lines up with its edge. */
+static void layout_large(DrasticRuntimeConfig *config, int width, int height,
+                         float gap) {
+  const float native_width = (config->rotation & 1) ? 192.0f : 256.0f;
+  const float native_height = (config->rotation & 1) ? 256.0f : 192.0f;
+  const float small = 1.0f / config->large_proportion;
+  const DrasticSmallScreenPosition position = config->small_position;
+  const int stacked = position == DRASTIC_SMALL_ABOVE ||
+                      position == DRASTIC_SMALL_BELOW;
+  float scale = stacked
+      ? fminf((float)width / native_width,
+              ((float)height - gap) / (native_height * (1.0f + small)))
+      : fminf(((float)width - gap) / (native_width * (1.0f + small)),
+              (float)height / native_height);
+  if (config->integer_scale && scale >= 1.0f) scale = floorf(scale);
+  if (scale <= 0.0f) scale = 1.0f;
+  const float large_w = native_width * scale, large_h = native_height * scale;
+  const float small_w = large_w * small, small_h = large_h * small;
+  float large_x, large_y, small_x, small_y;
+  if (stacked) {
+    const float total_h = large_h + gap + small_h;
+    const float top = ((float)height - total_h) * 0.5f;
+    large_x = ((float)width - large_w) * 0.5f;
+    small_x = ((float)width - small_w) * 0.5f;
+    if (position == DRASTIC_SMALL_ABOVE) {
+      small_y = top;
+      large_y = top + small_h + gap;
+    } else {
+      large_y = top;
+      small_y = top + large_h + gap;
+    }
+  } else {
+    const float total_w = large_w + gap + small_w;
+    const float left = ((float)width - total_w) * 0.5f;
+    const int on_left = position == DRASTIC_SMALL_TOP_LEFT ||
+                        position == DRASTIC_SMALL_MIDDLE_LEFT ||
+                        position == DRASTIC_SMALL_BOTTOM_LEFT;
+    large_x = on_left ? left + small_w + gap : left;
+    small_x = on_left ? left : left + large_w + gap;
+    large_y = ((float)height - large_h) * 0.5f;
+    if (position == DRASTIC_SMALL_TOP_RIGHT || position == DRASTIC_SMALL_TOP_LEFT)
+      small_y = large_y;
+    else if (position == DRASTIC_SMALL_BOTTOM_RIGHT ||
+             position == DRASTIC_SMALL_BOTTOM_LEFT)
+      small_y = large_y + large_h - small_h;
+    else
+      small_y = large_y + (large_h - small_h) * 0.5f;
+  }
+  set_rect(config, 0, 0, large_x, large_y, large_w, large_h);
+  set_rect(config, 1, 1, small_x, small_y, small_w, small_h);
+  config->screen_count = 2;
+}
+
+/* Screen overlay: the large screen fills the display and the small one is
+ * drawn over its corner (or top/bottom centre), gap pixels in from its edge. */
+static void layout_overlay(DrasticRuntimeConfig *config, int width,
+                           int height, float gap) {
+  float large_w, large_h;
+  fit_size((float)width, (float)height, config->integer_scale,
+           config->rotation, &large_w, &large_h);
+  const float large_x = ((float)width - large_w) * 0.5f;
+  const float large_y = ((float)height - large_h) * 0.5f;
+  const float small_w = large_w * (float)config->overlay_size / 100.0f;
+  const float small_h = small_w * large_h / large_w;
+  const float left = large_x + gap;
+  const float right = large_x + large_w - small_w - gap;
+  const float centre_x = large_x + (large_w - small_w) * 0.5f;
+  const float top = large_y + gap;
+  const float bottom = large_y + large_h - small_h - gap;
+  const float middle = large_y + (large_h - small_h) * 0.5f;
+  float x = right, y = bottom;
+  switch (config->overlay_position) {
+    case DRASTIC_SMALL_TOP_RIGHT: x = right; y = top; break;
+    case DRASTIC_SMALL_MIDDLE_RIGHT: x = right; y = middle; break;
+    case DRASTIC_SMALL_BOTTOM_RIGHT: x = right; y = bottom; break;
+    case DRASTIC_SMALL_TOP_LEFT: x = left; y = top; break;
+    case DRASTIC_SMALL_MIDDLE_LEFT: x = left; y = middle; break;
+    case DRASTIC_SMALL_BOTTOM_LEFT: x = left; y = bottom; break;
+    case DRASTIC_SMALL_ABOVE: x = centre_x; y = top; break;
+    case DRASTIC_SMALL_BELOW: x = centre_x; y = bottom; break;
+  }
+  set_rect(config, 0, 0, large_x, large_y, large_w, large_h);
+  /* drawn second, so it lands on top */
+  set_rect(config, 1, 1, x, y, small_w, small_h);
+  config->screens[1].opacity = (float)config->overlay_opacity / 100.0f;
+  config->screen_count = 2;
+}
+
+/* Shrinks each screen by its padding, keeping its aspect ratio (unless it
+ * was stretched) and its centre. */
+static void apply_padding(DrasticRuntimeConfig *config, int height,
+                          int keep_aspect) {
+  const float unit = (float)height / 720.0f;
+  for (int index = 0; index < config->screen_count; index++) {
+    DrasticScreenRect *rect = &config->screens[index];
+    const int *padding = config->padding[rect->screen ? 1 : 0];
+    const float pad_x = (float)padding[0] * unit;
+    const float pad_y = (float)padding[1] * unit;
+    if (pad_x <= 0.0f && pad_y <= 0.0f) continue;
+    const float available_w = fmaxf(rect->width - pad_x * 2.0f, 8.0f);
+    const float available_h = fmaxf(rect->height - pad_y * 2.0f, 8.0f);
+    float w = available_w, h = available_h;
+    if (keep_aspect) {
+      const float scale = fminf(available_w / rect->width,
+                                available_h / rect->height);
+      w = rect->width * scale;
+      h = rect->height * scale;
+    }
+    rect->x += (rect->width - w) * 0.5f;
+    rect->y += (rect->height - h) * 0.5f;
+    rect->width = w;
+    rect->height = h;
+  }
 }
 
 void drastic_config_calculate_layout(DrasticRuntimeConfig *config,
@@ -324,11 +480,19 @@ void drastic_config_calculate_layout(DrasticRuntimeConfig *config,
     set_rect(config, 0, 0, x, y, w, h);
     set_rect(config, 1, 1, x + w + gap, y, w, h);
     config->screen_count = 2;
+  } else if (config->layout == DRASTIC_LAYOUT_LARGE) {
+    layout_large(config, width, height, gap);
+  } else if (config->layout == DRASTIC_LAYOUT_OVERLAY) {
+    layout_overlay(config, width, height, gap);
   } else if (config->layout == DRASTIC_LAYOUT_TOP_ONLY ||
              config->layout == DRASTIC_LAYOUT_BOTTOM_ONLY) {
     float w, h;
     fit_size((float)width, (float)height, config->integer_scale,
              config->rotation, &w, &h);
+    if (config->stretch_single) {
+      w = (float)width;
+      h = (float)height;
+    }
     const int screen = config->layout == DRASTIC_LAYOUT_TOP_ONLY ? 0 : 1;
     set_rect(config, 0, screen, ((float)width - w) * 0.5f,
              ((float)height - h) * 0.5f, w, h);
@@ -352,6 +516,10 @@ void drastic_config_calculate_layout(DrasticRuntimeConfig *config,
              small_w, small_h);
     config->screen_count = 3;
   }
+  apply_padding(config, height,
+                !(config->stretch_single &&
+                  (config->layout == DRASTIC_LAYOUT_TOP_ONLY ||
+                   config->layout == DRASTIC_LAYOUT_BOTTOM_ONLY)));
 }
 
 bool drastic_config_map_touch_rects(const DrasticScreenRect *screens,

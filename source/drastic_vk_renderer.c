@@ -1869,6 +1869,7 @@ static void build_draws(const DrasticRuntimeConfig *config,
           (float)g_textures[texture].height, target_width,
           target_height);
       screen.padding[0] = (float)config->fsr_sharpness / 100.0f;
+      screen.color[3] = rectangle->opacity > 0.0f ? rectangle->opacity : 1.0f;
       add_rectangle(rectangle->x, rectangle->y, rectangle->width,
                     rectangle->height, config->rotation,
                     texture, chain->final_sampler,
@@ -2161,7 +2162,10 @@ static int record_commands(VkCommandBuffer command, uint32_t image_index,
   }
   if (!record_filter_chains(command, config)) return 0;
 
-  const VkClearValue clear = {.color = {{0.0f, 0.0f, 0.0f, 1.0f}}};
+  const VkClearValue clear = {.color = {{
+      (float)((config->background >> 16) & 0xff) / 255.0f,
+      (float)((config->background >> 8) & 0xff) / 255.0f,
+      (float)(config->background & 0xff) / 255.0f, 1.0f}}};
   const VkRenderPassBeginInfo render_begin = {
     .sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
     .renderPass = g_render_pass,

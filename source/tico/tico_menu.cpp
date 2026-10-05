@@ -10,6 +10,8 @@
 #include <cstdio>
 #include <cstring>
 #include <ctime>
+#include <fstream>
+#include <map>
 #include <string>
 #include <sys/stat.h>
 #include <vector>
@@ -33,6 +35,8 @@ extern "C" {
 #include "tico/overlay/tico_config.h"
 #include "tico/overlay/translation_manager.h"
 #include "tico/TicoSafeFile.h"
+#include "tico/UsbStorage.h"
+#include "tico/tico_library.h"
 
 namespace OverlayUI = SwitchFrontend::OverlayUI;
 namespace ImGuiOverlay = SwitchFrontend::ImGuiOverlay;
@@ -201,6 +205,137 @@ std::vector<int32_t> ParseCheatWords(const std::string& text) {
     return words;
 }
 
+std::string Trim(const std::string& text) {
+    const std::size_t first = text.find_first_not_of(" \t\r\n");
+    if (first == std::string::npos)
+        return {};
+    return text.substr(first, text.find_last_not_of(" \t\r\n") - first + 1);
+}
+
+struct FileCheat {
+    std::string name;
+    // Action Replay words, as the custom cheat row takes them
+    std::string codes;
+};
+
+// The game's cheats in tico's folder, sdmc:/tico/cheats/nds/<game>.cht
+// (RetroArch: cheatN_desc / cheatN_code) or <game>.cheats ("# Name", then the
+// codes), as the other tico cores read them.
+std::vector<FileCheat> ReadTicoCheats(const std::string& rom_path) {
+    std::string name = rom_path.substr(rom_path.find_last_of('/') + 1);
+    name = name.substr(0, name.find_last_of('.'));
+    std::vector<FileCheat> cheats;
+    if (name.empty())
+        return cheats;
+    const std::string base = "sdmc:/tico/cheats/nds/" + name;
+    std::ifstream cht(base + ".cht");
+    std::map<int, FileCheat> by_index;
+    std::string line;
+    while (cht.is_open() && std::getline(cht, line)) {
+        const std::size_t equals = line.find('=');
+        if (equals == std::string::npos)
+            continue;
+        const std::string key = Trim(line.substr(0, equals));
+        std::string value = Trim(line.substr(equals + 1));
+        if (value.size() >= 2 && value.front() == '"' && value.back() == '"')
+            value = value.substr(1, value.size() - 2);
+        int index = -1;
+        char field[16] = {0};
+        if (std::sscanf(key.c_str(), "cheat%d_%15s", &index, field) != 2 || index < 0)
+            continue;
+        if (!std::strcmp(field, "desc"))
+            by_index[index].name = value;
+        else if (!std::strcmp(field, "code"))
+            by_index[index].codes += " " + value;
+    }
+    for (auto& [index, cheat] : by_index) {
+        if (cheat.name.empty())
+            cheat.name = TrFormat("drastic_cheat_number", index + 1);
+        cheats.push_back(cheat);
+    }
+    std::ifstream simple(base + ".cheats");
+    while (simple.is_open() && std::getline(simple, line)) {
+        const std::string text = Trim(line);
+        if (text.empty() || text[0] == '!')
+            continue;
+        if (text[0] == '#') {
+            cheats.push_back({Trim(text.substr(1)), {}});
+            continue;
+        }
+        if (cheats.empty())
+            cheats.push_back({TrFormat("drastic_cheat_number", 1), {}});
+        cheats.back().codes += " " + text;
+    }
+    for (FileCheat& cheat : cheats) {
+        for (char& c : cheat.codes)
+            if (c == '+')
+                c = ' ';
+    }
+    return cheats;
+}
+
+// A text setting chosen in the menu, edited with the system keyboard.
+void EditTextOption() {
+    const TicoConfig::OptionDef* option = OverlayUI::ConsumeTextEditOption();
+    if (!option)
+        return;
+    std::string value;
+    const std::size_t length = option->max_length > 0 ? option->max_length : 64;
+    const std::string header = Tr(option->label_key ? option->label_key : option->fallback);
+    if (!PromptKeyboard(header.c_str(), nullptr, TicoConfig::GetOptionValue(*option), length,
+                        false, value))
+        return;
+    TicoConfig::SetOptionValue(*option, value);
+    OverlayUI::NotifyOptionEdited(*option);
+}
+
+// Edge-triggered directions, repeating while one is held.
+struct NavRepeat {
+    u64 button = 0;
+    u64 at = 0;
+
+    u64 Apply(u64 held, u64 pressed) {
+        constexpr u64 kDirections = HidNpadButton_AnyUp | HidNpadButton_AnyDown |
+                                    HidNpadButton_AnyLeft | HidNpadButton_AnyRight;
+        const u64 now = NowMs();
+        if (pressed & kDirections) {
+            button = pressed & kDirections;
+            at = now + kRepeatDelayMs;
+            return pressed;
+        }
+        if (!button || !(held & button)) {
+            button = 0;
+            return pressed;
+        }
+        if (now >= at) {
+            at = now + kRepeatRateMs;
+            return pressed | button;
+        }
+        return pressed;
+    }
+};
+
+// The pad and the touchscreen, for the open menu.
+void FeedOverlayInput(u64 held, u64 pressed, NavRepeat& repeat) {
+    HidTouchScreenState touch{};
+    if (hidGetTouchScreenStates(&touch, 1)) {
+        ImGuiOverlay::FeedTouch({
+            .down = touch.count > 0,
+            .x = touch.count > 0 ? static_cast<float>(touch.touches[0].x) : 0.0f,
+            .y = touch.count > 0 ? static_cast<float>(touch.touches[0].y) : 0.0f,
+        });
+    }
+    pressed = repeat.Apply(held, pressed);
+    ImGuiOverlay::FeedNav({
+        .up = (pressed & HidNpadButton_AnyUp) != 0,
+        .down = (pressed & HidNpadButton_AnyDown) != 0,
+        .left = (pressed & HidNpadButton_AnyLeft) != 0,
+        .right = (pressed & HidNpadButton_AnyRight) != 0,
+        .accept = (pressed & HidNpadButton_A) != 0,
+        .cancel = (pressed & HidNpadButton_B) != 0,
+    });
+}
+
 } // namespace
 
 struct TicoMenu {
@@ -211,9 +346,7 @@ struct TicoMenu {
     bool exit_requested = false;
     u64 toggle_combo = 0;
 
-    // held d-pad direction and when it next repeats
-    u64 repeat_button = 0;
-    u64 repeat_at = 0;
+    NavRepeat repeat;
 
     void* snapshot_top_array = nullptr;
     void* snapshot_bottom_array = nullptr;
@@ -394,7 +527,7 @@ struct TicoMenu {
         if (open)
             return;
         open = true;
-        repeat_button = 0;
+        repeat = {};
         Pause(true);
         ImGuiOverlay::SetVisible(true);
     }
@@ -497,6 +630,45 @@ struct TicoMenu {
         return true;
     }
 
+    // Brings the game's cheats from tico's folder in as custom cheats: added the
+    // first time (Drastic keeps them), and off at every launch like the other
+    // cores' cheats.
+    void ImportTicoCheats() {
+        if (!core.add_custom_cheat || !core.get_custom_cheat_count)
+            return;
+        const std::vector<FileCheat> file_cheats = ReadTicoCheats(tico_rom_path());
+        if (file_cheats.empty())
+            return;
+        std::map<std::string, int> custom;
+        const int count = core.get_custom_cheat_count(core.env, core.clazz);
+        for (int i = 0; i < count; i++)
+            if (core.get_custom_cheat_name)
+                custom[JavaBytes(core.get_custom_cheat_name(core.env, core.clazz, i))] = i;
+        for (const FileCheat& cheat : file_cheats) {
+            const auto existing = custom.find(cheat.name);
+            if (existing != custom.end()) {
+                if (core.set_custom_cheat_enabled)
+                    core.set_custom_cheat_enabled(core.env, core.clazz, existing->second, 0);
+                continue;
+            }
+            const std::vector<int32_t> words = ParseCheatWords(cheat.codes);
+            if (words.empty())
+                continue;
+            void* array = jni_make_int_array(static_cast<int>(words.size()));
+            int32_t* data = jni_int_array_data(array);
+            if (data) {
+                std::memcpy(data, words.data(), words.size() * sizeof(*data));
+                void* java_name = jni_make_string(cheat.name.c_str());
+                core.add_custom_cheat(core.env, core.clazz, java_name, array,
+                                      static_cast<int>(words.size()), 0);
+                jni_release_string(java_name);
+            }
+            jni_release_int_array(array);
+        }
+        if (core.update_cheats)
+            core.update_cheats(core.env, core.clazz, 1);
+    }
+
     void AddCustomCheat() {
         if (!core.add_custom_cheat) {
             OverlayUI::ShowToast(Tr("drastic_cheats_unavailable"));
@@ -577,6 +749,14 @@ struct TicoMenu {
         live.swap_screens = fresh.swap_screens;
         live.screen_gap = fresh.screen_gap;
         live.integer_scale = fresh.integer_scale;
+        live.large_proportion = fresh.large_proportion;
+        live.small_position = fresh.small_position;
+        live.overlay_position = fresh.overlay_position;
+        live.overlay_size = fresh.overlay_size;
+        live.overlay_opacity = fresh.overlay_opacity;
+        live.stretch_single = fresh.stretch_single;
+        std::memcpy(live.padding, fresh.padding, sizeof(live.padding));
+        live.background = fresh.background;
         live.custom_aspect_lock = fresh.custom_aspect_lock;
         std::memcpy(live.custom_screens, fresh.custom_screens, sizeof(live.custom_screens));
         if (live.rotation != fresh.rotation) {
@@ -635,20 +815,6 @@ struct TicoMenu {
         }
     }
 
-    void EditText() {
-        const TicoConfig::OptionDef* option = OverlayUI::ConsumeTextEditOption();
-        if (!option)
-            return;
-        std::string value;
-        const std::size_t length = option->max_length > 0 ? option->max_length : 64;
-        const std::string header = Tr(option->label_key ? option->label_key : option->fallback);
-        if (!PromptKeyboard(header.c_str(), nullptr, TicoConfig::GetOptionValue(*option),
-                            length, false, value))
-            return;
-        TicoConfig::SetOptionValue(*option, value);
-        OverlayUI::NotifyOptionEdited(*option);
-    }
-
     // ---------------------------------------------------------------------
 
     void RunAction(OverlayUI::Action action) {
@@ -677,7 +843,7 @@ struct TicoMenu {
             Close(false);
             return;
         case Action::EditText:
-            EditText();
+            EditTextOption();
             return;
         case Action::AddCheat:
             AddCustomCheat();
@@ -692,27 +858,6 @@ struct TicoMenu {
             LoadState(OverlayUI::GetStateSlotForAction(action) - 1);
             Close(true);
         }
-    }
-
-    // Edge-triggered directions, repeating while one is held.
-    u64 Repeated(u64 held, u64 pressed) {
-        constexpr u64 kDirections = HidNpadButton_AnyUp | HidNpadButton_AnyDown |
-                                    HidNpadButton_AnyLeft | HidNpadButton_AnyRight;
-        const u64 now = NowMs();
-        if (pressed & kDirections) {
-            repeat_button = pressed & kDirections;
-            repeat_at = now + kRepeatDelayMs;
-            return pressed;
-        }
-        if (!repeat_button || !(held & repeat_button)) {
-            repeat_button = 0;
-            return pressed;
-        }
-        if (now >= repeat_at) {
-            repeat_at = now + kRepeatRateMs;
-            return pressed | repeat_button;
-        }
-        return pressed;
     }
 };
 
@@ -843,24 +988,7 @@ void tico_menu_update(TicoMenu* menu, u64 held, u64 pressed, HidAnalogStickState
         return;
     }
 
-    HidTouchScreenState touch{};
-    if (hidGetTouchScreenStates(&touch, 1)) {
-        ImGuiOverlay::FeedTouch({
-            .down = touch.count > 0,
-            .x = touch.count > 0 ? static_cast<float>(touch.touches[0].x) : 0.0f,
-            .y = touch.count > 0 ? static_cast<float>(touch.touches[0].y) : 0.0f,
-        });
-    }
-
-    pressed = menu->Repeated(held, pressed);
-    ImGuiOverlay::FeedNav({
-        .up = (pressed & HidNpadButton_AnyUp) != 0,
-        .down = (pressed & HidNpadButton_AnyDown) != 0,
-        .left = (pressed & HidNpadButton_AnyLeft) != 0,
-        .right = (pressed & HidNpadButton_AnyRight) != 0,
-        .accept = (pressed & HidNpadButton_A) != 0,
-        .cancel = (pressed & HidNpadButton_B) != 0,
-    });
+    FeedOverlayInput(held, pressed, menu->repeat);
 }
 
 bool tico_menu_take_exit_request(TicoMenu* menu) {
@@ -871,7 +999,8 @@ bool tico_menu_take_exit_request(TicoMenu* menu) {
 }
 
 void tico_menu_apply_persisted_cheats(TicoMenu* menu) {
-    (void)menu;
+    if (menu)
+        menu->ImportTicoCheats();
 }
 
 void tico_menu_set_toggle_combo(TicoMenu* menu, u64 combo) {
@@ -879,10 +1008,71 @@ void tico_menu_set_toggle_combo(TicoMenu* menu, u64 combo) {
         menu->toggle_combo = combo;
 }
 
-void tico_menu_set_hud(float fps, bool fast_forward) {
+void tico_library_run(void (*present)(void* user), void* user) {
+    // games on USB drives too; drives mount in the background
+    UsbStorage::Init();
+    bool done = false;
+    TicoLibrary::Register([&done](const std::string& path) {
+        if (tico_queue_library_game(path.c_str()))
+            done = true;
+        else
+            OverlayUI::ShowToast(Tr("drastic_launch_failed"));
+    });
+    OverlayUI::SetGameTitle("DraStic");
+    OverlayUI::SetLibraryMode(true);
+    ImGuiOverlay::Init(drastic_renderer_is_vulkan());
+    ImGuiOverlay::SetVisible(true);
+
+    PadState pad;
+    padConfigureInput(1, HidNpadStyleSet_NpadStandard);
+    padInitializeDefault(&pad);
+    hidInitializeTouchScreen();
+    NavRepeat repeat;
+    while (!done && appletMainLoop()) {
+        padUpdate(&pad);
+        FeedOverlayInput(padGetButtons(&pad), padGetButtonsDown(&pad), repeat);
+        present(user);
+        switch (ImGuiOverlay::ConsumeAction()) {
+        case OverlayUI::Action::Exit:
+            done = true;
+            break;
+        case OverlayUI::Action::EditText:
+            EditTextOption();
+            break;
+        default:
+            break;
+        }
+        OverlayUI::ConsumeSettingsChanged(); // read by the game when it starts
+    }
+    ImGuiOverlay::Shutdown();
+    TicoLibrary::Unregister();
+    OverlayUI::SetLibraryMode(false);
+    // unmounted before the next launch, which mounts them its own way
+    UsbStorage::Shutdown();
+}
+
+void tico_menu_layout_changed(const char* layout) {
+    const TicoConfig::OptionDef* option = TicoConfig::FindOption("Wrapper/Layout");
+    if (!option || !layout)
+        return;
+    TicoConfig::SetOptionValue(*option, layout);
+    const TicoConfig::OptionValueLabel label = TicoConfig::GetOptionValueLabel(*option);
+    std::string name = label.fallback;
+    if (label.label_key) {
+        const std::string translated = Tr(label.label_key);
+        if (!translated.empty() && translated != label.label_key)
+            name = translated;
+    }
+    OverlayUI::ShowToast(name, OverlayUI::ToastCorner::TopRight);
+}
+
+void tico_menu_set_hud(float fps, bool fast_forward, int rendered_width,
+                       int rendered_height) {
     OverlayUI::HudStats stats;
     stats.fps = fps;
     stats.fast_forward = fast_forward;
+    stats.rendered_width = rendered_width;
+    stats.rendered_height = rendered_height;
     OverlayUI::SetHudStats(stats);
 }
 

@@ -503,6 +503,7 @@ typedef struct {
   u64 previous_slot;
   u64 reset;
   u64 quit;
+  u64 cycle_layout;
 } RuntimeHotkeys;
 
 typedef struct {
@@ -542,6 +543,7 @@ static void remove_duplicate_hotkeys(RuntimeHotkeys *hotkeys) {
     &hotkeys->previous_slot,
     &hotkeys->reset,
     &hotkeys->quit,
+    &hotkeys->cycle_layout,
   };
   for (unsigned index = 0;
        index < sizeof(ordered) / sizeof(*ordered); index++) {
@@ -582,8 +584,10 @@ static void update_runtime_hud(RuntimeHud *hud,
     }
   }
 #ifdef DRASTIC_TICO
-  (void)config;
-  tico_menu_set_hud(hud->fps, controls->fast_forward > 0);
+  /* each DS screen is 256x192, doubled with high-resolution 3D */
+  const int scale = (config->core_config >> 41) & 1 ? 2 : 1;
+  tico_menu_set_hud(hud->fps, controls->fast_forward > 0, 256 * scale,
+                    192 * scale);
 #else
   overlay_draw_hud(config->show_fps, hud->fps, controls->fast_forward);
 #endif
@@ -617,6 +621,8 @@ static void load_runtime_controls(RuntimeControls *controls) {
       prefs_get_string("Wrapper/HotkeyReset", "L+R+Minus+A"));
   controls->hotkeys.quit = buttons_for_combo(
       prefs_get_string("Wrapper/HotkeyQuit", "None"));
+  controls->hotkeys.cycle_layout = buttons_for_combo(
+      prefs_get_string("Wrapper/HotkeyCycleLayout", "None"));
   /* A saved duplicate must never execute two emulator actions. The menu is
    * reserved first, then fast-forward, followed by the remaining hotkeys. */
   remove_duplicate_hotkeys(&controls->hotkeys);
@@ -682,10 +688,53 @@ static void configure_input_sampler(DrasticInputSamplerConfig *config,
       controls->hotkeys.previous_slot;
   config->hotkeys[DRASTIC_INPUT_HOTKEY_RESET] = controls->hotkeys.reset;
   config->hotkeys[DRASTIC_INPUT_HOTKEY_QUIT] = controls->hotkeys.quit;
+  config->hotkeys[DRASTIC_INPUT_HOTKEY_CYCLE_LAYOUT] =
+      controls->hotkeys.cycle_layout;
   config->analog_touch_button = controls->analog_touch_button;
   config->stylus_speed = controls->stylus_speed;
   config->panel_width = panel_width;
   config->panel_height = panel_height;
+}
+
+/* The layouts the cycle hotkey steps through, in order, each with the
+ * setting that keeps it in the rotation. */
+static const struct {
+  DrasticLayoutMode layout;
+  const char *key;
+  bool cycled;
+} layout_cycle[] = {
+  {DRASTIC_LAYOUT_VERTICAL, "Wrapper/CycleVertical", true},
+  {DRASTIC_LAYOUT_HORIZONTAL, "Wrapper/CycleHorizontal", true},
+  {DRASTIC_LAYOUT_LARGE, "Wrapper/CycleLarge", true},
+  {DRASTIC_LAYOUT_OVERLAY, "Wrapper/CycleOverlay", true},
+  {DRASTIC_LAYOUT_HYBRID_TOP, "Wrapper/CycleHybridTop", true},
+  {DRASTIC_LAYOUT_HYBRID_BOTTOM, "Wrapper/CycleHybridBottom", true},
+  {DRASTIC_LAYOUT_TOP_ONLY, "Wrapper/CycleTop", true},
+  {DRASTIC_LAYOUT_BOTTOM_ONLY, "Wrapper/CycleBottom", true},
+  {DRASTIC_LAYOUT_CUSTOM, "Wrapper/CycleCustom", false},
+};
+
+/* Moves to the next layout in the rotation and keeps it as the setting. */
+static void cycle_layout(DrasticRuntimeConfig *config) {
+  const int count = (int)(sizeof(layout_cycle) / sizeof(*layout_cycle));
+  int current = -1;
+  for (int index = 0; index < count; index++)
+    if (layout_cycle[index].layout == config->layout) current = index;
+  for (int step = 1; step <= count; step++) {
+    const int index = (current + step + count) % count;
+    if (!prefs_get_bool(layout_cycle[index].key, layout_cycle[index].cycled))
+      continue;
+    if (layout_cycle[index].layout == config->layout) return;
+    config->layout = layout_cycle[index].layout;
+    drastic_config_calculate_layout(config, panel_width, panel_height);
+#ifdef DRASTIC_TICO
+    tico_menu_layout_changed(drastic_config_layout_name(config->layout));
+#else
+    prefs_set_string("Wrapper/Layout",
+                     drastic_config_layout_name(config->layout));
+#endif
+    return;
+  }
 }
 
 static int process_input(DrasticRuntimeConfig *config,
@@ -749,6 +798,8 @@ static int process_input(DrasticRuntimeConfig *config,
     config->swap_screens ^= 1;
     drastic_config_calculate_layout(config, panel_width, panel_height);
   }
+  if (pressed & DRASTIC_INPUT_HOTKEY_BIT(DRASTIC_INPUT_HOTKEY_CYCLE_LAYOUT))
+    cycle_layout(config);
   const int microphone_feed =
       config->microphone_enabled &&
       config->microphone_source == DRASTIC_MICROPHONE_SIMULATED &&
@@ -893,6 +944,34 @@ static void applet_lifecycle_hook(AppletHookType hook, void *parameter) {
 }
 
 #ifdef DRASTIC_TICO
+/* The game list draws over an empty frame: there is no core frame to take. */
+static void no_core_frame(void *env, void *clazz, int top, int bottom,
+                          unsigned char swap) {
+  (void)env; (void)clazz; (void)top; (void)bottom; (void)swap;
+}
+
+static void present_library(void *user) {
+  drastic_renderer_present((DrasticRuntimeConfig *)user, no_core_frame, NULL,
+                           NULL, NULL, false);
+}
+
+/* Started without a game: the renderer shows the game list, and the chosen
+ * game is launched in a fresh process (or Exit leaves). Does not return. */
+static void NX_NORETURN run_library(DrasticRuntimeConfig *runtime) {
+  select_panel_size();
+  drastic_config_calculate_layout(runtime, panel_width, panel_height);
+  if (!drastic_renderer_init(runtime))
+    fatal_error("Could not initialize the %s renderer.",
+                drastic_renderer_backend_name());
+  fatal_error_set_graphics_active(1);
+  runtime->screen_count = 0;
+  tico_library_run(present_library, runtime);
+  drastic_renderer_shutdown();
+  romfsExit();
+  extern void NX_NORETURN __libnx_exit(int rc);
+  __libnx_exit(0);
+}
+
 int main(int argc, char **argv) {
 #else
 int main(void) {
@@ -936,6 +1015,9 @@ int main(void) {
       runtime.microphone_source == DRASTIC_MICROPHONE_EXTERNAL
           ? OPENSLES_MIC_SOURCE_EXTERNAL
           : OPENSLES_MIC_SOURCE_SIMULATED);
+#ifdef DRASTIC_TICO
+  if (tico_library_mode()) run_library(&runtime);
+#endif
   char storage_error[256];
   if (!switchStorageInitializeForPath(DATA_ROOT "/launcher.ini", runtime.rom_path,
                                       sizeof(runtime.rom_path), storage_error,
@@ -1011,6 +1093,14 @@ int main(void) {
                              sizeof(prepared_rom_path), archive_error,
                              sizeof(archive_error)))
       fatal_error("Could not open the ZIP game:\n%s\n\n%s",
+                  runtime.rom_path, archive_error);
+    native_archive = 0;
+  } else if (extension && !strcasecmp(extension, ".7z")) {
+    char archive_error[256];
+    if (!drastic_7z_prepare(runtime.rom_path, prepared_rom_path,
+                            sizeof(prepared_rom_path), archive_error,
+                            sizeof(archive_error)))
+      fatal_error("Could not open the 7z game:\n%s\n\n%s",
                   runtime.rom_path, archive_error);
     native_archive = 0;
   }

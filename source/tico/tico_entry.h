@@ -2,8 +2,8 @@
  *
  * tico chainloads tico-drastic.nro with the ROM path in argv[1] and the game's
  * display title in argv[2]; on exit the host chainloads back to tico with
- * --resume. Started without a ROM, the first game in /switch/tico-drastic is
- * used so the host can be tested without tico. */
+ * --resume. Started without a ROM, it shows a list of the games in tico's ROM
+ * folders and launches the chosen one. */
 #ifndef DRASTIC_TICO_ENTRY_H
 #define DRASTIC_TICO_ENTRY_H
 
@@ -36,6 +36,13 @@ bool tico_was_restarted(void);
 
 /* Queues this NRO with the same game for when this process exits. */
 bool tico_queue_restart(void);
+
+/* True when started without a game: the host shows the game list. */
+bool tico_library_mode(void);
+
+/* Queues this NRO with a game chosen from the game list; Exit Game in it
+ * comes back to the list. */
+bool tico_queue_library_game(const char *rom);
 
 /* Queues tico to be loaded with --resume when this process exits. */
 bool tico_queue_return(void);

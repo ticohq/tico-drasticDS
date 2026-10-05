@@ -788,7 +788,7 @@ static void render_cheats(DrasticIngameMenu *menu) {
 static const char *layout_label(DrasticLayoutMode layout) {
   static const char *labels[] = {
     "Vertical", "Horizontal", "Top only", "Touch only", "Hybrid top",
-    "Hybrid touch", "Custom"
+    "Hybrid touch", "Custom", "Large screen", "Screen overlay"
   };
   return (unsigned)layout < sizeof(labels) / sizeof(*labels)
       ? labels[layout] : labels[0];
@@ -1372,12 +1372,7 @@ static void update_cheats(DrasticIngameMenu *menu, u64 pressed) {
 }
 
 static const char *layout_value(DrasticLayoutMode layout) {
-  static const char *values[] = {
-    "vertical", "horizontal", "top", "bottom", "hybrid_top",
-    "hybrid_bottom", "custom"
-  };
-  return (unsigned)layout < sizeof(values) / sizeof(*values)
-      ? values[layout] : values[0];
+  return drastic_config_layout_name(layout);
 }
 
 static int change_direction(u64 pressed) {
@@ -1558,7 +1553,8 @@ static void update_display(DrasticIngameMenu *menu, u64 pressed) {
   switch (selection) {
     case 0:
       menu->config->layout = (DrasticLayoutMode)(
-          ((int)menu->config->layout + direction + 7) % 7);
+          ((int)menu->config->layout + direction + DRASTIC_LAYOUT_COUNT) %
+          DRASTIC_LAYOUT_COUNT);
       save_string("Wrapper/Layout", layout_value(menu->config->layout));
       break;
     case 1:

@@ -35,6 +35,7 @@ ifeq ($(TICO),1)
 TARGET		:=	tico-drastic
 APP_TITLE	:=	tico DrasticDS
 APP_AUTHOR	:=	ticoverse.com
+APP_VERSION	:=	3.0.0
 BUILD		:=	build_tico
 SOURCES		+=	source/tico source/tico/overlay \
 			third_party/imgui third_party/imgui/backends
@@ -95,7 +96,7 @@ ELF_LIB ?= -lelf
 LIBDIRS	:= $(MESA_SDK) $(PORTLIBS) $(LIBNX)
 LIBS	:= -Wl,-u,vk_icdGetInstanceProcAddr \
 		-Wl,-u,vk_icdNegotiateLoaderICDInterfaceVersion -pthread \
-		-Wl,--start-group $(STORAGE_LIBS) -lminizip \
+		-Wl,--start-group $(STORAGE_LIBS) -lminizip -larchive -lbz2 -llzma -llz4 \
 		-l:libGLESv2.a -l:libEGL.a -l:libvulkan.a -l:libglapi.a \
 		-l:libmesa_util_c11.a -l:libblake3.a -l:libmesa_util.a \
 		-l:libmesa_util_simd.a -l:libxmlconfig.a \

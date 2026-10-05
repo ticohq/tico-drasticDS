@@ -33,6 +33,11 @@ bool DarkMode();
 // "ask", "always" or "never", for a game that has an auto save.
 std::string ResumeOnLaunch();
 
+// A structured value (an object or array) as JSON text, empty when absent, and
+// its replacement (persisted by SaveConfig). Scalars use Get/SetConfigValue.
+std::string GetConfigJson(std::string_view key);
+void SetConfigJson(const std::string& key, const std::string& json_text);
+
 // Per-game settings (Settings > This Game). SetGame names the running game by
 // its ROM path and reads its overrides from
 // sdmc:/tico/config/games/drastic/<game>.jsonc, if it has them; while it has

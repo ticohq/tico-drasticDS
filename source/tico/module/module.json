@@ -14,7 +14,30 @@
       "extensions": [
         ".nds",
         ".zip",
+        ".7z",
         ".rar"
+      ],
+      "bios": [
+        {
+          "any_of": [
+            "nds_bios_arm7.bin",
+            "bios7.bin"
+          ],
+          "size": 16384
+        },
+        {
+          "any_of": [
+            "nds_bios_arm9.bin",
+            "bios9.bin"
+          ],
+          "size": 4096
+        },
+        {
+          "any_of": [
+            "nds_firmware.bin",
+            "firmware.bin"
+          ]
+        }
       ],
       "games_file": "nds.json",
       "retroachievements_id": 18,

@@ -1,12 +1,10 @@
 #include <switch.h>
 
-#include <dirent.h>
 #include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strings.h>
 #include <sys/stat.h>
 
 #include "config.h"
@@ -14,8 +12,6 @@
 #include "prefs.h"
 #include "tico/tico_entry.h"
 
-/* where a ROM is picked from when the NRO is started without tico */
-#define FALLBACK_ROM_DIR "/switch/tico-drastic"
 /* the standalone DrasticDS install, used for files this build does not bundle */
 #define STANDALONE_ROOT  "/switch/drastic"
 #define BUNDLED_CORE     "romfs:/cores/" SO_NAME
@@ -24,10 +20,15 @@
 /* Restart relaunches this NRO with this argument added, so the game starts
  * over instead of offering to continue from the auto save. */
 #define RESTART_ARGUMENT "--tico-restart"
+/* A game chosen from the game list is launched with this argument, so Exit
+ * Game goes back to the list instead of to tico. */
+#define LIBRARY_ARGUMENT "--from-library"
 
 static char display_title[256];
 static char rom_path[1024];
 static bool restarted;
+static bool from_library;
+static bool library_mode;
 static char self_path[512];
 /* the launch arguments, quoted, for Restart */
 static char launch_arguments[2048];
@@ -106,7 +107,6 @@ void tico_make_directories(void) {
   tico_make_path(SAVESTATES_DIR);
   tico_make_path(DATA_ROOT "/cores");
   tico_make_path(SYSTEM_DIR);
-  tico_make_path(FALLBACK_ROM_DIR);
 }
 
 /* tico keeps the user's NDS dumps in the module's system folder under either
@@ -162,35 +162,12 @@ static const char *select_core(void) {
   return candidates[1];
 }
 
-static int is_game(const char *name) {
-  const char *extension = strrchr(name, '.');
-  return extension && (!strcasecmp(extension, ".nds") ||
-                       !strcasecmp(extension, ".zip") ||
-                       !strcasecmp(extension, ".rar"));
-}
-
-/* the alphabetically first game in the fallback folder */
-static int find_fallback_rom(char *output, size_t output_size) {
-  DIR *directory = opendir(FALLBACK_ROM_DIR);
-  if (!directory) return 0;
-  char best[512] = "";
-  struct dirent *entry;
-  while ((entry = readdir(directory))) {
-    if (entry->d_name[0] == '.' || !is_game(entry->d_name)) continue;
-    if (!best[0] || strcmp(entry->d_name, best) < 0)
-      snprintf(best, sizeof(best), "%s", entry->d_name);
-  }
-  closedir(directory);
-  if (!best[0]) return 0;
-  snprintf(output, output_size, "%s/%s", FALLBACK_ROM_DIR, best);
-  return 1;
-}
-
 static const char *rom_argument(int argc, char **argv) {
   for (int index = 1; index < argc; index++) {
     /* some tico launch paths pass this guard word before the ROM */
     if (!argv[index] || !argv[index][0] || !strcmp(argv[index], "ticoSetup") ||
-        !strcmp(argv[index], RESTART_ARGUMENT))
+        !strcmp(argv[index], RESTART_ARGUMENT) ||
+        !strcmp(argv[index], LIBRARY_ARGUMENT))
       continue;
     return argv[index];
   }
@@ -230,6 +207,7 @@ static void remember_launch(int argc, char **argv) {
       restarted = true;
       continue;
     }
+    if (!strcmp(argv[index], LIBRARY_ARGUMENT)) from_library = true;
     const int written = snprintf(launch_arguments + used, sizeof(launch_arguments) - used,
                                  "%s\"%s\"", used ? " " : "", argv[index]);
     if (written < 0 || (size_t)written >= sizeof(launch_arguments) - used) break;
@@ -247,11 +225,15 @@ void tico_prepare(int argc, char **argv) {
     snprintf(rom, sizeof(rom), "%s", argument);
     snprintf(rom_path, sizeof(rom_path), "%s", argument);
     resolve_usb_token(rom, sizeof(rom));
+  } else {
+    /* started on its own: the game list picks one and launches it */
+    library_mode = true;
+    snprintf(display_title, sizeof(display_title), "DraStic");
+    prefs_set_string("Wrapper/CoreSo", select_core());
+    prefs_remove("Wrapper/LauncherPath");
+    prefs_remove("Wrapper/GameConfigPath");
+    return;
   }
-  else if (!find_fallback_rom(rom, sizeof(rom)))
-    fatal_error("No game was passed by tico, and none was found in\n"
-                "sdmc:" FALLBACK_ROM_DIR "/\n\n"
-                "Put a .nds, .zip or .rar there to test without tico.");
   if (rom[0]) prefs_set_disc_path(rom);
   if (!rom_path[0]) snprintf(rom_path, sizeof(rom_path), "%s", rom);
   set_display_title(argc, argv, rom);
@@ -267,6 +249,23 @@ const char *tico_display_title(void) { return display_title; }
 const char *tico_rom_path(void) { return rom_path; }
 
 bool tico_was_restarted(void) { return restarted; }
+
+bool tico_library_mode(void) { return library_mode; }
+
+/* This NRO with the given arguments (each quoted) for when this process exits. */
+static bool queue_self(const char *arguments) {
+  if (!envHasNextLoad() || !self_path[0] || !file_size(self_path, NULL)) return false;
+  static char line[2048];
+  snprintf(line, sizeof(line), "\"%s\"%s%s", self_path, arguments[0] ? " " : "",
+           arguments);
+  return R_SUCCEEDED(envSetNextLoad(self_path, line));
+}
+
+bool tico_queue_library_game(const char *rom) {
+  char arguments[1400];
+  snprintf(arguments, sizeof(arguments), "\"%s\" \"\" \"" LIBRARY_ARGUMENT "\"", rom);
+  return queue_self(arguments);
+}
 
 bool tico_queue_restart(void) {
   if (!envHasNextLoad() || !self_path[0] || !file_size(self_path, NULL)) return false;
@@ -289,6 +288,8 @@ void tico_log(const char *format, ...) {
 }
 
 bool tico_queue_return(void) {
+  /* a game from the game list goes back to it */
+  if (from_library) return queue_self("");
   if (!envHasNextLoad() || !file_size(TICO_LAUNCHER_PATH, NULL)) return false;
   static char arguments[512];
   snprintf(arguments, sizeof(arguments), "%s --resume", TICO_LAUNCHER_PATH);

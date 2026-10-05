@@ -985,14 +985,26 @@ void drastic_renderer_present(const DrasticRuntimeConfig *config,
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_SCISSOR_TEST);
   glViewport(0, 0, panel_width, panel_height);
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glClearColor((float)((config->background >> 16) & 0xff) / 255.0f,
+               (float)((config->background >> 8) & 0xff) / 255.0f,
+               (float)(config->background & 0xff) / 255.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   for (int index = 0; index < config->screen_count; index++) {
+    /* the overlaid screen may be see-through, whatever the shader writes */
+    const float opacity = config->screens[index].opacity;
+    const int translucent = opacity > 0.0f && opacity < 1.0f;
+    if (translucent) {
+      glEnable(GL_BLEND);
+      glBlendColor(0.0f, 0.0f, 0.0f, opacity);
+      glBlendFunc(GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA);
+    }
     if (custom)
       draw_custom_screen(&config->screens[index], config->rotation);
     else
       draw_screen(&config->screens[index], config->rotation, chain,
                   (float)config->fsr_sharpness / 100.0f);
+    if (translucent) glDisable(GL_BLEND);
   }
   draw_stylus_cursor(config);
   if (overlay && overlay->visible && upload_overlay(overlay))

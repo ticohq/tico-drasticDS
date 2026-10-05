@@ -48,14 +48,24 @@ bool tico_menu_is_open(const TicoMenu *menu);
 void tico_menu_update(TicoMenu *menu, u64 held, u64 pressed,
                       HidAnalogStickState left, HidAnalogStickState right);
 bool tico_menu_take_exit_request(TicoMenu *menu);
-/* The core keeps cheat toggles in usrcheat.dat itself, so this does nothing;
- * it exists so main.c treats both menus alike. */
+/* The core keeps its own cheat toggles; this brings in the game's cheats from
+ * tico's folder (sdmc:/tico/cheats/nds/) as custom cheats, off. Call once the
+ * game runs, with the core paused. */
 void tico_menu_apply_persisted_cheats(TicoMenu *menu);
 /* The combo that opened the menu also closes it. */
 void tico_menu_set_toggle_combo(TicoMenu *menu, u64 combo);
 
+/* The layout hotkey chose another layout: keeps it as the setting and names
+ * it in a toast. */
+void tico_menu_layout_changed(const char *layout);
+
+/* Started without a game: shows the game list until a game is chosen (this
+ * NRO is then queued with it) or Exit, presenting a frame each time round. */
+void tico_library_run(void (*present)(void *user), void *user);
+
 /* Figures for the FPS counter drawn over the game. */
-void tico_menu_set_hud(float fps, bool fast_forward);
+void tico_menu_set_hud(float fps, bool fast_forward, int rendered_width,
+                       int rendered_height);
 
 #ifdef __cplusplus
 }

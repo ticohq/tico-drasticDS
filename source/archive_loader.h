@@ -10,4 +10,9 @@ int drastic_zip_prepare(const char *archive_path, char *rom_path,
                         size_t rom_path_size, char *error,
                         size_t error_size);
 
+/* The same for the single Nintendo DS image in a .7z. */
+int drastic_7z_prepare(const char *archive_path, char *rom_path,
+                       size_t rom_path_size, char *error,
+                       size_t error_size);
+
 #endif

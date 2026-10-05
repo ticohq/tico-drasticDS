@@ -321,6 +321,7 @@ class Manager {
 public:
     void ReloadConfig() {
         options.clear();
+        changed_json.clear();
         original = nlohmann::json::object();
         loaded_path.clear();
 
@@ -372,12 +373,43 @@ public:
         changed[key] = value;
     }
 
+    std::string GetConfigJson(std::string_view key) const {
+        if (UsesGameLayer(key)) {
+            const auto game_it = game_root.find(std::string(key));
+            if (game_it != game_root.end() && (game_it->is_object() || game_it->is_array())) {
+                return game_it->dump();
+            }
+        }
+        const auto changed_it = changed_json.find(key);
+        if (changed_it != changed_json.end()) {
+            return changed_it->second.dump();
+        }
+        const auto it = original.find(std::string(key));
+        return it != original.end() && (it->is_object() || it->is_array()) ? it->dump()
+                                                                          : std::string();
+    }
+
+    void SetConfigJson(const std::string& key, const std::string& json_text) {
+        nlohmann::json value = nlohmann::json::parse(json_text, nullptr, false);
+        if (value.is_discarded()) {
+            return;
+        }
+        if (UsesGameLayer(key)) {
+            game_root[key] = std::move(value);
+            return;
+        }
+        changed_json[key] = std::move(value);
+    }
+
     // Writes back what was read, with this session's changes as strings, the
     // way tico stores them (bools as settings.json's bool_true_value and
     // bool_false_value). Keys tico wrote keep their own JSON types.
     bool SaveConfig() {
         nlohmann::json root = original.is_object() ? original : nlohmann::json::object();
         for (const auto& [key, value] : changed) {
+            root[key] = value;
+        }
+        for (const auto& [key, value] : changed_json) {
             root[key] = value;
         }
         const std::string serialized = root.dump(2);
@@ -545,6 +577,7 @@ private:
     bool game_active = false;
     OptionMap options;
     OptionMap changed;
+    std::map<std::string, nlohmann::json, std::less<>> changed_json;
     nlohmann::json original = nlohmann::json::object();
     std::string loaded_path;
 };
@@ -643,6 +676,14 @@ std::string ResumeOnLaunch() {
                                  ? root.value("resume_on_launch", std::string("ask"))
                                  : std::string("ask");
     return (mode == "always" || mode == "never") ? mode : "ask";
+}
+
+std::string GetConfigJson(std::string_view key) {
+    return GetManager().GetConfigJson(key);
+}
+
+void SetConfigJson(const std::string& key, const std::string& json_text) {
+    GetManager().SetConfigJson(key, json_text);
 }
 
 void SetGame(const std::string& rom_path) {

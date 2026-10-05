@@ -214,6 +214,7 @@ void main() {
     else
         color = nearest_pixel(texcoord);
     output_color = color * parameters.color;
+    // screens are opaque, at the opacity the layout gives them
     if (parameters.mode == 2)
-        output_color.a = 1.0;
+        output_color.a = parameters.color.a;
 }
