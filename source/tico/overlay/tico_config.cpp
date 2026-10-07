@@ -771,11 +771,18 @@ std::string GetOptionValue(const OptionDef& option) {
 }
 
 bool IsOptionShown(const OptionDef& option) {
-    if (!option.shown_when_key) {
-        return true;
+    // shown when the option it depends on has the value, and that one is
+    // shown too (a chain: Renderer = Vulkan > LSFG on > its options), as in
+    // tico's settings; the depth limit stops a loop in a broken settings.json
+    const OptionDef* current = &option;
+    for (int depth = 0; depth < 8 && current->shown_when_key; ++depth) {
+        const OptionDef* controller = FindOption(current->shown_when_key);
+        if (!controller || PrefsValue(*controller) != current->shown_when_value) {
+            return false;
+        }
+        current = controller;
     }
-    const OptionDef* controller = FindOption(option.shown_when_key);
-    return controller && PrefsValue(*controller) == option.shown_when_value;
+    return !current->shown_when_key;
 }
 
 OptionValueLabel GetOptionValueLabel(const OptionDef& option) {
