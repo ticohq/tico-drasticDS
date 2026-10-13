@@ -18,6 +18,8 @@
 
 #include <json.hpp>
 
+#include "../TicoSession.h"
+
 extern "C" {
 #include "prefs.h"
 #include "tico/tico_entry.h"
@@ -626,6 +628,16 @@ std::string ContentPath(const char* key, const char* default_root) {
     return root + "/" + kSlug;
 }
 
+// Saves and states are the current user's (tico's session): tico's folder
+// becomes theirs, a custom folder gets users/<id>/ inside it (TicoSession.h)
+std::string UserContentPath(const char* key, const char* default_root, bool saves) {
+    std::string root = GetManager().GetConfigValue(key, "");
+    if (root.empty()) {
+        root = default_root;
+    }
+    return tico::UserContentRoot(root, saves) + kSlug;
+}
+
 } // namespace
 
 void ReloadConfig() {
@@ -637,16 +649,16 @@ std::string SystemPath() {
 }
 
 std::string SavesPath() {
-    return ContentPath("tico_saves_path", "sdmc:/tico/saves");
+    return UserContentPath("tico_saves_path", "sdmc:/tico/saves/", true);
 }
 
 std::string StatesPath() {
-    return ContentPath("tico_states_path", "sdmc:/tico/states");
+    return UserContentPath("tico_states_path", "sdmc:/tico/states/", false);
 }
 
 int BorderTint() {
     std::string content;
-    if (!ReadWholeFile("sdmc:/tico/config/display.jsonc", content)) {
+    if (!tico::ReadSettings("display", content)) { // The user's, from tico's session
         return 0;
     }
     const nlohmann::json root = nlohmann::json::parse(StripJsonComments(content), nullptr, false);
@@ -659,7 +671,7 @@ int BorderTint() {
 
 bool DarkMode() {
     std::string content;
-    if (!ReadWholeFile("sdmc:/tico/config/display.jsonc", content)) {
+    if (!tico::ReadSettings("display", content)) {
         return false;
     }
     const nlohmann::json root = nlohmann::json::parse(StripJsonComments(content), nullptr, false);
@@ -668,7 +680,7 @@ bool DarkMode() {
 
 std::string ResumeOnLaunch() {
     std::string content;
-    if (!ReadWholeFile("sdmc:/tico/config/general.jsonc", content)) {
+    if (!tico::ReadSettings("general", content)) {
         return "ask";
     }
     const nlohmann::json root = nlohmann::json::parse(StripJsonComments(content), nullptr, false);

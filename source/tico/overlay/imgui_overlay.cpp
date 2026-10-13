@@ -26,6 +26,7 @@
 #define NANOSVGRAST_IMPLEMENTATION
 #include <nanosvgrast.h>
 
+#include "../TicoSession.h"
 #include "drastic_overlay_hook.h"
 extern "C" {
 #include "tico/tico_entry.h"
@@ -127,7 +128,8 @@ bool DecodeAvatarFromAccount() {
     }
 
     AccountUid uid{};
-    bool found = R_SUCCEEDED(accountGetPreselectedUser(&uid)) && accountUidIsValid(&uid);
+    bool found = tico::CurrentSession().AccountId(uid); // Who tico says plays
+    if (!found) found = R_SUCCEEDED(accountGetPreselectedUser(&uid)) && accountUidIsValid(&uid);
     if (!found) {
         found = R_SUCCEEDED(accountGetLastOpenedUser(&uid)) && accountUidIsValid(&uid);
     }
@@ -173,7 +175,7 @@ void DecodeAvatarOnce() {
         return;
     }
     s_avatar_decoded = true;
-    for (const char* path : kAvatarPaths) {
+    for (const char* path : tico::AvatarCandidates(kAvatarPaths)) { // Only the user's own
         int width = 0;
         int height = 0;
         int channels = 0;

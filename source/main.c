@@ -1270,6 +1270,9 @@ int main(void) {
     if (__atomic_load_n(&game.finished, __ATOMIC_ACQUIRE))
       break;
     update_runtime_hud(&hud, &runtime, &controls, 1);
+#ifdef DRASTIC_TICO
+    tico_playtime_frame(!drastic_menu_is_open(menu));
+#endif
     drastic_renderer_present(&runtime, core.renderFrame, fake_env, clazz,
                              overlay_frame(), true);
     if (cpu_boost_active) {
@@ -1304,6 +1307,7 @@ int main(void) {
   prefs_set_int("Wrapper/StateSlot", controls.state_slot);
   prefs_save();
 #ifdef DRASTIC_TICO
+  tico_playtime_flush(); /* the game's last seconds */
   const bool restart = tico_menu_take_restart_request(menu);
   if (controls.exit_requested && lifecycle.started &&
       !__atomic_load_n(&game.finished, __ATOMIC_ACQUIRE))

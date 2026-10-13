@@ -14,6 +14,8 @@
 
 #include <json.hpp>
 
+#include "TicoSession.h"
+
 #include "tico/UsbStorage.h"
 #include "tico/overlay/overlay_ui.h"
 #include "tico/overlay/tico_config.h"
@@ -82,7 +84,8 @@ nlohmann::json ReadJsonFile(const char* path) {
 // tico's ROM bases (general.jsonc): the ROMs path, then the extra bases.
 std::vector<std::string> TicoRomBases() {
     std::vector<std::string> bases;
-    const nlohmann::json general = ReadJsonFile("sdmc:/tico/config/general.jsonc");
+    // The user's general settings, from tico's session
+    const nlohmann::json general = nlohmann::json::parse(tico::SettingsText("general"), nullptr, false, true);
     const std::string roms =
         general.is_object() ? general.value("roms_path", std::string()) : std::string();
     bases.push_back(WithSlash(roms.empty() ? "sdmc:/tico/roms/" : roms));

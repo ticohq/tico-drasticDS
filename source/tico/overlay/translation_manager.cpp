@@ -11,6 +11,8 @@
 
 #include <json.hpp>
 
+#include "../TicoSession.h"
+
 namespace SwitchFrontend::OverlayTranslation {
 namespace {
 
@@ -93,7 +95,7 @@ bool ReadWholeFile(const char* path, std::string& out) {
 std::string LoadConfiguredLanguage() {
     for (const char* path : kGeneralConfigPaths) {
         std::string content;
-        if (!ReadWholeFile(path, content)) {
+        if (!tico::ReadConfigFile(path, content)) { // tico's settings come from its session
             continue;
         }
         const std::string stripped = StripJsonComments(content);

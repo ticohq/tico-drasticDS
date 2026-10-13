@@ -34,7 +34,7 @@ MESA_SDK ?= $(TOPDIR)/../mesa-switch-unified-sdk
 ifeq ($(TICO),1)
 TARGET		:=	tico-drastic
 APP_TITLE	:=	tico-drastic
-APP_AUTHOR	:=	Exophase/ticoverse.com
+APP_AUTHOR	:=	Exophase, Naga/ticoverse.com
 APP_VERSION	:=	3.0.0
 ICON		:=	tico/icon.jpg
 BUILD		:=	build_tico
@@ -103,6 +103,10 @@ LIBS	:= -Wl,-u,vk_icdGetInstanceProcAddr \
 		-l:libmesa_util_simd.a -l:libxmlconfig.a \
 		$(ELF_LIB) -lexpat -lzstd -lz -lnx -lstdc++ -lm \
 		-Wl,--end-group
+ifeq ($(TICO),1)
+# TicoSecure (source/tico/TicoSecure.h): the session tico seals for each launch
+LIBS	+= -lsodium
+endif
 
 #---------------------------------------------------------------------------------
 ifneq ($(BUILD),$(notdir $(CURDIR)))

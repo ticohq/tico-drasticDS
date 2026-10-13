@@ -67,6 +67,11 @@ void tico_library_run(void (*present)(void *user), void *user);
 void tico_menu_set_hud(float fps, bool fast_forward, int rendered_width,
                        int rendered_height);
 
+/* The player's playtime (TicoSession.h): call once per emulated frame, with
+ * running false while the menu has the game paused; flush when the game ends. */
+void tico_playtime_frame(bool running);
+void tico_playtime_flush(void);
+
 #ifdef __cplusplus
 }
 #endif

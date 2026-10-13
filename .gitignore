@@ -25,3 +25,6 @@ __pycache__/
 *.apk
 .DS_Store
 /tico-*-module.zip
+
+# TicoSecure build secret (shared with tico)
+/source/tico/TicoSecret.h

@@ -16,6 +16,8 @@
 #include <sys/stat.h>
 #include <vector>
 
+#include "TicoSession.h"
+
 extern "C" {
 #include "config.h"
 #include "drastic_config.h"
@@ -1077,3 +1079,11 @@ void tico_menu_set_hud(float fps, bool fast_forward, int rendered_width,
 }
 
 } // extern "C"
+
+extern "C" void tico_playtime_frame(bool running) {
+    if (running) tico::PlaytimeFrame();
+}
+
+extern "C" void tico_playtime_flush(void) {
+    tico::PlaytimeFlush();
+}
