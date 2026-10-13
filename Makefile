@@ -33,9 +33,10 @@ MESA_SDK ?= $(TOPDIR)/../mesa-switch-unified-sdk
 # cores/libdrastic_arm64.so and res/game_database.xml.
 ifeq ($(TICO),1)
 TARGET		:=	tico-drastic
-APP_TITLE	:=	tico DrasticDS
-APP_AUTHOR	:=	ticoverse.com
+APP_TITLE	:=	tico-drastic
+APP_AUTHOR	:=	Exophase/ticoverse.com
 APP_VERSION	:=	3.0.0
+ICON		:=	tico/icon.jpg
 BUILD		:=	build_tico
 SOURCES		+=	source/tico source/tico/overlay \
 			third_party/imgui third_party/imgui/backends
