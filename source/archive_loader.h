@@ -15,4 +15,9 @@ int drastic_7z_prepare(const char *archive_path, char *rom_path,
                        size_t rom_path_size, char *error,
                        size_t error_size);
 
+/* And in a .rar (RAR 4 or 5). */
+int drastic_rar_prepare(const char *archive_path, char *rom_path,
+                        size_t rom_path_size, char *error,
+                        size_t error_size);
+
 #endif

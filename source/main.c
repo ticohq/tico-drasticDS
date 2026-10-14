@@ -1110,6 +1110,15 @@ int main(void) {
       fatal_error("Could not open the 7z game:\n%s\n\n%s",
                   runtime.rom_path, archive_error);
     native_archive = 0;
+  } else if (extension && !strcasecmp(extension, ".rar")) {
+    /* Unpacked once like .7z, rather than left to Drastic's own reader */
+    char archive_error[256];
+    if (!drastic_rar_prepare(runtime.rom_path, prepared_rom_path,
+                             sizeof(prepared_rom_path), archive_error,
+                             sizeof(archive_error)))
+      fatal_error("Could not open the RAR game:\n%s\n\n%s",
+                  runtime.rom_path, archive_error);
+    native_archive = 0;
   }
 
   void *rom = jni_make_string(prepared_rom_path);

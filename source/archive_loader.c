@@ -70,7 +70,8 @@ static void cache_stem(const char *archive_path, char *output,
   size_t length = strlen(name);
   const char *extension = strrchr(name, '.');
   if (extension && (!strcasecmp(extension, ".zip") ||
-                    !strcasecmp(extension, ".7z")))
+                    !strcasecmp(extension, ".7z") ||
+                    !strcasecmp(extension, ".rar")))
     length = (size_t)(extension - name);
   if (length > 180) length = 180;
 
@@ -349,11 +350,13 @@ failure:
   return 0;
 }
 
-/* Opens a .7z for reading, or NULL. */
-static struct archive *open_7z(const char *archive_path) {
+/* Opens a .7z or .rar (RAR 4 and 5) for reading, or NULL. */
+static struct archive *open_libarchive(const char *archive_path) {
   struct archive *archive = archive_read_new();
   if (!archive) return NULL;
   archive_read_support_format_7zip(archive);
+  archive_read_support_format_rar(archive);
+  archive_read_support_format_rar5(archive);
   archive_read_support_filter_all(archive);
   if (archive_read_open_filename(archive, archive_path, 256 * 1024) !=
       ARCHIVE_OK) {
@@ -363,26 +366,28 @@ static struct archive *open_7z(const char *archive_path) {
   return archive;
 }
 
-int drastic_7z_prepare(const char *archive_path, char *rom_path,
-                       size_t rom_path_size, char *error,
-                       size_t error_size) {
+/* The single .nds in a .7z or .rar, through libarchive; @p kind names the
+ * format in messages. */
+static int libarchive_prepare(const char *kind, const char *archive_path,
+                              char *rom_path, size_t rom_path_size,
+                              char *error, size_t error_size) {
   if (error && error_size) error[0] = '\0';
   if (!archive_path || !*archive_path || !rom_path || !rom_path_size) {
-    set_error(error, error_size, "Invalid 7z launch path.");
+    set_error(error, error_size, "Invalid %s launch path.", kind);
     return 0;
   }
   struct stat archive_status;
   if (stat(archive_path, &archive_status) != 0 ||
       !S_ISREG(archive_status.st_mode)) {
-    set_error(error, error_size, "Could not read 7z archive: %s",
+    set_error(error, error_size, "Could not read %s archive: %s", kind,
               strerror(errno));
     return 0;
   }
 
   /* First pass: the archive must hold exactly one .nds. */
-  struct archive *archive = open_7z(archive_path);
+  struct archive *archive = open_libarchive(archive_path);
   if (!archive) {
-    set_error(error, error_size, "The selected file is not a readable 7z archive.");
+    set_error(error, error_size, "The selected file is not a readable %s archive.", kind);
     return 0;
   }
   char selected_name[1024] = "";
@@ -402,16 +407,17 @@ int drastic_7z_prepare(const char *archive_path, char *rom_path,
   const int listed = result == ARCHIVE_EOF || selected_count > 1;
   archive_read_free(archive);
   if (!listed) {
-    set_error(error, error_size, "The 7z directory is damaged.");
+    set_error(error, error_size, "The %s directory is damaged.", kind);
     return 0;
   }
   if (selected_count > 1) {
     set_error(error, error_size,
-              "The 7z contains more than one .nds game. Keep one ROM per archive.");
+              "The %s contains more than one .nds game. Keep one ROM per archive.",
+              kind);
     return 0;
   }
   if (!selected_count) {
-    set_error(error, error_size, "The 7z does not contain an .nds game.");
+    set_error(error, error_size, "The %s does not contain an .nds game.", kind);
     return 0;
   }
   if (selected_size <= 0 || (uint64_t)selected_size > DS_ROM_SIZE_LIMIT) {
@@ -427,16 +433,16 @@ int drastic_7z_prepare(const char *archive_path, char *rom_path,
                            !strcasecmp(stem + stem_length - 4, ".nds");
   if (snprintf(rom_path, rom_path_size, "%s/%s%s", UNZIP_CACHE_DIR, stem,
                stem_has_nds ? "" : ".nds") >= (int)rom_path_size) {
-    set_error(error, error_size, "The 7z cache path is too long.");
+    set_error(error, error_size, "The %s cache path is too long.", kind);
     return 0;
   }
   char metadata_path[1100];
   if (snprintf(metadata_path, sizeof(metadata_path), "%s.nxzip", rom_path) >=
       (int)sizeof(metadata_path)) {
-    set_error(error, error_size, "The 7z cache metadata path is too long.");
+    set_error(error, error_size, "The %s cache metadata path is too long.", kind);
     return 0;
   }
-  /* 7z keeps no CRC libarchive hands back cheaply: the archive's size and
+  /* 7z and RAR keep no CRC libarchive hands back cheaply: the archive's size and
    * time stand for its contents */
   ZipCacheInfo expected = {0};
   memcpy(expected.magic, zip_cache_magic, sizeof(expected.magic));
@@ -448,9 +454,9 @@ int drastic_7z_prepare(const char *archive_path, char *rom_path,
   if (cache_matches(rom_path, metadata_path, &expected)) return 1;
 
   /* Second pass: unpack it. */
-  archive = open_7z(archive_path);
+  archive = open_libarchive(archive_path);
   if (!archive) {
-    set_error(error, error_size, "The selected file is not a readable 7z archive.");
+    set_error(error, error_size, "The selected file is not a readable %s archive.", kind);
     return 0;
   }
   int found = 0;
@@ -464,14 +470,14 @@ int drastic_7z_prepare(const char *archive_path, char *rom_path,
   }
   if (!found) {
     archive_read_free(archive);
-    set_error(error, error_size, "Could not locate the NDS entry in the 7z.");
+    set_error(error, error_size, "Could not locate the NDS entry in the %s.", kind);
     return 0;
   }
   char temporary_path[1100];
   if (snprintf(temporary_path, sizeof(temporary_path), "%s.tmp", rom_path) >=
       (int)sizeof(temporary_path)) {
     archive_read_free(archive);
-    set_error(error, error_size, "The temporary 7z cache path is too long.");
+    set_error(error, error_size, "The temporary %s cache path is too long.", kind);
     return 0;
   }
   FILE *output = fopen(temporary_path, "wb");
@@ -513,4 +519,18 @@ int drastic_7z_prepare(const char *archive_path, char *rom_path,
     return 0;
   }
   return 1;
+}
+
+int drastic_7z_prepare(const char *archive_path, char *rom_path,
+                       size_t rom_path_size, char *error,
+                       size_t error_size) {
+  return libarchive_prepare("7z", archive_path, rom_path, rom_path_size, error,
+                            error_size);
+}
+
+int drastic_rar_prepare(const char *archive_path, char *rom_path,
+                        size_t rom_path_size, char *error,
+                        size_t error_size) {
+  return libarchive_prepare("RAR", archive_path, rom_path, rom_path_size,
+                            error, error_size);
 }
