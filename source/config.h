@@ -23,7 +23,10 @@ const char *tico_nds_states_dir(void);
 #ifdef __cplusplus
 }
 #endif
-#define DATA_ROOT       "/tico/system/drastic/drastic"
+#define DATA_ROOT       "/tico/system/drastic"
+/* The custom shader presets built into the NRO, read in place; the user's
+ * own .dfx files in SHADERS_DIR come first */
+#define BUNDLED_SHADERS_DIR "romfs:/shaders"
 #else
 #define DATA_ROOT       "/switch/drastic"
 #endif

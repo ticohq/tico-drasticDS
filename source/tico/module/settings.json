@@ -1679,6 +1679,243 @@
               }
             },
             {
+              "key": "Wrapper/CustomShader",
+              "label": "settings_drastic_custom_shader",
+              "type": "string",
+              "default": "",
+              "max_length": 255,
+              "choices": [
+                {
+                  "label": "lcd1x + natural vision",
+                  "value": "lcd1x+natural_vision.dfx"
+                },
+                {
+                  "label": "lcd1x + nds color + natural vision",
+                  "value": "lcd1x+nds_color+natural_vision.dfx"
+                },
+                {
+                  "label": "lcd1x + nds color",
+                  "value": "lcd1x+nds_color.dfx"
+                },
+                {
+                  "label": "lcd1x",
+                  "value": "lcd1x.dfx"
+                },
+                {
+                  "label": "natural vision",
+                  "value": "natural_vision.dfx"
+                },
+                {
+                  "label": "nds color",
+                  "value": "nds_color.dfx"
+                },
+                {
+                  "label": "sharp bilinear + natural vision",
+                  "value": "sharp_bilinear+natural_vision.dfx"
+                },
+                {
+                  "label": "sharp bilinear + nds color + natural vision",
+                  "value": "sharp_bilinear+nds_color+natural_vision.dfx"
+                },
+                {
+                  "label": "sharp bilinear + nds color",
+                  "value": "sharp_bilinear+nds_color.dfx"
+                },
+                {
+                  "label": "sharp bilinear",
+                  "value": "sharp_bilinear.dfx"
+                },
+                {
+                  "label": "zfast lcd + dsi color",
+                  "value": "zfast_lcd+dsi_color.dfx"
+                },
+                {
+                  "label": "zfast lcd + dslite color + natural vision",
+                  "value": "zfast_lcd+dslite_color+natural_vision.dfx"
+                },
+                {
+                  "label": "zfast lcd + dslite color",
+                  "value": "zfast_lcd+dslite_color.dfx"
+                },
+                {
+                  "label": "zfast lcd + natural vision",
+                  "value": "zfast_lcd+natural_vision.dfx"
+                },
+                {
+                  "label": "zfast lcd + nds color + natural vision",
+                  "value": "zfast_lcd+nds_color+natural_vision.dfx"
+                },
+                {
+                  "label": "zfast lcd + nds color",
+                  "value": "zfast_lcd+nds_color.dfx"
+                },
+                {
+                  "label": "zfast lcd",
+                  "value": "zfast_lcd.dfx"
+                },
+                {
+                  "label": "xBR/SABR: 2XBR v3.7C 1x",
+                  "value": "xbr-sabr/2XBR_v3.7C_1x.dfx"
+                },
+                {
+                  "label": "xBR/SABR: 2XBR v3.7C 2x",
+                  "value": "xbr-sabr/2XBR_v3.7C_2x.dfx"
+                },
+                {
+                  "label": "xBR/SABR: 2XBR v3.7C 3x(Full)",
+                  "value": "xbr-sabr/2XBR_v3.7C_3x(Full).dfx"
+                },
+                {
+                  "label": "xBR/SABR: 4XBR v1.1 Low configuration",
+                  "value": "xbr-sabr/4XBR_v1.1_Low configuration.dfx"
+                },
+                {
+                  "label": "xBR/SABR: 5XBR v1.1 Low configuration",
+                  "value": "xbr-sabr/5XBR_v1.1_Low configuration.dfx"
+                },
+                {
+                  "label": "xBR/SABR: 5XBR v3.5a Low Configuration",
+                  "value": "xbr-sabr/5XBR_v3.5a_Low Configuration.dfx"
+                },
+                {
+                  "label": "xBR/SABR: 5XBR v3.5a Very High Configuration",
+                  "value": "xbr-sabr/5XBR_v3.5a_Very High Configuration.dfx"
+                },
+                {
+                  "label": "xBR/SABR: 5XBR v3.5b Very High Configuration",
+                  "value": "xbr-sabr/5XBR_v3.5b_Very High Configuration.dfx"
+                },
+                {
+                  "label": "xBR/SABR: 5XBR v3.7 CRT  +  Low Configuration",
+                  "value": "xbr-sabr/5XBR_v3.7_CRT + Low Configuration.dfx"
+                },
+                {
+                  "label": "xBR/SABR: 5XBR v3.7 Low configuration",
+                  "value": "xbr-sabr/5XBR_v3.7_Low configuration.dfx"
+                },
+                {
+                  "label": "xBR/SABR: 5XBR v3.7A  +  CRT 1x(Full)",
+                  "value": "xbr-sabr/5XBR_v3.7A + CRT_1x(Full).dfx"
+                },
+                {
+                  "label": "xBR/SABR: 5XBR v3.7A 1x",
+                  "value": "xbr-sabr/5XBR_v3.7A_1x.dfx"
+                },
+                {
+                  "label": "xBR/SABR: 5XBR v3.7A 2x",
+                  "value": "xbr-sabr/5XBR_v3.7A_2x.dfx"
+                },
+                {
+                  "label": "xBR/SABR: 5XBR v3.7A 3x(Full)",
+                  "value": "xbr-sabr/5XBR_v3.7A_3x(Full).dfx"
+                },
+                {
+                  "label": "xBR/SABR: 5XBR v3.7a CRT  +  Low Configuration",
+                  "value": "xbr-sabr/5XBR_v3.7a_CRT + Low Configuration.dfx"
+                },
+                {
+                  "label": "xBR/SABR: 5XBR v3.7a CRT  +  Very Low Configuration",
+                  "value": "xbr-sabr/5XBR_v3.7a_CRT + Very Low Configuration.dfx"
+                },
+                {
+                  "label": "xBR/SABR: 5XBR v3.7a High Configuration",
+                  "value": "xbr-sabr/5XBR_v3.7a_High Configuration.dfx"
+                },
+                {
+                  "label": "xBR/SABR: 5XBR v3.7a Low Configuration",
+                  "value": "xbr-sabr/5XBR_v3.7a_Low Configuration.dfx"
+                },
+                {
+                  "label": "xBR/SABR: 5XBR v3.7a Very Low Configuration",
+                  "value": "xbr-sabr/5XBR_v3.7a_Very Low Configuration.dfx"
+                },
+                {
+                  "label": "xBR/SABR: 5XBR v3.7B 1x",
+                  "value": "xbr-sabr/5XBR_v3.7B_1x.dfx"
+                },
+                {
+                  "label": "xBR/SABR: 5XBR v3.7B 2x",
+                  "value": "xbr-sabr/5XBR_v3.7B_2x.dfx"
+                },
+                {
+                  "label": "xBR/SABR: 5XBR v3.7B 3x(Full)",
+                  "value": "xbr-sabr/5XBR_v3.7B_3x(Full).dfx"
+                },
+                {
+                  "label": "xBR/SABR: 5XBR v3.7C  +  CRT x1(Full)",
+                  "value": "xbr-sabr/5XBR_v3.7C + CRT_x1(Full).dfx"
+                },
+                {
+                  "label": "xBR/SABR: 5XBR v3.7C 1x",
+                  "value": "xbr-sabr/5XBR_v3.7C_1x.dfx"
+                },
+                {
+                  "label": "xBR/SABR: 5XBR v3.7C 2x",
+                  "value": "xbr-sabr/5XBR_v3.7C_2x.dfx"
+                },
+                {
+                  "label": "xBR/SABR: 5XBR v3.7C 3x(Full)",
+                  "value": "xbr-sabr/5XBR_v3.7C_3x(Full).dfx"
+                },
+                {
+                  "label": "xBR/SABR: 5XBR v4.0  +  CRT x1(Full)",
+                  "value": "xbr-sabr/5XBR_v4.0 + CRT_x1(Full).dfx"
+                },
+                {
+                  "label": "xBR/SABR: 5XBR v4.0 1x(Full)",
+                  "value": "xbr-sabr/5XBR_v4.0_1x(Full).dfx"
+                },
+                {
+                  "label": "xBR/SABR: 5XBR v4.0 CRT  +  Low Configuration",
+                  "value": "xbr-sabr/5XBR_v4.0_CRT + Low Configuration.dfx"
+                },
+                {
+                  "label": "xBR/SABR: 5XBR v4.0 High Configuration",
+                  "value": "xbr-sabr/5XBR_v4.0_High Configuration.dfx"
+                },
+                {
+                  "label": "xBR/SABR: 5XBR v4.0 Low Configuration",
+                  "value": "xbr-sabr/5XBR_v4.0_Low Configuration.dfx"
+                },
+                {
+                  "label": "xBR/SABR: SABR v3.0",
+                  "value": "xbr-sabr/SABR_v3.0.dfx"
+                },
+                {
+                  "label": "xBR/SABR: SABR v3.0 1x",
+                  "value": "xbr-sabr/SABR_v3.0_1x.dfx"
+                },
+                {
+                  "label": "xBR/SABR: SABR v3.0 Optimized",
+                  "value": "xbr-sabr/SABR_v3.0_Optimized.dfx"
+                },
+                {
+                  "label": "xBR/SABR: SABR v3.0 Optimized 1x",
+                  "value": "xbr-sabr/SABR_v3.0_Optimized_1x.dfx"
+                },
+                {
+                  "label": "xBR/SABR: SABR v3.0 Optimized 2x",
+                  "value": "xbr-sabr/SABR_v3.0_Optimized_2x.dfx"
+                },
+                {
+                  "label": "xBR/SABR: SABR v3.0 Optimized lq",
+                  "value": "xbr-sabr/SABR_v3.0_Optimized_lq.dfx"
+                },
+                {
+                  "label": "xBR/SABR: SABR v3.0 Optimized lq 1x",
+                  "value": "xbr-sabr/SABR_v3.0_Optimized_lq_1x.dfx"
+                },
+                {
+                  "label": "xBR/SABR: SABR v3.0 Optimized lq 2x",
+                  "value": "xbr-sabr/SABR_v3.0_Optimized_lq_2x.dfx"
+                }
+              ],
+              "depends_on": {
+                "key": "Wrapper/VideoFilter",
+                "value": "custom"
+              }
+            },
+            {
               "key": "fps_counter_position",
               "label": "settings_drastic_fps_counter",
               "type": "enum",

@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <dirent.h>
+#include <unistd.h>
 
 #include "config.h"
 #include "error.h"
@@ -98,6 +100,48 @@ void tico_make_path(const char *path) {
     *cursor = '/';
   }
   mkdir(partial, 0777);
+}
+
+static int is_directory(const char *path) {
+  struct stat st;
+  return stat(path, &st) == 0 && S_ISDIR(st.st_mode);
+}
+
+void tico_lift_legacy_data_root(const char *from, const char *to) {
+  if (!is_directory(from))
+    return;
+  DIR *dir = opendir(from);
+  if (!dir)
+    return;
+  /* Names first, then moves: renaming while reading may skip entries.
+   * On the heap, as this recurses into folders both sides have. */
+  enum { kMaxNames = 512, kNameLength = 256 };
+  char (*names)[kNameLength] = malloc(sizeof(char[kMaxNames][kNameLength]));
+  if (!names) {
+    closedir(dir);
+    return;
+  }
+  int count = 0;
+  struct dirent *entry;
+  while (count < kMaxNames && (entry = readdir(dir))) {
+    if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
+      continue;
+    snprintf(names[count++], kNameLength, "%s", entry->d_name);
+  }
+  closedir(dir);
+  for (int i = 0; i < count; i++) {
+    char source[1024], target[1024];
+    snprintf(source, sizeof(source), "%s/%s", from, names[i]);
+    snprintf(target, sizeof(target), "%s/%s", to, names[i]);
+    struct stat st;
+    if (stat(target, &st) != 0)
+      rename(source, target);
+    else if (is_directory(source) && S_ISDIR(st.st_mode))
+      tico_lift_legacy_data_root(source, target); /* Both have it: merge */
+    /* A file both have stays where it was: the newer layout's copy wins */
+  }
+  free(names);
+  rmdir(from); /* Only goes once empty */
 }
 
 void tico_make_directories(void) {

@@ -987,6 +987,9 @@ int main(void) {
     if (stat("/tico/system/drastic", &st) != 0 && stat("/tico/system/nds", &st) == 0)
       rename("/tico/system/nds", "/tico/system/drastic");
   }
+  /* Drastic's own files (drastic.ini, cheats, shaders...) sat one folder down,
+   * in tico/system/drastic/drastic, before 3.0.0 was republished */
+  tico_lift_legacy_data_root("/tico/system/drastic/drastic", DATA_ROOT);
   tico_config_load();
   tico_make_directories();
 #endif

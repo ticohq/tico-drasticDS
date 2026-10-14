@@ -237,8 +237,19 @@ static std::string directory_of(const std::string &relative) {
   return slash == std::string::npos ? std::string() : relative.substr(0, slash);
 }
 
+// A shader file by its path under the shader folder: the user's own copy in
+// SHADERS_DIR, else the preset built into the NRO (tico build). Includes,
+// textures and Vulkan packs are looked up the same way, beside their .dfx.
 static std::string full_path(const std::string &relative) {
-  return std::string(SHADERS_DIR) + "/" + relative;
+  const std::string user = std::string(SHADERS_DIR) + "/" + relative;
+#ifdef BUNDLED_SHADERS_DIR
+  struct stat status;
+  if (stat(user.c_str(), &status) != 0) {
+    const std::string bundled = std::string(BUNDLED_SHADERS_DIR) + "/" + relative;
+    if (stat(bundled.c_str(), &status) == 0) return bundled;
+  }
+#endif
+  return user;
 }
 
 static std::string strip_versions(const std::string &source) {

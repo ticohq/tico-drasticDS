@@ -15,6 +15,9 @@
 /* Creates tico's folders; the host's own folders are created inside them.
  * Call once the tico config is loaded, since it names the content folders. */
 void tico_make_directories(void);
+/// Moves everything in @p from into @p to, merging folders and keeping what
+/// @p to already has, then removes @p from once it is empty.
+void tico_lift_legacy_data_root(const char *from, const char *to);
 
 /* Creates a directory and any missing parents. */
 void tico_make_path(const char *path);

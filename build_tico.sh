@@ -77,6 +77,12 @@ cp -R "$APP/source/tico/assets/icons" "$WORK/romfs/assets/"
 # the overlay builds its settings menu from the module's own definition
 mkdir -p "$WORK/romfs/module"
 cp -f "$MODULE_SRC/settings.json" "$WORK/romfs/module/"
+# The custom shader presets (xBR/SABR upscalers, LCD and colour filters),
+# read in place from romfs:/shaders, with their Vulkan packs
+echo "==== bundled custom shaders ===="
+mkdir -p "$WORK/romfs/shaders"
+cp -a "$APP/third_party/drastic-ds-shaders/." "$WORK/romfs/shaders/"
+python3 "$APP/tools/compile_custom_shader.py" "$WORK/romfs/shaders" --glslang "$GLSLANG"
 
 echo "==== tico-drastic host ===="
 # Vulkan headers come after the repo's lsfg-vk headers: the image ships its own
