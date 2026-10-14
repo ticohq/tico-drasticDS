@@ -644,8 +644,15 @@ void ReloadConfig() {
     GetManager().ReloadConfig();
 }
 
+// The emulator's own BIOS folder (system/drastic). Before 3.0.1 it was the
+// console's (system/nds); a custom root's is renamed here, sdmc's in main.
 std::string SystemPath() {
-    return ContentPath("tico_system_path", "sdmc:/tico/system");
+    const std::string legacy = ContentPath("tico_system_path", "sdmc:/tico/system");
+    const std::string path = legacy.substr(0, legacy.size() - std::strlen(kSlug)) + "drastic";
+    struct stat st;
+    if (stat(path.c_str(), &st) != 0 && stat(legacy.c_str(), &st) == 0)
+        rename(legacy.c_str(), path.c_str());
+    return path;
 }
 
 std::string SavesPath() {

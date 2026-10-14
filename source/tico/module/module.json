@@ -5,6 +5,7 @@
   "launch": "\"{nro}\" \"{rom}\" \"{title}\"",
   "settings": "config/modules/drastic/settings.json",
   "config_file": "drastic.jsonc",
+  "system_dir": "drastic",
   "is_libretro": false,
   "systems": [
     {

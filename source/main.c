@@ -980,6 +980,13 @@ int main(void) {
   bool cpu_boost_active = true;
 #ifdef DRASTIC_TICO
   romfsInit();
+  /* The emulator's folder; before 3.0.1 it was tico/system/nds. tico moves
+   * it too, but DraStic may start without tico. */
+  {
+    struct stat st;
+    if (stat("/tico/system/drastic", &st) != 0 && stat("/tico/system/nds", &st) == 0)
+      rename("/tico/system/nds", "/tico/system/drastic");
+  }
   tico_config_load();
   tico_make_directories();
 #endif

@@ -42,7 +42,7 @@ constexpr const char* TAG = "[tico-overlay]";
 constexpr std::array<const char*, 3> kFontPaths = {{
     "romfs:/fonts/font.ttf",
     "sdmc:/tico/fonts/font.ttf",
-    "sdmc:/tico/system/nds/fonts/font.ttf",
+    "sdmc:/tico/system/drastic/fonts/font.ttf",
 }};
 constexpr std::array<const char*, 6> kAvatarPaths = {{
     "sdmc:/tico/assets/avatar.jpg",

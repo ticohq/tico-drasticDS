@@ -23,7 +23,7 @@ const char *tico_nds_states_dir(void);
 #ifdef __cplusplus
 }
 #endif
-#define DATA_ROOT       "/tico/system/nds/drastic"
+#define DATA_ROOT       "/tico/system/drastic/drastic"
 #else
 #define DATA_ROOT       "/switch/drastic"
 #endif
