@@ -40,7 +40,7 @@
           ]
         }
       ],
-      "games_file": "nds.json",
+      "games_file": "nds.dat",
       "retroachievements_id": 18,
       "colors": {
         "start": "A3C4E6",

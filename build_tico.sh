@@ -106,9 +106,9 @@ cp -r "$MODULE_SRC/." "$MODULE_OUT/"
 cp -f "$APP/tico-drastic.nro" "$MODULE_OUT/"
 # tico merges these into its own strings to label the settings screen
 cp -R "$APP/source/tico/lang" "$MODULE_OUT/"
-# tico prefers .json.gz when resolving a gamelist
+# Game lists ship as gzipped DATs; a JSON one (older lists) is gzipped here
 if [[ -d "$MODULE_OUT/gamelists" ]]; then
-  gzip -f -9 "$MODULE_OUT"/gamelists/*.json
+  gzip -f -9 "$MODULE_OUT"/gamelists/*.json 2>/dev/null || true
 fi
 BUNDLE="$APP/tico-$MODULE_ID-module.zip"
 rm -f "$BUNDLE"
