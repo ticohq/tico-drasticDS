@@ -32,6 +32,9 @@ bool DarkMode();
 // tico's General > Continue Last Game (resume_on_launch in general.jsonc):
 // "ask", "always" or "never", for a game that has an auto save.
 std::string ResumeOnLaunch();
+// tico's General > Quick Menu Tip (quick_menu_tip in general.jsonc): whether a
+// game's start shows that Plus and Minus open the menu. On unless turned off.
+bool QuickMenuTip();
 
 // A structured value (an object or array) as JSON text, empty when absent, and
 // its replacement (persisted by SaveConfig). Scalars use Get/SetConfigValue.

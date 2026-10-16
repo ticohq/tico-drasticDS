@@ -402,5 +402,6 @@
   "drastic_cheat_rejected": "Drastic a refusé le code personnalisé",
   "drastic_shader_failed": "Impossible de charger ce shader personnalisé",
   "drastic_lsfg_next_launch": "La génération d'images s'applique au prochain lancement",
-  "drastic_launch_failed": "Impossible de lancer ce jeu"
+  "drastic_launch_failed": "Impossible de lancer ce jeu",
+  "emulator_quick_menu_tip": "Appuyez sur {plus} et {minus} ensemble pour ouvrir le menu rapide"
 }

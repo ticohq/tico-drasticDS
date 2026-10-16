@@ -402,5 +402,6 @@
   "drastic_cheat_rejected": "Drastic rejected the custom cheat",
   "drastic_shader_failed": "This custom shader could not be loaded",
   "drastic_lsfg_next_launch": "Frame generation applies the next time the game starts",
-  "drastic_launch_failed": "This game could not be launched"
+  "drastic_launch_failed": "This game could not be launched",
+  "emulator_quick_menu_tip": "Press {plus} and {minus} together to open the quick menu"
 }

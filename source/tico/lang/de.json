@@ -401,5 +401,6 @@
   "drastic_cheat_rejected": "Drastic hat den eigenen Cheat abgelehnt",
   "drastic_shader_failed": "Dieser eigene Shader konnte nicht geladen werden",
   "drastic_lsfg_next_launch": "Bildgenerierung gilt beim nächsten Spielstart",
-  "drastic_launch_failed": "Dieses Spiel konnte nicht gestartet werden"
+  "drastic_launch_failed": "Dieses Spiel konnte nicht gestartet werden",
+  "emulator_quick_menu_tip": "Drücke {plus} und {minus} gleichzeitig, um das Schnellmenü zu öffnen"
 }

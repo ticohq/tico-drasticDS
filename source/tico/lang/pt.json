@@ -402,5 +402,6 @@
   "drastic_cheat_rejected": "O Drastic rejeitou a trapaça personalizada",
   "drastic_shader_failed": "Não foi possível carregar este shader personalizado",
   "drastic_lsfg_next_launch": "A geração de quadros vale a partir do próximo início do jogo",
-  "drastic_launch_failed": "Não foi possível iniciar este jogo"
+  "drastic_launch_failed": "Não foi possível iniciar este jogo",
+  "emulator_quick_menu_tip": "Aperte {plus} e {minus} juntos para abrir o menu rápido"
 }

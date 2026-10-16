@@ -512,7 +512,11 @@ struct TicoMenu {
         if (resume_offered)
             return;
         resume_offered = true;
-        if (tico_was_restarted() || !SlotOccupied(kAutoSlot))
+        const bool restarted = tico_was_restarted();
+        // tico's General > Quick Menu Tip: shown once the game runs smoothly
+        if (!restarted)
+            OverlayUI::ShowQuickMenuTip();
+        if (restarted || !SlotOccupied(kAutoSlot))
             return;
         const std::string mode = TicoConfig::ResumeOnLaunch();
         if (mode == "never")

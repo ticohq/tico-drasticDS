@@ -402,5 +402,6 @@
   "drastic_cheat_rejected": "Drastic rechazó el truco personalizado",
   "drastic_shader_failed": "No se pudo cargar este shader personalizado",
   "drastic_lsfg_next_launch": "La generación de fotogramas se aplica al reiniciar el juego",
-  "drastic_launch_failed": "No se pudo iniciar este juego"
+  "drastic_launch_failed": "No se pudo iniciar este juego",
+  "emulator_quick_menu_tip": "Pulsa {plus} y {minus} a la vez para abrir el menú rápido"
 }

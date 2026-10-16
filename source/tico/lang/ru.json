@@ -401,5 +401,6 @@
   "drastic_cheat_rejected": "Drastic отклонил свой чит",
   "drastic_shader_failed": "Не удалось загрузить этот шейдер",
   "drastic_lsfg_next_launch": "Генерация кадров применится при следующем запуске игры",
-  "drastic_launch_failed": "Не удалось запустить эту игру"
+  "drastic_launch_failed": "Не удалось запустить эту игру",
+  "emulator_quick_menu_tip": "Нажмите {plus} и {minus} вместе, чтобы открыть быстрое меню"
 }

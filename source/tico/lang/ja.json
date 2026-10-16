@@ -402,5 +402,6 @@
   "drastic_cheat_rejected": "Drasticがカスタムチートを拒否しました",
   "drastic_shader_failed": "このカスタムシェーダーを読み込めませんでした",
   "drastic_lsfg_next_launch": "フレーム生成は次回のゲーム起動時に反映されます",
-  "drastic_launch_failed": "このゲームを起動できませんでした"
+  "drastic_launch_failed": "このゲームを起動できませんでした",
+  "emulator_quick_menu_tip": "{plus}と{minus}を同時に押すとクイックメニューが開きます"
 }
