@@ -987,6 +987,16 @@ int main(void) {
     if (stat("/tico/system/drastic", &st) != 0 && stat("/tico/system/nds", &st) == 0)
       rename("/tico/system/nds", "/tico/system/drastic");
   }
+  /* Mesa's shader cache beside the emulator's files, not at the SD card's
+   * root (sdmc:/.mesa); Mesa only makes the last folder of the path */
+  if (!getenv("MESA_SHADER_CACHE_DIR")) {
+    mkdir("/tico", 0777);
+    mkdir("/tico/system", 0777);
+    mkdir("/tico/system/drastic", 0777);
+    mkdir("/tico/system/drastic/cache", 0777);
+    mkdir("/tico/system/drastic/cache/mesa", 0777);
+    setenv("MESA_SHADER_CACHE_DIR", "/tico/system/drastic/cache/mesa", 1);
+  }
   /* Drastic's own files (drastic.ini, cheats, shaders...) sat one folder down,
    * in tico/system/drastic/drastic, before 3.0.0 was republished */
   tico_lift_legacy_data_root("/tico/system/drastic/drastic", DATA_ROOT);
